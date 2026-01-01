@@ -1,0 +1,95 @@
+baseURL = 'https://seunghan.xyz/'
+languageCode = 'ko-kr'
+title = 'Seunghan | Developer'
+theme = 'PaperMod'
+
+enableRobotsTXT = true
+buildDrafts = false
+buildFuture = false
+buildExpired = false
+
+[minify]
+disableXML = true
+minifyOutput = true
+
+[params]
+env = "production"
+title = "Seunghan"
+description = "Software Developer based in Seoul"
+keywords = ["Developer", "Portfolio", "iOS", "Flutter", "React Native"]
+author = "Seunghan"
+DateFormat = "2006-01-02"
+defaultTheme = "auto"
+disableThemeToggle = false
+ShowReadingTime = false
+ShowShareButtons = false
+ShowPostNavLinks = true
+ShowBreadCrumbs = true
+ShowCodeCopyButtons = true
+ShowWordCount = false
+ShowRssButtonInSectionTermList = false
+UseHugoToc = true
+disableSpecialTitlePostfix = true
+
+  [params.homeInfoParams]
+  Title = "Seunghan"
+  Content = """
+👋 안녕하세요, 개발자 승한입니다.
+
+모바일 앱과 웹 서비스를 만들고 있습니다.
+사용자 경험을 개선하고 실생활 문제를 해결하는 것에 관심이 있습니다.
+"""
+
+  [[params.socialIcons]]
+  name = "github"
+  url = "https://github.com/seunghan91"
+
+  [[params.socialIcons]]
+  name = "kakaotalk"
+  url = "https://open.kakao.com/o/sYu2sj9h"
+
+[params.assets]
+favicon = "/favicon.ico"
+favicon16x16 = "/favicon-16x16.png"
+favicon32x32 = "/favicon-32x32.png"
+apple_touch_icon = "/apple-touch-icon.png"
+
+[params.cover]
+hidden = true
+hiddenInList = true
+hiddenInSingle = true
+
+[params.fuseOpts]
+isCaseSensitive = false
+shouldSort = true
+location = 0
+distance = 1000
+threshold = 0.4
+minMatchCharLength = 0
+keys = ["title", "permalink", "summary", "content"]
+
+[[menu.main]]
+identifier = "about"
+name = "About"
+url = "/about/"
+weight = 10
+
+[[menu.main]]
+identifier = "projects"
+name = "Projects"
+url = "/projects/"
+weight = 20
+
+[[menu.main]]
+identifier = "blog"
+name = "Blog"
+url = "/posts/"
+weight = 30
+
+[outputs]
+home = ["HTML", "RSS", "JSON"]
+
+[markup]
+  [markup.highlight]
+  style = "github-dark"
+  noClasses = false
