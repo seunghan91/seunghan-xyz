@@ -1,6 +1,6 @@
 ---
 title: "AInote"
-date: 2025-01-01
+date: 2025-06-20
 draft: false
 tags: ["Flutter", "AI", "Productivity", "Cross-Platform"]
 description: "AI 기반 크로스 플랫폼 스마트 노트 서비스"

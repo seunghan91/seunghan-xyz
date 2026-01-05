@@ -1,6 +1,6 @@
 ---
 title: "K직장인"
-date: 2024-12-01
+date: 2025-12-30
 draft: false
 tags: ["SvelteKit", "PWA", "Firebase", "Social"]
 description: "직장인을 위한 오프라인 네트워킹 플랫폼"
