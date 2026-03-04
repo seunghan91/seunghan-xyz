@@ -99,9 +99,9 @@ url = "/posts/"
 weight = 30
 
 [[menu.main]]
-identifier = "gadgets"
-name = "신제품"
-url = "/gadgets/"
+identifier = "new"
+name = "New"
+url = "/new/"
 weight = 40
 
 [outputs]
