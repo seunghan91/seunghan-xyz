@@ -24,6 +24,7 @@ defaultTheme = "auto"
 disableThemeToggle = false
 ShowReadingTime = false
 ShowShareButtons = false
+comments = true
 ShowPostNavLinks = true
 ShowBreadCrumbs = true
 ShowCodeCopyButtons = true

@@ -1,2 +1,5 @@
 {{- /* PaperMod custom head extension point. */ -}}
 <meta name="naver-site-verification" content="4aff3baeafe680ba320dbda5a51bc963b58356c3" />
+{{- if .IsPage }}
+<script defer src="https://vercount.one/js"></script>
+{{- end }}
