@@ -98,6 +98,12 @@ name = "Blog"
 url = "/posts/"
 weight = 30
 
+[[menu.main]]
+identifier = "gadgets"
+name = "신제품"
+url = "/gadgets/"
+weight = 40
+
 [outputs]
 home = ["HTML", "RSS", "JSON"]
 
