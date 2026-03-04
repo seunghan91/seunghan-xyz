@@ -18,10 +18,6 @@
 {{- end }}
 {{- end }}
 
-{{- if .IsPage }}
-{{- $scratch.Add "meta" (slice `<span>👁 <span id="vercount-page-pv">-</span></span>`) }}
-{{- end }}
-
 {{- with ($scratch.Get "meta") }}
 {{- delimit . "&nbsp;·&nbsp;" | safeHTML -}}
 {{- end -}}

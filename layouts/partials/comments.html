@@ -1,22 +1,388 @@
-{{- /* Giscus comments — GitHub Discussions 기반 */ -}}
 {{- if .IsPage }}
-<div class="comments">
-  <hr />
-  <script src="https://giscus.app/client.js"
-    data-repo="seunghan91/seunghan-xyz"
-    data-repo-id="REPO_ID_HERE"
-    data-category="General"
-    data-category-id="CATEGORY_ID_HERE"
-    data-mapping="pathname"
-    data-strict="0"
-    data-reactions-enabled="1"
-    data-emit-metadata="0"
-    data-input-position="top"
-    data-theme="preferred_color_scheme"
-    data-lang="ko"
-    data-loading="lazy"
-    crossorigin="anonymous"
-    async>
-  </script>
+<style>
+.interactions {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  padding-bottom: 3rem;
+  border-top: 1px solid var(--border);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* 조회수 / 좋아요 */
+.interactions-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+.stat-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--secondary);
+}
+.like-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  border: 1.5px solid var(--border);
+  border-radius: 99px;
+  background: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--secondary);
+  transition: 0.2s;
+}
+.like-btn:hover { border-color: #e74c3c; color: #e74c3c; }
+.like-btn.liked { border-color: #e74c3c; color: #e74c3c; background: rgba(231,76,60,0.1); }
+.like-btn.liked .like-heart { animation: heartPop 0.3s ease; }
+@keyframes heartPop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+
+/* 댓글 */
+.comments-section h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+}
+.comment-form {
+  background: var(--code-bg);
+  border-radius: 10px;
+  padding: 1.2rem;
+  margin-bottom: 0.75rem;
+}
+.comment-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+.comment-form input,
+.comment-form textarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-size: 0.875rem;
+  background: var(--entry);
+  color: var(--primary);
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.comment-form input:focus,
+.comment-form textarea:focus {
+  outline: none;
+  border-color: var(--link);
+}
+.comment-form textarea { min-height: 90px; resize: vertical; }
+.comment-submit {
+  padding: 0.5rem 1.2rem;
+  background: var(--link);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.6rem;
+}
+.comment-submit:hover { opacity: 0.85; }
+.comment-hint {
+  font-size: 0.72rem;
+  color: var(--secondary);
+  margin-top: 0.4rem;
+}
+
+/* 댓글 목록 */
+.comment-list { display: flex; flex-direction: column; gap: 1rem; }
+.comment-item {
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--entry);
+  position: relative;
+}
+.comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.comment-name { font-weight: 700; font-size: 0.875rem; }
+.comment-date { font-size: 0.75rem; color: var(--secondary); }
+.comment-body { font-size: 0.875rem; line-height: 1.65; white-space: pre-wrap; word-break: break-word; }
+.comment-del {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.9rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--secondary);
+  opacity: 0.5;
+  padding: 0.15rem 0.4rem;
+}
+.comment-del:hover { opacity: 1; color: #e74c3c; }
+.comment-empty {
+  text-align: center;
+  color: var(--secondary);
+  font-size: 0.875rem;
+  padding: 2rem 0;
+}
+
+/* 삭제 모달 */
+.del-modal-bg {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+}
+.del-modal-bg.open { display: flex; }
+.del-modal {
+  background: var(--entry);
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 300px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+.del-modal h4 { margin-bottom: 0.8rem; font-size: 0.95rem; }
+.del-modal input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-size: 0.875rem;
+  background: var(--code-bg);
+  color: var(--primary);
+  box-sizing: border-box;
+  margin-bottom: 0.8rem;
+}
+.del-modal-btns { display: flex; gap: 0.5rem; justify-content: flex-end; }
+.del-modal-btns button {
+  padding: 0.4rem 0.9rem;
+  border-radius: 7px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.del-cancel { background: var(--code-bg); color: var(--primary); }
+.del-confirm { background: #e74c3c; color: #fff; font-weight: 600; }
+.del-confirm:hover { background: #c0392b; }
+</style>
+
+<div class="interactions" data-slug="{{ .File.ContentBaseName }}">
+
+  <!-- 조회수 + 좋아요 -->
+  <div class="interactions-bar">
+    <span class="stat-badge">
+      👁 <span id="view-count">-</span> 조회
+    </span>
+    <button class="like-btn" id="like-btn" onclick="toggleLike()">
+      <span class="like-heart">❤️</span>
+      <span id="like-count">-</span>
+    </button>
+  </div>
+
+  <!-- 댓글 -->
+  <div class="comments-section">
+    <h3>💬 댓글 <span id="comment-count" style="font-weight:400;color:var(--secondary);font-size:0.85rem"></span></h3>
+
+    <div class="comment-form">
+      <div class="comment-form-row">
+        <input type="text" id="c-name" placeholder="이름 *" maxlength="20" />
+        <input type="password" id="c-pw" placeholder="비밀번호 (삭제 시 필요)" maxlength="30" />
+      </div>
+      <textarea id="c-body" placeholder="댓글을 남겨주세요 ✍️" maxlength="500"></textarea>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.4rem">
+        <p class="comment-hint">비밀번호를 기억해두면 나중에 내 댓글을 삭제할 수 있어요.</p>
+        <button class="comment-submit" onclick="submitComment()">등록</button>
+      </div>
+    </div>
+
+    <div class="comment-list" id="comment-list">
+      <div class="comment-empty">댓글을 불러오는 중...</div>
+    </div>
+  </div>
 </div>
+
+<!-- 삭제 확인 모달 -->
+<div class="del-modal-bg" id="del-modal">
+  <div class="del-modal">
+    <h4>🗑 댓글 삭제</h4>
+    <input type="password" id="del-pw" placeholder="비밀번호 입력" />
+    <div class="del-modal-btns">
+      <button class="del-cancel" onclick="closeDelModal()">취소</button>
+      <button class="del-confirm" onclick="confirmDelete()">삭제</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const sb = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  const slug = document.querySelector('.interactions').dataset.slug;
+  const LIKE_KEY = 'liked_' + slug;
+  let deletingId = null;
+
+  // ── 조회수 ──────────────────────────────────────────
+  async function trackView() {
+    const { data } = await sb.from('page_views').select('count').eq('slug', slug).maybeSingle();
+    if (data) {
+      await sb.from('page_views').update({ count: data.count + 1 }).eq('slug', slug);
+      document.getElementById('view-count').textContent = (data.count + 1).toLocaleString();
+    } else {
+      await sb.from('page_views').insert({ slug, count: 1 });
+      document.getElementById('view-count').textContent = '1';
+    }
+  }
+
+  // ── 좋아요 ──────────────────────────────────────────
+  async function loadLikes() {
+    const { data } = await sb.from('page_likes').select('count').eq('slug', slug).maybeSingle();
+    const count = data?.count ?? 0;
+    document.getElementById('like-count').textContent = count.toLocaleString();
+    if (localStorage.getItem(LIKE_KEY)) {
+      document.getElementById('like-btn').classList.add('liked');
+    }
+  }
+
+  window.toggleLike = async function () {
+    const btn = document.getElementById('like-btn');
+    const liked = !!localStorage.getItem(LIKE_KEY);
+    const delta = liked ? -1 : 1;
+
+    const { data } = await sb.from('page_likes').select('count').eq('slug', slug).maybeSingle();
+    const current = data?.count ?? 0;
+    const next = Math.max(0, current + delta);
+
+    if (data) {
+      await sb.from('page_likes').update({ count: next }).eq('slug', slug);
+    } else {
+      await sb.from('page_likes').insert({ slug, count: 1 });
+    }
+
+    if (liked) {
+      localStorage.removeItem(LIKE_KEY);
+      btn.classList.remove('liked');
+    } else {
+      localStorage.setItem(LIKE_KEY, '1');
+      btn.classList.add('liked');
+    }
+    document.getElementById('like-count').textContent = next.toLocaleString();
+  };
+
+  // ── 댓글 ──────────────────────────────────────────
+  async function loadComments() {
+    const { data } = await sb
+      .from('comments')
+      .select('id, name, content, created_at')
+      .eq('slug', slug)
+      .order('created_at', { ascending: true });
+
+    const list = document.getElementById('comment-list');
+    const count = data?.length ?? 0;
+    document.getElementById('comment-count').textContent = count ? `(${count})` : '';
+
+    if (!count) {
+      list.innerHTML = '<div class="comment-empty">첫 댓글을 남겨주세요!</div>';
+      return;
+    }
+
+    list.innerHTML = data.map(c => `
+      <div class="comment-item" id="cm-${c.id}">
+        <div class="comment-meta">
+          <span class="comment-name">${escHtml(c.name)}</span>
+          <span class="comment-date">${formatDate(c.created_at)}</span>
+        </div>
+        <div class="comment-body">${escHtml(c.content)}</div>
+        <button class="comment-del" onclick="openDelModal('${c.id}')">삭제</button>
+      </div>
+    `).join('');
+  }
+
+  window.submitComment = async function () {
+    const name    = document.getElementById('c-name').value.trim();
+    const pw      = document.getElementById('c-pw').value.trim();
+    const content = document.getElementById('c-body').value.trim();
+
+    if (!name)    { alert('이름을 입력해주세요.'); return; }
+    if (!pw)      { alert('비밀번호를 입력해주세요.'); return; }
+    if (!content) { alert('댓글 내용을 입력해주세요.'); return; }
+
+    const { error } = await sb.from('comments').insert({ slug, name, content, password: pw });
+    if (error) { alert('댓글 등록 실패: ' + error.message); return; }
+
+    document.getElementById('c-name').value    = '';
+    document.getElementById('c-pw').value      = '';
+    document.getElementById('c-body').value    = '';
+    await loadComments();
+  };
+
+  // ── 삭제 모달 ──────────────────────────────────────
+  window.openDelModal = function (id) {
+    deletingId = id;
+    document.getElementById('del-pw').value = '';
+    document.getElementById('del-modal').classList.add('open');
+    setTimeout(() => document.getElementById('del-pw').focus(), 50);
+  };
+
+  window.closeDelModal = function () {
+    document.getElementById('del-modal').classList.remove('open');
+    deletingId = null;
+  };
+
+  window.confirmDelete = async function () {
+    const pw = document.getElementById('del-pw').value.trim();
+    if (!pw) { alert('비밀번호를 입력해주세요.'); return; }
+
+    const res = await fetch('/.netlify/functions/delete-comment', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: deletingId, password: pw }),
+    });
+
+    if (res.ok) {
+      closeDelModal();
+      await loadComments();
+    } else {
+      const data = await res.json();
+      alert(data.message || '삭제 실패. 비밀번호를 확인해주세요.');
+    }
+  };
+
+  // 모달 바깥 클릭 시 닫기
+  document.getElementById('del-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeDelModal();
+  });
+
+  // ── 유틸 ──────────────────────────────────────────
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+              .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  function formatDate(iso) {
+    return new Date(iso).toLocaleString('ko-KR', {
+      timeZone: 'Asia/Seoul',
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit',
+    });
+  }
+
+  // ── 초기화 ──────────────────────────────────────────
+  trackView();
+  loadLikes();
+  loadComments();
+})();
+</script>
 {{- end }}

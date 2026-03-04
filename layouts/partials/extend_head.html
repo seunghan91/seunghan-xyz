@@ -1,5 +1,6 @@
 {{- /* PaperMod custom head extension point. */ -}}
 <meta name="naver-site-verification" content="4aff3baeafe680ba320dbda5a51bc963b58356c3" />
 {{- if .IsPage }}
-<script defer src="https://vercount.one/js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-config.js"></script>
 {{- end }}
