@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PassPass 개인정보처리방침</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                   'Noto Sans KR', sans-serif;
+      background: #f8f9fa;
+      color: #212529;
+      line-height: 1.8;
+    }
+
+    .wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+      padding-bottom: 32px;
+      border-bottom: 2px solid #e9ecef;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #4263eb, #7048e8);
+      color: #fff;
+      font-weight: 800;
+      font-size: 20px;
+      border-radius: 14px;
+      margin-bottom: 14px;
+      letter-spacing: -0.5px;
+    }
+
+    header h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #212529;
+    }
+
+    header p {
+      font-size: 14px;
+      color: #868e96;
+      margin-top: 6px;
+    }
+
+    section {
+      background: #fff;
+      border: 1px solid #e9ecef;
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #212529;
+      margin-bottom: 14px;
+      padding-left: 10px;
+      border-left: 3px solid #4263eb;
+    }
+
+    p { font-size: 14px; color: #495057; margin-bottom: 10px; }
+    p:last-child { margin-bottom: 0; }
+
+    ul {
+      padding-left: 20px;
+      font-size: 14px;
+      color: #495057;
+    }
+
+    ul li { margin-bottom: 6px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    th {
+      background: #f1f3f5;
+      color: #495057;
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border: 1px solid #dee2e6;
+    }
+
+    td {
+      padding: 10px 14px;
+      border: 1px solid #dee2e6;
+      color: #495057;
+      vertical-align: top;
+    }
+
+    .highlight {
+      background: #f0f4ff;
+      border: 1px solid #c5d0fa;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-top: 12px;
+    }
+
+    .highlight p {
+      color: #3b5bdb;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    .badge-safe {
+      display: inline-block;
+      background: #ebfbee;
+      color: #2f9e44;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 12px;
+      color: #adb5bd;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">PP</div>
+      <h1>PassPass 개인정보처리방침</h1>
+      <p>시행일: 2025년 1월 1일 &nbsp;|&nbsp; 최종 수정: 2026년 2월 24일</p>
+    </header>
+
+    <!-- 1. 개요 -->
+    <section>
+      <h2>1. 개요</h2>
+      <p>PassPass(이하 "이 확장프로그램")는 공공기관·금융 사이트의 OACX 간편인증 팝업에서 이름·생년월일·휴대폰번호를 자동으로 입력해주는 Chrome 확장프로그램입니다.</p>
+      <p>이 방침은 이 확장프로그램이 수집하는 정보의 종류, 이용 방법, 보관 방법 및 이용자의 권리를 안내합니다.</p>
+      <div class="highlight">
+        <p>🔒 모든 개인정보는 이용자의 기기(브라우저)에만 저장됩니다. 개발자 서버 또는 외부 서버로 전송되지 않습니다.</p>
+      </div>
+    </section>
+
+    <!-- 2. 수집하는 정보 -->
+    <section>
+      <h2>2. 수집·저장하는 정보 <span class="badge-safe">로컬 저장</span></h2>
+      <p>이 확장프로그램은 자동입력 기능을 위해 아래 정보를 이용자의 브라우저(<code>chrome.storage.local</code>)에 저장합니다.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>항목</th>
+            <th>목적</th>
+            <th>저장 위치</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>이름</td>
+            <td>간편인증 폼 자동입력</td>
+            <td>기기 내 브라우저 로컬 저장소</td>
+          </tr>
+          <tr>
+            <td>생년월일 (8자리)</td>
+            <td>간편인증 폼 자동입력</td>
+            <td>기기 내 브라우저 로컬 저장소</td>
+          </tr>
+          <tr>
+            <td>휴대폰번호</td>
+            <td>간편인증 폼 자동입력</td>
+            <td>기기 내 브라우저 로컬 저장소</td>
+          </tr>
+          <tr>
+            <td>선호 인증기관 / 통신사</td>
+            <td>인증기관 자동 선택</td>
+            <td>기기 내 브라우저 로컬 저장소</td>
+          </tr>
+          <tr>
+            <td>비밀번호 해시값 (PIN)</td>
+            <td>확장프로그램 잠금 해제 인증</td>
+            <td>기기 내 브라우저 로컬 저장소</td>
+          </tr>
+          <tr>
+            <td>세션 인증 상태</td>
+            <td>브라우저 종료 전까지 잠금 유지</td>
+            <td>기기 내 브라우저 세션 저장소 (브라우저 종료 시 자동 삭제)</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top:12px;">비밀번호(PIN)는 원문이 아닌 <strong>해시값으로만 저장</strong>되며, 원래 비밀번호는 어디에도 저장되지 않습니다.</p>
+    </section>
+
+    <!-- 3. 정보 이용 목적 -->
+    <section>
+      <h2>3. 정보 이용 목적</h2>
+      <p>저장된 정보는 오직 다음 목적으로만 사용됩니다.</p>
+      <ul>
+        <li>간편인증(OACX) 폼에 이름·생년월일·휴대폰번호 자동입력</li>
+        <li>선호 인증기관 자동 선택</li>
+        <li>PIN을 통한 확장프로그램 잠금 및 잠금 해제</li>
+      </ul>
+      <p style="margin-top:10px;">광고, 마케팅, 분석, 프로파일링 등 다른 어떠한 목적으로도 사용하지 않습니다.</p>
+    </section>
+
+    <!-- 4. 정보 전송 -->
+    <section>
+      <h2>4. 외부 전송 정보</h2>
+      <p>이 확장프로그램은 기본적으로 외부로 정보를 전송하지 않습니다. 단, 이용자가 <strong>피드백 기능</strong>을 직접 사용하는 경우에 한해 아래 정보가 전송됩니다.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>항목</th>
+            <th>전송 대상</th>
+            <th>조건</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>이용자가 직접 입력한 피드백 내용</td>
+            <td>개발자 텔레그램 (Telegram Bot API)</td>
+            <td>이용자가 "보내기" 버튼을 직접 클릭한 경우에만</td>
+          </tr>
+          <tr>
+            <td>피드백 전송 시점의 현재 페이지 URL</td>
+            <td>개발자 텔레그램 (Telegram Bot API)</td>
+            <td>이용자가 "보내기" 버튼을 직접 클릭한 경우에만</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top:12px;">피드백 전송은 자동으로 이루어지지 않으며, 이용자가 명시적으로 전송 버튼을 눌러야만 발생합니다. 이름·생년월일·휴대폰번호 등 저장된 개인정보는 피드백 전송에 포함되지 않습니다.</p>
+    </section>
+
+    <!-- 5. 제3자 제공 -->
+    <section>
+      <h2>5. 제3자 제공 및 위탁</h2>
+      <p>이 확장프로그램은 이용자의 개인정보를 제3자에게 제공하거나 처리를 위탁하지 않습니다.</p>
+    </section>
+
+    <!-- 6. 보관 기간 -->
+    <section>
+      <h2>6. 보관 기간 및 파기</h2>
+      <ul>
+        <li>저장된 개인정보는 이용자가 직접 <strong>초기화(데이터 삭제)</strong> 버튼을 누르거나 확장프로그램을 삭제하기 전까지 기기에 보관됩니다.</li>
+        <li>세션 인증 상태는 브라우저 종료 시 자동으로 삭제됩니다.</li>
+        <li>확장프로그램 제거 시 <code>chrome.storage</code>에 저장된 모든 데이터는 브라우저에 의해 자동 삭제됩니다.</li>
+      </ul>
+    </section>
+
+    <!-- 7. 이용자 권리 -->
+    <section>
+      <h2>7. 이용자 권리</h2>
+      <p>이용자는 언제든지 다음 권리를 행사할 수 있습니다.</p>
+      <ul>
+        <li><strong>열람:</strong> 팝업 화면에서 저장된 정보 확인 가능</li>
+        <li><strong>수정:</strong> 팝업 → "정보 수정" 버튼으로 직접 수정 가능</li>
+        <li><strong>삭제:</strong> 팝업 → "초기화(데이터 삭제)" 버튼으로 모든 데이터 즉시 삭제</li>
+        <li><strong>확장프로그램 제거:</strong> Chrome 확장 관리 페이지에서 제거 시 모든 데이터 삭제</li>
+      </ul>
+    </section>
+
+    <!-- 8. 보안 -->
+    <section>
+      <h2>8. 보안</h2>
+      <ul>
+        <li>PIN(비밀번호)은 해시값으로만 저장되어 원문 복원이 불가합니다.</li>
+        <li>개인정보는 <code>chrome.storage.local</code>에만 저장되며, 동기화(<code>chrome.storage.sync</code>)를 사용하지 않아 Google 서버에 업로드되지 않습니다.</li>
+        <li>확장프로그램이 실행되는 웹페이지의 JavaScript 컨텍스트와 격리된 환경에서 동작합니다.</li>
+      </ul>
+    </section>
+
+    <!-- 9. 어린이 개인정보 -->
+    <section>
+      <h2>9. 만 14세 미만 어린이</h2>
+      <p>이 확장프로그램은 만 14세 미만 어린이를 대상으로 하지 않습니다. 만 14세 미만 이용자의 개인정보를 의도적으로 수집하지 않습니다.</p>
+    </section>
+
+    <!-- 10. 방침 변경 -->
+    <section>
+      <h2>10. 개인정보처리방침 변경</h2>
+      <p>방침이 변경될 경우 GitHub 저장소(<a href="https://github.com/seunghan91/passpass" target="_blank">github.com/seunghan91/passpass</a>)와 이 페이지를 통해 공지합니다. 변경 전에 이 페이지에서 확인하시기 바랍니다.</p>
+    </section>
+
+    <!-- 11. 문의 -->
+    <section>
+      <h2>11. 문의</h2>
+      <p>개인정보 관련 문의 또는 피드백은 확장프로그램 팝업 하단의 <strong>💬 개발자에게 한마디</strong> 기능을 이용하거나, GitHub 이슈로 남겨주세요.</p>
+      <p>GitHub: <a href="https://github.com/seunghan91/passpass/issues" target="_blank">github.com/seunghan91/passpass/issues</a></p>
+    </section>
+
+    <footer>
+      <p>© 2026 PassPass. 이 확장프로그램은 오픈소스이며 개인 데이터를 외부 서버에 전송하지 않습니다.</p>
+    </footer>
+  </div>
+</body>
+</html>

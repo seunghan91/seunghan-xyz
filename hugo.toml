@@ -1,5 +1,5 @@
 baseURL = 'https://seunghan.xyz/'
-languageCode = 'ko-kr'
+languageCode = 'ko'
 title = 'Seunghan | Developer'
 theme = 'PaperMod'
 
@@ -15,8 +15,9 @@ minifyOutput = true
 [params]
 env = "production"
 title = "Seunghan"
-description = "Software Developer based in Seoul"
-keywords = ["Developer", "Portfolio", "iOS", "Flutter", "React Native"]
+description = "모바일 앱 개발자 승한의 기술 블로그. Flutter, iOS, Rails 개발 경험과 디버깅 노하우를 공유합니다."
+keywords = ["Developer", "Flutter", "iOS", "Rails", "모바일 개발", "앱 개발", "디버깅", "개발 블로그"]
+images = ["/og-image.png"]
 author = "Seunghan"
 DateFormat = "2006-01-02"
 defaultTheme = "auto"
@@ -59,6 +60,17 @@ hidden = true
 hiddenInList = true
 hiddenInSingle = true
 
+[params.schema]
+publisherType = "Person"
+sameAs = ["https://github.com/seunghan91"]
+
+[params.analytics.google]
+SiteVerificationTag = "Tj5KeqDb_o5Mo8LDJZj05lAeGCz4kYYv3Gh5QpIDngs"
+
+# TODO: Naver Search Advisor에서 메타 태그 인증 코드를 발급받아 입력
+[params.analytics.naver]
+SiteVerificationTag = ""
+
 [params.fuseOpts]
 isCaseSensitive = false
 shouldSort = true
@@ -90,6 +102,8 @@ weight = 30
 home = ["HTML", "RSS", "JSON"]
 
 [markup]
+  [markup.goldmark.renderer]
+  unsafe = true
   [markup.highlight]
   style = "github-dark"
   noClasses = false
