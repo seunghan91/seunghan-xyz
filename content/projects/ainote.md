@@ -77,7 +77,7 @@ iOS와 Android를 지원하는 모바일 앱입니다.
 
 ### 다운로드
 
-- [App Store](https://apps.apple.com)
+- [App Store](https://apps.apple.com/kr/app/aisimplenote/id6747735383)
 - [Google Play](https://play.google.com)
 
 ---
