@@ -14,3 +14,7 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Local tools (contains API keys — NEVER commit)
+tools/
+.netlify/
