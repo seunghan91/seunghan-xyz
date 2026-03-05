@@ -1,0 +1,6 @@
+{{- /* Footer custom links */ -}}
+<div style="text-align:center; margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.6;">
+  {{- range site.Menus.footer }}
+  <a href="{{ .URL }}" style="margin: 0 0.5rem;">{{ .Name }}</a>
+  {{- end }}
+</div>

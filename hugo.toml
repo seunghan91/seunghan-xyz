@@ -105,6 +105,18 @@ name = "New"
 url = "/new/"
 weight = 40
 
+[[menu.footer]]
+identifier = "privacy-policy"
+name = "개인정보처리방침"
+url = "/privacy-policy/"
+weight = 10
+
+[[menu.footer]]
+identifier = "contact"
+name = "문의"
+url = "/contact/"
+weight = 20
+
 [outputs]
 home = ["HTML", "RSS", "JSON"]
 
