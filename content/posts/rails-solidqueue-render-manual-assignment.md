@@ -1,9 +1,13 @@
 ---
 title: "Rails 8 + SolidQueue Render 배포 삽질 3연타 — 테이블 누락, AI 담당자, 수동 배정"
-date: 2026-03-05
+date: 2026-01-06
 draft: false
 tags: ["Rails", "Render", "Solid Queue", "배포", "ITSM", "자동배정"]
 description: "SolidQueue 테이블이 없어서 Puma가 죽고, AI 에이전트가 티켓 담당자가 되고, 결국 수동 배정 기능을 만들기까지"
+cover:
+  image: "/images/og/rails-solidqueue-render-manual-assignment.png"
+  alt: "Rails Solidqueue Render Manual Assignment"
+  hidden: true
 ---
 
 오늘 Rails 8 기반 ITSM 시스템을 Render에 배포하면서 연속으로 삽질을 했다. 각각 원인이 달랐지만 사슬처럼 연결된 문제들이었다.

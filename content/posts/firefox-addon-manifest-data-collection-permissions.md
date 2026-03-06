@@ -1,9 +1,13 @@
 ---
 title: "Firefox 확장 프로그램 AMO 제출 시 data_collection_permissions 오류 해결"
-date: 2026-02-26
+date: 2025-09-17
 draft: false
 tags: ["Firefox", "Browser Extension", "AMO", "Manifest V3", "Chrome Extension"]
 description: "Firefox Add-ons(AMO)에 확장 프로그램을 제출할 때 data_collection_permissions 필수 오류와 manifest.json 설정 방법 정리"
+cover:
+  image: "/images/og/firefox-addon-manifest-data-collection-permissions.png"
+  alt: "Firefox Addon Manifest Data Collection Permissions"
+  hidden: true
 ---
 
 Chrome 확장 프로그램을 Firefox로 포팅해서 [AMO(addons.mozilla.org)](https://addons.mozilla.org)에 제출하면, Chrome Web Store에서는 없던 오류들을 만난다. 특히 2025년 11월부터 필수가 된 `data_collection_permissions` 때문에 삽질하기 쉽다.

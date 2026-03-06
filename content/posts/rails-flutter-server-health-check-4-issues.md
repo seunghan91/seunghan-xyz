@@ -1,9 +1,13 @@
 ---
 title: "Rails + Flutter 앱 서버 점검기: 한 번에 터진 4가지 문제와 해결"
-date: 2026-02-26
+date: 2025-10-15
 draft: false
 tags: ["Rails", "Flutter", "OAuth", "OpenAI", "PostgreSQL", "디버깅", "Seed Data"]
 description: "Google SSO 실패, AI 일정 생성 엉뚱한 결과, 알림 페이지 크래시, 시드 데이터 부재 — 앱 빌드 하나에서 동시에 터진 4가지 문제를 진단하고 수정한 기록."
+cover:
+  image: "/images/og/rails-flutter-server-health-check-4-issues.png"
+  alt: "Rails Flutter Server Health Check 4 Issues"
+  hidden: true
 ---
 
 앱 테스트 빌드를 올리고 직접 돌려보니 한꺼번에 4가지가 안 됐다. Google 로그인 실패, AI 일정 생성이 엉뚱한 결과, 알림 버튼 누르면 크래시, 인기 여행지 섹션이 텅 비어있음. 하나씩 원인을 찾고 고친 과정을 정리한다.

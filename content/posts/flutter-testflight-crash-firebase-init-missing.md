@@ -1,9 +1,13 @@
 ---
 title: "Flutter TestFlight 크래시 - Firebase.initializeApp() 누락"
-date: 2026-02-25
+date: 2025-08-16
 draft: false
 tags: ["Flutter", "Firebase", "iOS", "TestFlight", "크래시"]
 description: "firebase_core를 추가했는데 Firebase.initializeApp()을 호출하지 않으면 릴리즈 빌드에서 크래시가 난다. 디버그에서는 괜찮다가 TestFlight에서만 터지는 이유와 해결법."
+cover:
+  image: "/images/og/flutter-testflight-crash-firebase-init-missing.png"
+  alt: "Flutter Testflight Crash Firebase Init Missing"
+  hidden: true
 ---
 
 TestFlight 빌드를 올렸는데 앱을 열자마자 즉시 종료됐다. 시뮬레이터와 디버그 빌드에서는 멀쩡했다. 원인은 `Firebase.initializeApp()` 호출 누락이었다.

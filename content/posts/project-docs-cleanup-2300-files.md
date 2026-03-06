@@ -1,9 +1,13 @@
 ---
 title: "프로젝트 문서 2,300개를 400개로 줄인 전수점검 기록"
-date: 2026-03-06
+date: 2026-01-27
 draft: false
 tags: ["문서관리", "기술부채", "정리", "Git", "개발환경", "생산성"]
 description: "docs/ 폴더에 2,350개 마크다운이 쌓여있었다. 에이전트 병렬 분석으로 전수점검하고, 활성 문서 404개만 남기기까지의 과정을 기록한다."
+cover:
+  image: "/images/og/project-docs-cleanup-2300-files.png"
+  alt: "Project Docs Cleanup 2300 Files"
+  hidden: true
 ---
 
 프로젝트를 1년 가까이 진행하다 보면 문서가 쌓인다. 기능 설계서, TODO, 디버깅 기록, 마이그레이션 계획서, 테스트 시나리오... 각각은 그 시점에 필요했지만, 시간이 지나면 노이즈가 된다. 어느 날 `find docs -name "*.md" | wc -l`을 쳤더니 **2,352개**가 나왔다.

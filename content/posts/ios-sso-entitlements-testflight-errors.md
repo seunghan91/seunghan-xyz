@@ -1,9 +1,13 @@
 ---
 title: "iOS TestFlight 배포 삽질 모음: SSO 에러부터 entitlements mismatch까지"
-date: 2026-02-25
+date: 2025-08-30
 draft: false
 tags: ["iOS", "Flutter", "TestFlight", "Apple Sign-In", "Google OAuth", "Provisioning", "배포"]
 description: "Apple Sign-In 에러 1000, Google OAuth 400 invalid_request, entitlements mismatch, BGTaskSchedulerPermittedIdentifiers 누락까지. TestFlight 배포 과정에서 만난 에러들과 해결법 정리."
+cover:
+  image: "/images/og/ios-sso-entitlements-testflight-errors.png"
+  alt: "Ios Sso Entitlements Testflight Errors"
+  hidden: true
 ---
 
 Flutter 앱 여러 개를 TestFlight에 올리면서 반복적으로 마주친 에러들을 정리했다.

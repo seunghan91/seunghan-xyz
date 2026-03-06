@@ -1,9 +1,13 @@
 ---
 title: "Flutter UI 전수조사 — GlassAppBar TabBar overflow와 Colors.white 라이트모드 버그"
-date: 2026-02-26
+date: 2025-09-24
 draft: false
 tags: ["Flutter", "UI", "GlassAppBar", "TabBar", "overflow", "다크모드", "라이트모드"]
 description: "앱 전체 화면을 대상으로 bottom overflow와 Colors.white 텍스트 버그를 전수조사한 과정. preferredSize 메커니즘과 라이트모드에서 흰 텍스트가 사라지는 원인을 정리했다."
+cover:
+  image: "/images/og/flutter-glassappbar-tabbar-overflow-colors-white-lightmode.png"
+  alt: "Flutter Glassappbar Tabbar Overflow Colors White Lightmode"
+  hidden: true
 ---
 
 Flutter 앱을 어느 정도 만들다 보면 꼭 한 번씩 마주치는 두 가지 버그가 있다.

@@ -1,9 +1,13 @@
 ---
 title: "Rails 8 프로젝트 간 패턴 교차 적용 — rack-attack, PWA 배너, Sentry, FCM 멀티디바이스"
-date: 2026-03-06
+date: 2026-02-20
 draft: false
 tags: ["Rails", "Ruby", "PWA", "Sentry", "Hotwire", "Stimulus", "FCM"]
 description: "두 Rails 8 프로젝트를 나란히 운영하다 보니, 한쪽에서 잘 동작하는 패턴이 다른 쪽에는 빠져있는 경우가 많았다. 이번 글에서는 rack-attack, PWA 설치 배너, Sentry 에러 추적, FCM 멀티디바이스 토큰 관리, iOS 딥링크 설정을 교차 적용하면서 겪은 내용을 정리한다."
+cover:
+  image: "/images/og/rails8-cross-project-patterns-and-improvements.png"
+  alt: "Rails8 Cross Project Patterns And Improvements"
+  hidden: true
 ---
 
 두 개의 Rails 8 프로젝트를 병렬로 운영하다 보면 한쪽에서 공들여 만든 패턴이 다른 쪽에는 빠져있는 경우가 자주 생긴다. 기능을 구현할 때는 당장의 요구사항에 집중하다 보니 다른 프로젝트의 좋은 구현을 챙기지 못하는 것이다.

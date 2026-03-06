@@ -1,0 +1,9 @@
+{{- if .IsTranslated }}
+<div class="lang-switch" style="display:inline-flex;gap:0.3rem;font-size:0.8rem;margin-left:0.5rem;">
+  {{- range .Translations }}
+  <a href="{{ .RelPermalink }}" style="padding:0.2rem 0.5rem;border:1px solid var(--border);border-radius:4px;text-decoration:none;color:var(--secondary);">
+    {{ .Language.LanguageName }}
+  </a>
+  {{- end }}
+</div>
+{{- end }}

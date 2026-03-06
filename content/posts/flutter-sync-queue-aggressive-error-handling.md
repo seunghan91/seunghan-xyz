@@ -1,9 +1,13 @@
 ---
 title: "Flutter Sync Queue에서 불필요한 에러가 반복 노출되는 문제 해결"
-date: 2026-02-26
+date: 2025-10-04
 draft: false
 tags: ["Flutter", "Sync", "Offline-First", "디버깅", "모바일"]
 description: "Transactional Outbox 패턴 기반 sync queue에서 retryable failure를 blocking failure로 취급하여 사용자에게 에러가 반복 노출되던 문제를 분석하고 해결한 과정"
+cover:
+  image: "/images/og/flutter-sync-queue-aggressive-error-handling.png"
+  alt: "Flutter Sync Queue Aggressive Error Handling"
+  hidden: true
 ---
 
 모바일 앱에서 오프라인 동기화를 위해 Transactional Outbox 패턴을 구현하던 중, 동기화가 실제로는 정상 완료되었는데도 "동기화 실패" 에러가 반복적으로 사용자에게 노출되는 문제를 발견했다.

@@ -1,9 +1,13 @@
 ---
 title: "웹 캘린더 인쇄 기능의 함정: window.print()는 off-screen 엘리먼트를 무시한다"
-date: 2026-03-06
+date: 2026-01-20
 draft: false
 tags: ["Svelte", "CSS", "인쇄", "jsPDF", "html2canvas", "디버깅", "UX"]
 description: "PDF/PNG 다운로드는 정상인데 브라우저 인쇄만 이미지 위치가 틀어지는 버그. html2canvas vs window.print()의 렌더링 차이, @media print 동적 주입으로 해결한 과정과 용지 크기/스케일 기능 구현기."
+cover:
+  image: "/images/og/calendar-print-browser-print-bug-paper-sizes.png"
+  alt: "Calendar Print Browser Print Bug Paper Sizes"
+  hidden: true
 ---
 
 웹에서 캘린더를 출력하는 기능을 만들었다. PDF와 PNG 다운로드는 완벽한데, 브라우저 인쇄 버튼만 누르면 이미지 위치가 전혀 반영되지 않았다. 같은 데이터를 쓰는데 왜 결과가 다를까?

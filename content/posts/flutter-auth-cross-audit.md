@@ -1,9 +1,13 @@
 ---
 title: "7개 Flutter 앱 인증 보안 크로스 감사 - iOS 제출 전 점검"
-date: 2026-02-26T12:00:00+09:00
+date: 2025-10-21
 draft: false
-tags: ["Flutter", "보안", "SecureStorage", "SharedPreferences", "인증"]
+tags: ["Flutter", "보안", "SecureStorage", "SharedPreferences", "Authentication"]
 description: "iOS 1.0 제출 전 7개 Flutter 앱의 인증/보안을 일괄 점검하여 SharedPreferences 평문 저장, 401 갱신 미구현, PII 노출 3가지 패턴을 발견하고 수정한 기록"
+cover:
+  image: "/images/og/flutter-auth-cross-audit.png"
+  alt: "Flutter Auth Cross Audit"
+  hidden: true
 ---
 
 [이전 글](/posts/flutter-rails-auth-session-persistence-debugging/)에서 Flutter + Rails 앱의 세션 버그 3개를 고쳤다. 고치고 나니 궁금해졌다. **다른 프로젝트에도 같은 문제가 있지 않을까?**

@@ -1,9 +1,13 @@
 ---
 title: "Rails Turbo Stream 500 에러 3종 세트 디버깅 — broadcast, SolidCable, Telegram Markdown"
-date: 2026-03-05
+date: 2026-01-09
 draft: false
 tags: ["Rails", "Turbo", "ActionCable", "SolidCable", "Telegram", "디버깅", "Ruby"]
 description: "Rails 8 + Turbo Stream 환경에서 broadcast_append_to 500 에러, SolidCable 테이블 누락, Telegram Markdown 파싱 오류가 한꺼번에 터졌을 때 각각 어떻게 원인을 찾고 해결했는지 기록한다."
+cover:
+  image: "/images/og/rails-turbo-actioncable-500-debug.png"
+  alt: "Rails Turbo Actioncable 500 Debug"
+  hidden: true
 ---
 
 Rails 8 + Hotwire(Turbo) 기반 앱을 운영하다 보면 `broadcast_append_to` 계열 콜백이 조용히 500을 내뱉는 경우가 있다. 거기에 SolidCable 초기 설정 문제와 Telegram Bot 메시지 파싱 오류가 겹치면 로그 해석도 헷갈린다. 이번에 세 가지가 한꺼번에 터져서 순서대로 해결한 과정을 정리한다.

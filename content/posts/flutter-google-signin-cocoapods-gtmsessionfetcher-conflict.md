@@ -1,9 +1,13 @@
 ---
 title: "Flutter google_sign_in 추가 후 CocoaPods GTMSessionFetcher 버전 충돌 해결"
-date: 2026-02-25
+date: 2025-07-27
 draft: false
 tags: ["Flutter", "iOS", "CocoaPods", "Google Sign-In", "Troubleshooting"]
 description: "Flutter 프로젝트에 google_sign_in 패키지를 추가하고 빌드하면 CocoaPods에서 GTMSessionFetcher/Core 버전 충돌이 발생할 수 있다. 원인과 해결 방법을 정리한다."
+cover:
+  image: "/images/og/flutter-google-signin-cocoapods-gtmsessionfetcher-conflict.png"
+  alt: "Flutter Google Signin Cocoapods Gtmsessionfetcher Conflict"
+  hidden: true
 ---
 
 Flutter 앱에 `google_sign_in` 패키지를 추가하고 `flutter build ipa`를 실행했더니 CocoaPods 단계에서 빌드가 실패했다.

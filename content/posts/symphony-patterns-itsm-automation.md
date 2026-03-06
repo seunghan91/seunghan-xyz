@@ -1,9 +1,13 @@
 ---
 title: "OpenAI Symphony에서 배운 7가지 패턴을 Rails ITSM에 적용한 이야기"
-date: 2026-03-05
+date: 2026-01-16
 draft: false
 tags: ["Rails", "자동화", "ITSM", "Symphony", "SolidQueue", "아키텍처"]
 description: "이슈 트래커 자동화 오케스트레이터 Symphony의 핵심 패턴 7가지를 Rails 기반 티켓 시스템에 실제로 적용해본 기록"
+cover:
+  image: "/images/og/symphony-patterns-itsm-automation.png"
+  alt: "Symphony Patterns Itsm Automation"
+  hidden: true
 ---
 
 AI 에이전트가 티켓을 잡고 방치하는 문제를 겪고 나서, OpenAI의 Symphony 프로젝트를 분석했다. Symphony는 이슈 트래커를 폴링하고 코딩 에이전트를 자동으로 실행시키는 오케스트레이터인데, 핵심 철학이 인상적이었다:

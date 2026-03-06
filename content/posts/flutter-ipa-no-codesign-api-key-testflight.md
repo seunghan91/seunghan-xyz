@@ -1,9 +1,13 @@
 ---
 title: "flutter build ipa 실패 원인과 --no-codesign + API Key로 TestFlight 배포하기"
-date: 2026-02-27
+date: 2025-11-04
 draft: false
 tags: ["Flutter", "iOS", "TestFlight", "Xcode", "Makefile", "코드서명", "배포자동화"]
 description: "Development 인증서 없이 flutter build ipa가 실패하는 이유와, --no-codesign + App Store Connect API Key로 Xcode 계정 로그인 없이 TestFlight 배포하는 방법"
+cover:
+  image: "/images/og/flutter-ipa-no-codesign-api-key-testflight.png"
+  alt: "Flutter Ipa No Codesign Api Key Testflight"
+  hidden: true
 ---
 
 Flutter iOS 앱을 여러 Apple 계정으로 관리하다 보면 한 프로젝트에서는 `make testflight`가 잘 되는데 다른 프로젝트에서는 동일한 Makefile이 실패하는 상황이 생긴다. 오늘 겪은 케이스를 정리한다.

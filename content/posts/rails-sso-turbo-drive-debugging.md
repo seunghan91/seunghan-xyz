@@ -1,9 +1,13 @@
 ---
 title: "Rails SSO 구현 중 Turbo Drive가 유발한 두 가지 버그 디버깅"
-date: 2026-03-06
+date: 2026-02-13
 draft: false
 tags: ["Rails", "SSO", "Turbo Drive", "디버깅", "Ruby", "보안"]
 description: "HMAC 기반 SSO를 Rails에서 구현하면서 만난 두 가지 삽질 — Turbo Drive prefetch로 인한 세션 state 충돌과, ERB에서 j 헬퍼 사용 시 발생하는 이중 HTML 인코딩 문제"
+cover:
+  image: "/images/og/rails-sso-turbo-drive-debugging.png"
+  alt: "Rails Sso Turbo Drive Debugging"
+  hidden: true
 ---
 
 Rails 앱 간 SSO(Single Sign-On)를 HMAC 기반으로 구현하던 중 예상치 못한 두 가지 버그를 만났다. 둘 다 Turbo Drive와 ERB의 동작 방식에서 비롯된 문제였다.

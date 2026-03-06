@@ -1,9 +1,13 @@
 ---
 title: "크롬 확장 content script — 한국 보험사 자동입력, HTML 목업 스크린샷, MOV→GIF"
-date: 2026-02-27
+date: 2025-10-28
 draft: false
 tags: ["Chrome Extension", "Browser Extension", "Playwright", "ffmpeg", "JavaScript", "content script"]
 description: "다이렉트 자동차보험 10개사 JS 렌더링 대응 자동입력, React/Vue Native Setter trick, HTML+Playwright 스토어 스크린샷, ffmpeg 2-pass GIF 변환까지 하루 삽질 기록"
+cover:
+  image: "/images/og/chrome-extension-insurance-autofill-playwright-gif.png"
+  alt: "Chrome Extension Insurance Autofill Playwright Gif"
+  hidden: true
 ---
 
 브라우저 확장 프로그램에서 form 자동입력 기능을 확장하면서 삽질한 내용들을 정리한다.

@@ -1,9 +1,13 @@
 ---
 title: "Flutter + Rails 인증 세션이 계속 풀리는 문제 - 3가지 원인과 해결"
-date: 2026-02-26
+date: 2025-09-27
 draft: false
-tags: ["Flutter", "Rails", "BLoC", "WebSocket", "인증", "디버깅"]
+tags: ["Flutter", "Rails", "BLoC", "WebSocket", "Session", "디버깅"]
 description: "Flutter BLoC 앱에서 로그인 세션이 자꾸 끊기는 현상을 서버 로그부터 추적하여 DTA 잔존 코드, WebSocket 클로저 캡처 버그, 토큰 수명 설정 3가지 원인을 찾고 해결한 기록"
+cover:
+  image: "/images/og/flutter-rails-auth-session-persistence-debugging.png"
+  alt: "Flutter Rails Auth Session Persistence Debugging"
+  hidden: true
 ---
 
 Flutter BLoC 앱에서 로그인을 해도 세션이 자꾸 풀린다. 분명 SecureStorage에 토큰도 저장하고, Dio 인터셉터로 401 시 자동 갱신도 구현했는데 왜?

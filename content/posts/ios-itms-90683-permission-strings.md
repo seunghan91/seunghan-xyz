@@ -1,9 +1,13 @@
 ---
 title: "App Store Connect ITMS-90683: Info.plist 권한 purpose string 누락 오류 해결"
-date: 2026-02-25
+date: 2025-08-27
 draft: false
 tags: ["Flutter", "iOS", "App Store Connect", "TestFlight", "Info.plist", "권한"]
 description: "TestFlight 업로드 후 ITMS-90683 오류 메일이 오는 경우 해결 방법. NSPhotoLibraryUsageDescription, NSCameraUsageDescription 등 권한 설명 문자열 누락 시 처리."
+cover:
+  image: "/images/og/ios-itms-90683-permission-strings.png"
+  alt: "Ios Itms 90683 Permission Strings"
+  hidden: true
 ---
 
 TestFlight에 IPA를 업로드하고 몇 분 후 App Store Connect에서 메일이 온다.

@@ -1,9 +1,13 @@
 ---
 title: "Rails 간 SSO 구현 + iOS Universal Links로 앱 자동 전환까지"
-date: 2026-03-06
+date: 2026-02-17
 draft: false
-tags: ["Rails", "SSO", "iOS", "Universal Links", "Hotwire Native", "인증", "보안"]
+tags: ["Rails", "SSO", "iOS", "Universal Links", "Hotwire Native", "보안"]
 description: "두 Rails 앱 간 커스텀 SSO를 구현하고, iOS Universal Links를 연동해 앱이 설치돼 있으면 자동으로 네이티브 앱에서 인증하도록 만든 과정. 세션 유실, 리다이렉트 루프, AASA 설정까지 삽질 기록."
+cover:
+  image: "/images/og/rails-sso-universal-links-hotwire-native.png"
+  alt: "Rails Sso Universal Links Hotwire Native"
+  hidden: true
 ---
 
 두 개의 Rails 8 서비스가 있다. 하나는 메인 앱(IdP 역할), 다른 하나는 연동 서비스(RP 역할). 연동 서비스 로그인 페이지에 "메인 앱으로 로그인" 버튼을 넣고, SSO로 인증 후 돌아오는 플로우를 구현했다.

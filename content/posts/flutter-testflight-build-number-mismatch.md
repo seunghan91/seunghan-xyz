@@ -1,9 +1,13 @@
 ---
 title: "Flutter TestFlight 빌드 번호 불일치: pubspec.yaml +9인데 TestFlight에서 빌드 11로 표시되는 이유"
-date: 2026-02-25
+date: 2025-08-13
 draft: false
 tags: ["Flutter", "iOS", "TestFlight", "Xcode", "빌드번호", "CFBundleVersion"]
 description: "pubspec.yaml에 +9로 설정했는데 TestFlight에서 빌드 11로 표시되는 이유와, 이후 빌드 번호 관리를 일치시키는 방법을 정리한다."
+cover:
+  image: "/images/og/flutter-testflight-build-number-mismatch.png"
+  alt: "Flutter Testflight Build Number Mismatch"
+  hidden: true
 ---
 
 Flutter iOS 앱을 TestFlight에 업로드했을 때 `pubspec.yaml`에 설정한 빌드 번호와 TestFlight에 표시되는 빌드 번호가 다른 경우가 있다. 예를 들어 `version: 1.0.1+9`로 설정했는데 TestFlight에서는 빌드 11로 표시된다.

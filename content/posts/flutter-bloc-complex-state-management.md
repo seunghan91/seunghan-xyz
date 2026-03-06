@@ -1,9 +1,13 @@
 ---
 title: "Flutter BLoC - Q&A 세션처럼 상태가 복잡할 때 설계하기"
-date: 2026-02-25
+date: 2025-07-06
 draft: false
 tags: ["Flutter", "BLoC", "상태관리", "UX"]
 description: "단순한 목록/상세가 아닌, 세션 생성 → 질문 추가 → 답변 → 완료 흐름을 BLoC로 관리할 때 이벤트와 상태를 어떻게 나눌지 정리"
+cover:
+  image: "/images/og/flutter-bloc-complex-state-management.png"
+  alt: "Flutter Bloc Complex State Management"
+  hidden: true
 ---
 
 목록을 불러오고 보여주는 수준의 BLoC는 어렵지 않다.

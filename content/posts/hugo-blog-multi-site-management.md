@@ -1,9 +1,13 @@
 ---
 title: "Hugo 블로그 3개를 하나의 폴더에서 관리하는 구조"
-date: 2026-02-26
+date: 2025-10-08
 draft: false
 tags: ["Hugo", "Netlify", "블로그", "정적사이트", "PaperMod", "Stack"]
 description: "용도가 다른 Hugo 블로그 3개(개발 블로그, 앱 홈페이지, 개인 블로그)를 단일 디렉토리에서 운영하면서 각각 Netlify로 독립 배포하는 방법"
+cover:
+  image: "/images/og/hugo-blog-multi-site-management.png"
+  alt: "Hugo Blog Multi Site Management"
+  hidden: true
 ---
 
 Hugo 블로그를 목적별로 3개 운영하고 있다.
@@ -186,7 +190,7 @@ hugo server -D --port 1316
 ```markdown
 ---
 title: "제목"
-date: 2026-02-26
+date: 2025-10-08
 draft: false
 tags: ["태그1", "태그2"]
 description: "SEO용 한 줄 설명"

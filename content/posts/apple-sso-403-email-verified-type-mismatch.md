@@ -1,9 +1,13 @@
 ---
 title: "Apple Sign-In 403 에러: email_verified 타입 불일치와 복붙 버그 3종 세트"
-date: 2026-02-27
+date: 2025-10-25
 draft: false
 tags: ["Rails", "Apple Sign-In", "OAuth", "JWT", "디버깅", "Flutter"]
 description: "Apple SSO 로그인이 403으로 실패하는데 Google은 정상인 경우, JWT의 email_verified 타입 차이와 코드 복붙에서 발생한 버그 3가지를 정리한다."
+cover:
+  image: "/images/og/apple-sso-403-email-verified-type-mismatch.png"
+  alt: "Apple Sso 403 Email Verified Type Mismatch"
+  hidden: true
 ---
 
 Apple Sign-In이 403 Forbidden으로 실패하는데, Google Sign-In은 정상 동작하는 상황이었다. 동일한 스택(Rails 8 + Flutter)의 다른 프로젝트에서는 Apple 로그인이 잘 되고 있어서 비교 분석했다.

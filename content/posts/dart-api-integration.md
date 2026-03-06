@@ -1,9 +1,13 @@
 ---
 title: "DART Open API 연동 삽질기 (Rails + Flutter)"
-date: 2026-02-24
+date: 2025-06-01
 draft: false
 tags: ["Rails", "Flutter", "DART", "PostgreSQL", "ActiveJob"]
 description: "금융감독원 DART Open API를 Rails 백엔드에 붙이면서 겪은 마이그레이션 오류, 필드명 불일치, 권한 구조 설계까지 정리"
+cover:
+  image: "/images/og/dart-api-integration.png"
+  alt: "Dart Api Integration"
+  hidden: true
 ---
 
 [DART Open API](https://opendart.fss.or.kr)를 Rails 백엔드에 연동하면서 겪은 과정을 정리한다.

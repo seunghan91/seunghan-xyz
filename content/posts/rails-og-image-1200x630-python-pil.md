@@ -1,9 +1,13 @@
 ---
 title: "Rails OG 이미지 최적화 — Python PIL로 1200×630 생성 + 메타태그 완전판"
-date: 2026-03-04
+date: 2025-12-23
 draft: false
 tags: ["Rails", "OG Image", "Open Graph", "Python", "PIL", "SEO", "카카오톡"]
 description: "og:image를 정사각형 아이콘에서 1200x630 전용 이미지로 교체하고, og:url / og:site_name / Twitter Card까지 메타태그를 완성한 기록"
+cover:
+  image: "/images/og/rails-og-image-1200x630-python-pil.png"
+  alt: "Rails Og Image 1200X630 Python Pil"
+  hidden: true
 ---
 
 카카오톡에 링크를 붙여넣으니 아이콘이 작고 이상하게 나왔다. 원인은 `og:image`가 512×512 정사각형 앱 아이콘을 그대로 쓰고 있었기 때문이다.

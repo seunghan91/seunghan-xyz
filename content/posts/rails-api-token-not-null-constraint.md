@@ -1,9 +1,13 @@
 ---
 title: "Rails API 토큰 생성: NOT NULL 컬럼 누락으로 발생하는 오류"
-date: 2026-02-24
+date: 2025-06-22
 draft: false
 tags: ["Rails", "API", "Authentication", "디버깅"]
 description: "Rails에서 API 토큰을 직접 create!로 생성할 때 NOT NULL 컬럼이 누락되면 발생하는 오류와, Service 객체를 사용해야 하는 이유"
+cover:
+  image: "/images/og/rails-api-token-not-null-constraint.png"
+  alt: "Rails Api Token Not Null Constraint"
+  hidden: true
 ---
 
 Rails API 서버에서 소셜 로그인(SSO) 후 토큰을 발급하는 로직을 작성하다가 발생한 문제를 정리한다.

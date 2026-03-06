@@ -1,9 +1,13 @@
 ---
 title: "Svelte 5 + Inertia.js 프로젝트 8개에 디자인 토큰 체계 잡기"
-date: 2026-03-06
+date: 2026-03-03
 draft: false
 tags: ["Svelte 5", "Inertia.js", "Design Tokens", "Tailwind CSS", "디자인 시스템", "CSS Custom Properties"]
 description: "Rails + Inertia.js + Svelte 5 기반 프로젝트 8개를 운영하면서 디자인 시스템 적용 현황을 감사하고, 미적용 프로젝트에 CSS Custom Properties 기반 디자인 토큰을 일괄 구축한 과정을 정리한다."
+cover:
+  image: "/images/og/svelte-inertia-design-tokens-system.png"
+  alt: "Svelte Inertia Design Tokens System"
+  hidden: true
 ---
 
 Rails + Inertia.js + Svelte 5 기반으로 여러 프로젝트를 운영하다 보면 하나의 고질적 문제가 생긴다. **각 프로젝트마다 색상, 타이포그래피, 간격 등의 디자인 기준이 제각각**이라는 점이다. 어떤 프로젝트는 `tailwind.config.js`에 체계적으로 정리되어 있고, 어떤 프로젝트는 `bg-[#3182F6]` 같은 하드코딩이 넘쳐난다.

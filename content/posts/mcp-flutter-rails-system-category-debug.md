@@ -1,9 +1,13 @@
 ---
 title: "MCP 도구 연동부터 Flutter 설정 토글까지 — 삽질 기록"
-date: 2026-03-04
+date: 2025-12-13
 draft: false
 tags: ["Rails", "Flutter", "BLoC", "MCP", "RSpec", "HydratedBloc"]
 description: "MCP로 서버에 카테고리를 만들었는데 앱에서 안 보인다? API 응답 필드 누락부터 Flutter Freezed 엔티티 수정, 설정 토글 구현까지의 과정 정리"
+cover:
+  image: "/images/og/mcp-flutter-rails-system-category-debug.png"
+  alt: "Mcp Flutter Rails System Category Debug"
+  hidden: true
 ---
 
 MCP 도구로 서버 사이드에 카테고리를 생성했다.

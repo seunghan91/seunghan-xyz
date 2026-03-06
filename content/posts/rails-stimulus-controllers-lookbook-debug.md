@@ -1,9 +1,13 @@
 ---
 title: "Rails + Stimulus 컨트롤러 11개 구현기: 스크롤·캐러셀·텍스트 애니메이션"
-date: 2026-03-02
+date: 2025-11-18
 draft: false
 tags: ["Rails", "Stimulus", "ViewComponent", "Lookbook", "JavaScript", "애니메이션"]
 description: "스텁(빈 껍데기) 상태의 Stimulus 컨트롤러 11개를 실제 동작하도록 구현하면서 겪은 삽질과 해결 과정. Lookbook 프리뷰에서 Stimulus가 작동하지 않는 버그 포함."
+cover:
+  image: "/images/og/rails-stimulus-controllers-lookbook-debug.png"
+  alt: "Rails Stimulus Controllers Lookbook Debug"
+  hidden: true
 ---
 
 Rails + ViewComponent + Lookbook 조합으로 컴포넌트 라이브러리를 만들 때, Stimulus 컨트롤러가 전부 스텁(빈 껍데기) 상태로 남아있는 상황을 맞닥뜨렸다. 13개 컨트롤러 중 3개만 동작하고 나머지 10개는 `connect() {}` 한 줄짜리였다. 이걸 전부 구현하면서 겪은 삽질을 정리한다.

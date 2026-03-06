@@ -1,9 +1,13 @@
 ---
 title: "Flutter TestFlight 빌드에서 API URL이 localhost로 고정되는 문제"
-date: 2026-02-25
+date: 2025-07-13
 draft: false
 tags: ["Flutter", "TestFlight", "dart-define", "iOS", "배포"]
 description: "flutter build ipa에 --dart-define=API_URL을 추가하지 않으면 TestFlight 빌드가 localhost를 API 서버로 사용해서 모든 요청이 실패한다. Makefile에서 관리하는 방법을 정리한다."
+cover:
+  image: "/images/og/flutter-dart-define-api-url-testflight.png"
+  alt: "Flutter Dart Define Api Url Testflight"
+  hidden: true
 ---
 
 Flutter 앱을 TestFlight에 올렸는데 실기기에서 모든 API 요청이 실패하는 경우, `--dart-define`으로 API URL이 주입되지 않아서 앱이 `localhost`로 요청을 보내고 있는 게 원인일 수 있다.

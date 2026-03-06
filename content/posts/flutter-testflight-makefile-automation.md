@@ -1,9 +1,13 @@
 ---
 title: "Flutter TestFlight 업로드 자동화 - Makefile로 한 줄에 끝내기"
-date: 2026-02-25
+date: 2025-08-20
 draft: false
 tags: ["Flutter", "TestFlight", "iOS", "Makefile", "자동화", "배포"]
 description: "flutter build ipa부터 xcrun altool 업로드까지 Makefile 한 줄로 처리하는 방법과 흔히 빠지는 IPA 파일명 함정"
+cover:
+  image: "/images/og/flutter-testflight-makefile-automation.png"
+  alt: "Flutter Testflight Makefile Automation"
+  hidden: true
 ---
 
 Flutter iOS 앱을 TestFlight에 올리는 과정은 단계가 많다. `flutter build ipa`, Xcode 아카이브, altool 업로드... Makefile로 묶어두면 `make testflight` 한 줄로 끝난다.

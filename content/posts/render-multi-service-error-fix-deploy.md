@@ -1,9 +1,13 @@
 ---
 title: "Render 6개 서비스 에러 일괄 점검 & 수정 — Stoplight, FK 제약, Puma 7, Solid Stack 삽질 기록"
-date: 2026-03-06
+date: 2026-02-24
 draft: false
 tags: ["Rails", "Render", "Stoplight", "Telegram", "Puma", "PostgreSQL", "SolidCache", "SolidQueue", "디버깅", "배포"]
 description: "Render에 배포된 Rails 8 서비스 6개를 한꺼번에 로그 점검하고, Stoplight 5.x 호환성, Telegram parse_mode, solid_cache 스키마, FK 제약 위반, Puma 7 deprecated API 등 다양한 에러를 수정한 기록."
+cover:
+  image: "/images/og/render-multi-service-error-fix-deploy.png"
+  alt: "Render Multi Service Error Fix Deploy"
+  hidden: true
 ---
 
 Render에 올려둔 Rails 서비스 6개가 전부 각자 다른 에러를 토해내고 있었다. 하나씩 로그를 까보니 공통 패턴도 있고, 프로젝트마다 고유한 문제도 있었다. 한 세션에서 전부 수정하고 배포까지 마친 과정을 정리한다.

@@ -1,9 +1,13 @@
 ---
 title: "Flutter iOS 크래시: workmanager의 BGTaskScheduler NSException이 Dart try-catch에 잡히지 않는 문제"
-date: 2026-02-25
+date: 2025-08-06
 draft: false
 tags: ["Flutter", "iOS", "workmanager", "BGTaskScheduler", "crash"]
 description: "workmanager 패키지를 iOS에서 사용할 때 BGTaskScheduler가 던지는 ObjC NSException은 Dart try-catch로 잡을 수 없어 앱이 크래시된다. 원인 분석과 해결 방법을 정리한다."
+cover:
+  image: "/images/og/flutter-ios-workmanager-crash-bgtaskscheduler.png"
+  alt: "Flutter Ios Workmanager Crash Bgtaskscheduler"
+  hidden: true
 ---
 
 Flutter 앱을 TestFlight에 올렸는데 앱 실행 즉시 크래시가 발생하는 경우가 있다. 코드에 try-catch를 감싸뒀는데도 크래시가 잡히지 않는다면 `workmanager` 패키지의 iOS BGTaskScheduler 문제일 가능성이 높다.

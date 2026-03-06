@@ -1,9 +1,13 @@
 ---
 title: "Flutter SSO 로그인 실패 + Rails 서버 크래시 동시 디버깅 기록"
-date: 2026-02-26
+date: 2025-10-01
 draft: false
 tags: ["Flutter", "Rails", "TestFlight", "SSO", "Render", "디버깅"]
 description: "TestFlight 앱에서 SSO 로그인이 localhost에 연결을 시도하며 실패하고, 동시에 Rails 서버가 uninitialized constant로 크래시되는 문제를 두 개 동시에 잡은 기록."
+cover:
+  image: "/images/og/flutter-sso-localhost-rails-uninitialized-constant-debug.png"
+  alt: "Flutter Sso Localhost Rails Uninitialized Constant Debug"
+  hidden: true
 ---
 
 TestFlight에서 소셜 로그인(Apple, Google)이 전부 실패하는 버그를 잡다가 서버도 크래시되고 있다는 걸 같이 발견했다. 각각 원인이 달랐고 둘 다 잡아야 앱이 정상 동작했다.

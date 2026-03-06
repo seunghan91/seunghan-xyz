@@ -1,9 +1,13 @@
 ---
 title: "Rails 8 + Devise 다단계 회원가입 & Resend 이메일 삽질 기록"
-date: 2026-03-04
+date: 2025-12-20
 draft: false
 tags: ["Rails 8", "Devise", "Resend", "Svelte 5", "Inertia.js", "이메일", "디버깅"]
 description: "역할별 조건부 다단계 회원가입 폼과 Resend 이메일 서비스 통합 과정에서 만난 삽질들 — gem 위치 오류, MAILER_FROM 미설정, Devise mailer sender 불일치까지."
+cover:
+  image: "/images/og/rails-devise-multistep-signup-resend-email.png"
+  alt: "Rails Devise Multistep Signup Resend Email"
+  hidden: true
 ---
 
 Rails 8 + Inertia.js + Svelte 5 스택에서 역할별 다단계 회원가입과 Resend 이메일 서비스를 연동하면서 겪은 문제들을 정리한다.

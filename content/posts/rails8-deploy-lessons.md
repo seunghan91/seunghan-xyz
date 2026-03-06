@@ -1,9 +1,13 @@
 ---
 title: "Rails 8 첫 배포에서 마주친 5가지 문제: 보안, 마이그레이션, 호환성"
-date: 2026-02-28
+date: 2025-11-11
 draft: false
 tags: ["Rails 8", "Render", "Solid Queue", "Sentry", "배포", "보안", "디버깅"]
 description: "Rails 8 프로젝트를 처음 클라우드에 배포하면서 겪은 보안 파일 유출, database.yml 제거 실수, Solid Suite 멀티DB 마이그레이션 누락, Sentry 호환성 오류, image_processing 경고까지 5가지 삽질을 정리한다."
+cover:
+  image: "/images/og/rails8-deploy-lessons.png"
+  alt: "Rails8 Deploy Lessons"
+  hidden: true
 ---
 
 Rails 8 프로젝트를 처음 클라우드 서비스에 배포하면서 하루 동안 연속으로 5가지 문제를 만났다. 각각 독립적인 문제처럼 보였지만, 하나를 고치면 다음 문제가 드러나는 패턴이었다. 기록으로 남긴다.

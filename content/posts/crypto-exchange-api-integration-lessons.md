@@ -1,9 +1,13 @@
 ---
 title: "5개 암호화폐 거래소 API 연동하면서 겪은 삽질 모음"
-date: 2026-03-04
+date: 2025-12-06
 draft: false
 tags: ["Ruby", "Rails", "API", "암호화폐", "디버깅", "Faraday", "Circuit Breaker"]
 description: "Binance, Bybit, OKX, Bitget, HyperLiquid 5개 거래소 펀딩레이트 API를 Rails에서 연동하면서 마주친 문제들과 해결 방법. 문서와 다른 실제 API 동작, 에러 처리 패턴, Faraday 재시도 설정까지."
+cover:
+  image: "/images/og/crypto-exchange-api-integration-lessons.png"
+  alt: "Crypto Exchange Api Integration Lessons"
+  hidden: true
 ---
 
 Ruby on Rails로 여러 암호화폐 거래소의 펀딩레이트(funding rate)를 수집하는 기능을 만들면서 겪은 문제들을 정리한다. 5개 거래소를 붙이면서 각 거래소마다 API 동작 방식이 달랐고, 공식 문서와 실제 동작이 다른 경우도 있었다.

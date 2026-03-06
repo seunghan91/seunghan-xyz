@@ -1,9 +1,13 @@
 ---
 title: "Rails AASA 라우팅 3가지 함정: proc vs lambda, 경로 누락, git 미추적"
-date: 2026-02-25
+date: 2025-09-03
 draft: false
 tags: ["Rails", "iOS", "Universal Links", "AASA", "라우팅", "디버깅"]
 description: "Rails에서 Apple App Site Association(AASA) 파일을 서빙할 때 proc 사용, 경로 누락, git 미추적 3가지 문제가 동시에 발생할 수 있다. 각각의 원인과 수정 방법을 정리한다."
+cover:
+  image: "/images/og/rails-aasa-routing-proc-lambda-git.png"
+  alt: "Rails Aasa Routing Proc Lambda Git"
+  hidden: true
 ---
 
 iOS 유니버설 링크(Universal Links)를 설정하려면 `/.well-known/apple-app-site-association` 경로에서 JSON을 반환해야 한다. Rails에서 이걸 라우팅할 때 흔히 빠지는 함정 3가지를 정리한다.

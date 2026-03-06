@@ -1,9 +1,13 @@
 ---
 title: "Chrome 확장 프로그램에서 iframe OACX 자동입력이 안 되는 문제 — 타이밍과 한글 IME"
-date: 2026-03-06
+date: 2026-01-23
 draft: false
 tags: ["Chrome Extension", "Manifest V3", "iframe", "OACX", "Korean IME", "디버깅", "MutationObserver"]
 description: "정부 사이트 간편인증(OACX) 자동입력 확장을 만들었는데, 특정 사이트에서만 이름이 안 들어가는 버그. iframe 비동기 렌더링 타이밍과 한글 IME composition 이벤트가 원인이었다."
+cover:
+  image: "/images/og/chrome-extension-oacx-iframe-korean-ime-fix.png"
+  alt: "Chrome Extension Oacx Iframe Korean Ime Fix"
+  hidden: true
 ---
 
 Chrome 확장 프로그램으로 정부 사이트 간편인증(OACX) 폼을 자동입력하는 기능을 만들었다. 대부분의 사이트에서 잘 동작하는데, 특정 대형 사이트에서 "이름 입력이 안 됩니다"라는 피드백이 들어왔다.

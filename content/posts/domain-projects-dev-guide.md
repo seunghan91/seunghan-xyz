@@ -1,10 +1,14 @@
 ---
 title: "멀티 도메인 정적 사이트 운영 개발 가이드"
-date: 2026-02-26
+date: 2025-09-13
 draft: false
 tags: ["Hugo", "Netlify", "Static Site", "DevOps", "Deployment"]
 categories: ["Dev Guide"]
 description: "Hugo + Netlify 기반 멀티 사이트 정적 호스팅 아키텍처와 배포 워크플로우 정리"
+cover:
+  image: "/images/og/domain-projects-dev-guide.png"
+  alt: "Domain Projects Dev Guide"
+  hidden: true
 ---
 
 ## 개요
@@ -162,7 +166,7 @@ hugo new posts/my-new-post.md
 ```yaml
 ---
 title: "Post Title"
-date: 2026-02-26
+date: 2025-09-13
 draft: true          # 배포 시 false로 변경
 tags: ["tag1"]
 categories: ["Dev"]

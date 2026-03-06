@@ -1,9 +1,13 @@
 ---
 title: "Rails 프로젝트 정밀 점검 — 16개 테스트에서 553개, 숨어있던 버그 8개"
-date: 2026-03-06
+date: 2026-02-03
 draft: false
 tags: ["Rails", "RSpec", "디버깅", "리팩토링", "Pundit", "테스트"]
 description: "테스트 커버리지 3%짜리 Rails 프로젝트를 점검했더니 Dockerfile 버전 불일치, 누락된 Serializer, Policy 버그 등 8개의 숨은 문제가 나왔다. 553개 테스트를 작성하며 하나씩 잡아간 기록."
+cover:
+  image: "/images/og/rails-project-health-check-553-tests.png"
+  alt: "Rails Project Health Check 553 Tests"
+  hidden: true
 ---
 
 운영 중인 Rails 8 API 서버를 점검하기로 했다. 기능은 대부분 동작하고 있었지만, 테스트 커버리지가 3%밖에 안 되는 상태. "동작하니까 괜찮겠지"라는 생각이 얼마나 위험한지 확인하는 과정이었다.

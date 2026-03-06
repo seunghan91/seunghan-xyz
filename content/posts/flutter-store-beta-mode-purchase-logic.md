@@ -1,9 +1,13 @@
 ---
 title: "Flutter IAP 스토어 베타 모드 설계와 구매 로직 보강 실전기"
-date: 2026-02-27
+date: 2025-11-08
 draft: false
 tags: ["Flutter", "IAP", "In-App Purchase", "베타", "StoreKit", "BLoC"]
 description: "오픈 베타 기간에 스토어 화면을 어떻게 처리할 것인가, IAP Restore 중복 지급 방지, 미인증 사용자 크레딧 보호 등 실전에서 만난 구매 로직 허점들과 해결법"
+cover:
+  image: "/images/og/flutter-store-beta-mode-purchase-logic.png"
+  alt: "Flutter Store Beta Mode Purchase Logic"
+  hidden: true
 ---
 
 Flutter 앱에서 IAP(In-App Purchase)를 구현하고 오픈 베타를 운영하다 보면, "베타인데 스토어는 유료 가격이 그대로 보인다"거나 "Restore하면 크레딧이 중복 지급된다" 같은 허점들이 드러난다. 실제로 마주친 문제들과 해결 과정을 정리한다.

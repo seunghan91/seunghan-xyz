@@ -1,9 +1,13 @@
 ---
 title: "Hotwire Native iOS 탭바 앱 구축 — HotwireTabBarController 적용기와 삽질 모음"
-date: 2026-03-05
+date: 2025-12-26
 draft: false
 tags: ["Rails", "Hotwire Native", "iOS", "Swift", "HotwireTabBarController", "WKWebView", "TestFlight", "Puma"]
 description: "Rails + Hotwire Native로 네이티브 탭바 iOS 앱을 만들면서 겪은 문제들 — 백그라운드 WebView suspend, 수출 규정 누락, 뒤로가기 중복, Puma 스레드 부족까지 정리했다."
+cover:
+  image: "/images/og/hotwire-native-ios-tab-bar-patterns.png"
+  alt: "Hotwire Native Ios Tab Bar Patterns"
+  hidden: true
 ---
 
 Rails 앱을 Hotwire Native로 래핑할 때 단일 Navigator 대신 **HotwireTabBarController** 패턴으로 전환하면서 생긴 문제들을 정리한다.

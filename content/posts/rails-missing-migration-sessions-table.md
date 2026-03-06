@@ -1,9 +1,13 @@
 ---
 title: "Production DB에 테이블이 없다: schema.rb와 migration 파일 불일치 사고"
-date: 2026-02-26
+date: 2025-10-18
 draft: false
 tags: ["Rails", "PostgreSQL", "DevOps", "CI/CD", "디버깅", "마이그레이션"]
 description: "schema.rb에는 있지만 migration 파일이 누락되어 production DB에 테이블이 생성되지 않은 사고. 원인 분석과 3가지 방어 체계 구축기."
+cover:
+  image: "/images/og/rails-missing-migration-sessions-table.png"
+  alt: "Rails Missing Migration Sessions Table"
+  hidden: true
 ---
 
 회원가입, 로그인이 전부 안 된다는 제보를 받았다. 앱에서는 "예상하지 못한 오류가 발생했습니다"만 반복.

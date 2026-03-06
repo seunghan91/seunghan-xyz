@@ -1,9 +1,13 @@
 ---
 title: "KRX AI — App Store 제출 정보 레퍼런스"
-date: 2026-03-05
+date: 2025-12-30
 draft: false
 tags: ["KRX", "AppStore", "iOS", "제출", "레퍼런스"]
 description: "KRX AI 임직원 전용 앱 App Store Connect 제출 시 입력할 내용 정리"
+cover:
+  image: "/images/og/krx-ai-appstore-submission.png"
+  alt: "Krx Ai Appstore Submission"
+  hidden: true
 ---
 
 > Apple ID: **6760086555** · Bundle ID: `com.krxai.app` · 버전: **1.0**

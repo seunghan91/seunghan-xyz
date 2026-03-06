@@ -1,9 +1,13 @@
 ---
 title: "Flutter iOS 배포 삽질 모음: 빌드 오류 5종 + 다크모드 하드코딩 + 로그아웃 버그"
-date: 2026-02-27
+date: 2025-11-01
 draft: false
 tags: ["Flutter", "iOS", "TestFlight", "Dart", "Retrofit", "Freezed", "build_runner", "다크모드", "Makefile"]
 description: "코드 생성 실패(Retrofit 문법 오류, Freezed sealed class), 누락된 파일 복원, Xcode 계정 없이 TestFlight 배포, 다크모드 색상 하드코딩, 로그아웃 토큰 미삭제 버그까지 — 하루에 터진 문제들을 정리한다."
+cover:
+  image: "/images/og/flutter-ios-build-dark-mode-logout-debugging.png"
+  alt: "Flutter Ios Build Dark Mode Logout Debugging"
+  hidden: true
 ---
 
 빌드를 올리려는데 한꺼번에 여러 문제가 터졌다. 코드 생성기가 실패하고, 없어진 파일이 있고, 빌드 번호 규칙을 몰라서 거절당하고, UI는 다크모드가 하드코딩되어 있고, 로그아웃은 토큰을 안 지웠다. 하나씩 정리한다.

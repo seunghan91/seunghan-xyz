@@ -1,9 +1,13 @@
 ---
 title: "로그인이 자꾸 풀린다 — API 래퍼 포맷 불일치가 만든 연쇄 버그"
-date: 2026-03-04
+date: 2025-12-02
 draft: false
-tags: ["Flutter", "Rails", "BLoC", "디버깅", "인증", "Chrome Extension", "JWT"]
+tags: ["Flutter", "Rails", "BLoC", "디버깅", "JWT", "Chrome Extension"]
 description: "모바일 앱 로그인이 자꾸 풀리는 증상을 추적해보니, 서버 응답 래퍼 포맷 불일치 하나가 Flutter, Rails, Chrome Extension 3개 클라이언트에 걸쳐 5개 버그로 이어져 있었다."
+cover:
+  image: "/images/og/api-response-wrapper-token-parsing-debug.png"
+  alt: "Api Response Wrapper Token Parsing Debug"
+  hidden: true
 ---
 
 모바일 앱에서 로그인이 자꾸 풀린다. 로그인 직후는 정상인데, 앱을 잠깐 백그라운드로 내렸다가 다시 열면 로그인 화면이 뜬다.

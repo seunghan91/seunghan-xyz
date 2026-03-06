@@ -1,9 +1,13 @@
 ---
 title: "Firebase Phone Auth 플랫폼 설정 완전 정복 - Android SHA-1, iOS APNs"
-date: 2026-02-25
+date: 2025-06-29
 draft: false
 tags: ["Firebase", "Android", "iOS", "APNs", "SHA-1", "Phone Auth"]
 description: "Firebase 전화 인증을 실기기에서 동작시키기 위한 Android SHA-1 지문 등록과 iOS APNs 키 설정 전체 과정"
+cover:
+  image: "/images/og/firebase-android-sha1-ios-apns-complete-setup.png"
+  alt: "Firebase Android Sha1 Ios Apns Complete Setup"
+  hidden: true
 ---
 
 Firebase 전화 인증을 붙이고 에뮬레이터에서는 되는데 실기기에서 안 된다면, 대부분 플랫폼별 추가 설정이 빠진 것이다. Android와 iOS 각각 필요한 설정을 정리한다.

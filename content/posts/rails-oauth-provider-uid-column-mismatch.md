@@ -1,9 +1,13 @@
 ---
 title: "Rails OAuth: PG::UndefinedColumn users.uid 에러 — 컬럼명 불일치"
-date: 2026-02-25
+date: 2025-09-06
 draft: false
 tags: ["Rails", "OAuth", "PostgreSQL", "Apple Sign-In", "디버깅"]
 description: "Rails OAuth 컨트롤러에서 uid 컬럼을 참조했지만 실제 DB 컬럼명이 provider_uid인 경우 PG::UndefinedColumn 에러가 발생한다. 로그로 확인하는 방법과 수정 방법을 정리한다."
+cover:
+  image: "/images/og/rails-oauth-provider-uid-column-mismatch.png"
+  alt: "Rails Oauth Provider Uid Column Mismatch"
+  hidden: true
 ---
 
 Apple Sign-In / Google Sign-In 연동 후 클라이언트에서는 500 에러만 보이는데, 서버 로그를 보면 실제 원인이 다른 경우가 있다. 오늘 마주친 케이스를 정리한다.

@@ -1,9 +1,13 @@
 ---
 title: "Flutter Firebase Phone Auth - SMS가 안 와요? 진단부터 코드 수정까지"
-date: 2026-02-25
+date: 2025-07-02
 draft: false
-tags: ["Flutter", "Firebase", "Phone Auth", "Rails", "인증"]
+tags: ["Flutter", "Firebase", "Phone Auth", "Rails", "Firebase Auth"]
 description: "Firebase 전화 인증을 연동했는데 SMS가 안 오는 경우의 원인 분석과, 개발용 bypass 버튼이 Production에서 동작하지 않는 문제 해결"
+cover:
+  image: "/images/og/firebase-phone-auth-not-working-diagnosis.png"
+  alt: "Firebase Phone Auth Not Working Diagnosis"
+  hidden: true
 ---
 
 Flutter 앱에 전화번호 인증을 붙이고 나서 "인증번호가 안 와요"라는 상황을 마주쳤다. 그리고 개발용 bypass 버튼을 눌러서 인증을 건너뛰고 회원가입을 시도하면 서버에서 "인증이 완료되지 않은 전화번호입니다"가 떴다. 두 문제를 같이 정리한다.

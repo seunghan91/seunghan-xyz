@@ -1,9 +1,13 @@
 ---
 title: "Flutter iOS Google Sign-In: GIDClientID가 Info.plist에 없을 때"
-date: 2026-02-25
+date: 2025-08-23
 draft: false
 tags: ["Flutter", "iOS", "Google Sign-In", "OAuth", "Info.plist"]
 description: "GoogleService-Info.plist 없이 직접 Google OAuth를 연동할 때 GIDClientID를 Info.plist에 별도로 추가해야 한다. 누락 시 'No active configuration' 에러가 발생한다."
+cover:
+  image: "/images/og/ios-gidclientid-info-plist-missing.png"
+  alt: "Ios Gidclientid Info Plist Missing"
+  hidden: true
 ---
 
 Flutter iOS 앱에서 Google Sign-In을 구현할 때 Firebase를 쓰지 않고 Google Cloud Console에서 직접 OAuth 클라이언트 ID를 발급받는 경우가 있다. 이때 `GIDClientID`를 `Info.plist`에 명시적으로 추가하지 않으면 런타임에 에러가 발생한다.

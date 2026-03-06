@@ -1,9 +1,13 @@
 ---
 title: "Sign In with Apple 추가 후 TestFlight 빌드 에러 2연타 해결"
-date: 2026-02-25
+date: 2025-09-10
 draft: false
 tags: ["Flutter", "iOS", "TestFlight", "Xcode", "Sign In with Apple", "배포"]
 description: "Apple Developer Portal에서 Sign In with Apple을 활성화하고 프로비저닝 프로파일을 재생성한 뒤, 빌드에서 연달아 터진 두 가지 entitlement 에러 해결 과정"
+cover:
+  image: "/images/og/sign-in-with-apple-testflight-entitlement-errors.png"
+  alt: "Sign In With Apple Testflight Entitlement Errors"
+  hidden: true
 ---
 
 Flutter iOS 앱에 Sign In with Apple을 추가하면서 TestFlight 빌드까지 두 가지 에러를 연달아 만났다. 각각 원인이 달라서 정리해둔다.

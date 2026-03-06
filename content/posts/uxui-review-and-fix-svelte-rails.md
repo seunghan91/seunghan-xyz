@@ -4,6 +4,10 @@ date: 2026-03-06
 draft: false
 tags: ["Svelte", "Rails", "UX", "Accessibility", "svelte-sonner", "Tailwind"]
 description: "할일 관리 웹앱의 UX 문제를 전수 점검하고 시작일 UI 통일, Toast 알림, 터치 타겟, 비밀번호 토글을 개선한 과정"
+cover:
+  image: "/images/og/uxui-review-and-fix-svelte-rails.png"
+  alt: "Uxui Review And Fix Svelte Rails"
+  hidden: true
 ---
 
 Rails 8 + Inertia.js + Svelte 5 조합으로 만든 웹앱을 운영하다가, 기능은 돌아가는데 세부 UX가 들쭉날쭉하다는 걸 느꼈다. 이번 글은 전수 점검 후 우선순위 높은 4가지를 직접 고친 기록이다.

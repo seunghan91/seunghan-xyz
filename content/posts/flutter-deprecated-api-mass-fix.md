@@ -1,9 +1,13 @@
 ---
 title: "Flutter Deprecated API 대규모 수정 - withOpacity, DropdownButtonFormField, Switch 등"
-date: 2026-02-25
+date: 2025-07-20
 draft: false
 tags: ["Flutter", "Dart", "deprecated", "flutter analyze", "리팩터링", "코드품질"]
 description: "flutter analyze에서 쏟아지는 deprecated API 경고를 일괄 수정하는 방법. withOpacity, DropdownButtonFormField, Switch.activeColor, GoRouter 등 케이스별 패턴 정리"
+cover:
+  image: "/images/og/flutter-deprecated-api-mass-fix.png"
+  alt: "Flutter Deprecated Api Mass Fix"
+  hidden: true
 ---
 
 Flutter 프로젝트를 오래 유지하다 보면 `flutter analyze`가 수백 개의 deprecated 경고를 뱉는 시점이 온다. 기능은 잘 돌아가지만 Warning이 쌓이면 진짜 문제가 묻힌다. 이번에 한 번에 200개 넘는 deprecated 경고를 정리하면서 나온 패턴들을 정리한다.

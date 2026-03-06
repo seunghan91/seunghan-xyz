@@ -1,9 +1,13 @@
 ---
 title: "Rails 비정규화 캐시 컬럼과 COUNT 쿼리 불일치: 씨드 데이터가 0%를 만들었을 때"
-date: 2026-03-04
+date: 2025-12-16
 draft: false
 tags: ["Rails", "디버깅", "데이터베이스", "비정규화", "씨드 데이터", "PostgreSQL"]
 description: "직접 컬럼을 업데이트한 씨드 데이터가 화면에서 0%로 표시된 이유. vote_count 캐시 컬럼과 votes.count() 쿼리 사이의 불일치를 파헤친 디버깅 기록."
+cover:
+  image: "/images/og/rails-denormalized-cache-vs-count-query.png"
+  alt: "Rails Denormalized Cache Vs Count Query"
+  hidden: true
 ---
 
 Rails 앱에 데모용 씨드 데이터를 직접 삽입했는데, 화면에서 모든 퍼센트가 **0%** 로 표시되는 상황을 만났다.

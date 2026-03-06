@@ -1,9 +1,13 @@
 ---
 title: "하루 종일 삽질한 것들 — Ruby 3.0 kwargs, Docker env, NAS 크론, SSH 특수문자"
-date: 2026-03-05
+date: 2026-01-02
 draft: false
 tags: ["Rails", "Ruby", "Docker", "Synology", "NAS", "배포", "디버깅", "크론"]
 description: "AI 에이전트와 Rails API를 연동하는 작업을 하면서 만난 버그들: Ruby 3.0 키워드 인수 분리, Docker env_file 재로드 문제, Synology NAS 크론 설정, SSH heredoc 특수문자 이슈까지."
+cover:
+  image: "/images/og/rails-ruby3-kwargs-dispatch-integration-debug.png"
+  alt: "Rails Ruby3 Kwargs Dispatch Integration Debug"
+  hidden: true
 ---
 
 AI 에이전트가 Rails API 서버를 호출해서 티켓을 자동 배정하는 디스패처를 만들었다. 로직 자체는 간단한데 붙이는 과정에서 예상치 못한 곳에서 계속 막혔다. 겪은 것들을 기록해 둔다.

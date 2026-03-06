@@ -1,7 +1,9 @@
 baseURL = 'https://seunghan.xyz/'
-languageCode = 'ko'
+defaultContentLanguage = 'ko'
+defaultContentLanguageInSubdir = false
 title = 'Seunghan | Developer'
 theme = 'PaperMod'
+googleAnalytics = 'G-XXXXXXXXXX'
 
 enableRobotsTXT = true
 buildDrafts = false
@@ -12,43 +14,162 @@ buildExpired = false
 disableXML = true
 minifyOutput = true
 
-[params]
-env = "production"
-title = "Seunghan"
-description = "모바일 앱 개발자 승한의 기술 블로그. Flutter, iOS, Rails 개발 경험과 디버깅 노하우를 공유합니다."
-keywords = ["Developer", "Flutter", "iOS", "Rails", "모바일 개발", "앱 개발", "디버깅", "개발 블로그"]
-images = ["/og-image.png"]
-author = "Seunghan"
-DateFormat = "2006-01-02"
-defaultTheme = "auto"
-disableThemeToggle = false
-ShowReadingTime = false
-ShowShareButtons = false
-comments = true
-ShowPostNavLinks = true
-ShowBreadCrumbs = true
-ShowCodeCopyButtons = true
-ShowWordCount = false
-ShowRssButtonInSectionTermList = false
-UseHugoToc = true
-disableSpecialTitlePostfix = true
+[languages]
+  [languages.ko]
+  languageCode = 'ko'
+  languageName = '한국어'
+  weight = 1
+  title = 'Seunghan | Developer'
 
-  [params.homeInfoParams]
-  Title = "Seunghan"
-  Content = """
+    [languages.ko.params]
+    env = "production"
+    title = "Seunghan"
+    description = "모바일 앱 개발자 승한의 기술 블로그. Flutter, iOS, Rails 개발 경험과 디버깅 노하우를 공유합니다."
+    keywords = ["Developer", "Flutter", "iOS", "Rails", "모바일 개발", "앱 개발", "디버깅", "개발 블로그"]
+    images = ["/og-image.png"]
+    author = "Seunghan"
+    DateFormat = "2006-01-02"
+    defaultTheme = "auto"
+    disableThemeToggle = false
+    ShowReadingTime = true
+    ShowShareButtons = false
+    comments = true
+    ShowPostNavLinks = true
+    ShowBreadCrumbs = true
+    ShowCodeCopyButtons = true
+    ShowWordCount = false
+    ShowRssButtonInSectionTermList = false
+    UseHugoToc = true
+    disableSpecialTitlePostfix = true
+
+      [languages.ko.params.homeInfoParams]
+      Title = "Seunghan"
+      Content = """
 👋 안녕하세요, 개발자 승한입니다.
 
 모바일 앱과 웹 서비스를 만들고 있습니다.
 사용자 경험을 개선하고 실생활 문제를 해결하는 것에 관심이 있습니다.
 """
 
-  [[params.socialIcons]]
-  name = "github"
-  url = "https://github.com/seunghan91"
+    [[languages.ko.params.socialIcons]]
+    name = "github"
+    url = "https://github.com/seunghan91"
 
-  [[params.socialIcons]]
-  name = "kakaotalk"
-  url = "https://open.kakao.com/o/sYu2sj9h"
+    [[languages.ko.params.socialIcons]]
+    name = "kakaotalk"
+    url = "https://open.kakao.com/o/sYu2sj9h"
+
+    [[languages.ko.menu.main]]
+    identifier = "about"
+    name = "소개"
+    url = "/about/"
+    weight = 10
+
+    [[languages.ko.menu.main]]
+    identifier = "projects"
+    name = "프로젝트"
+    url = "/projects/"
+    weight = 20
+
+    [[languages.ko.menu.main]]
+    identifier = "blog"
+    name = "블로그"
+    url = "/posts/"
+    weight = 30
+
+    [[languages.ko.menu.main]]
+    identifier = "new"
+    name = "New"
+    url = "/new/"
+    weight = 40
+
+    [[languages.ko.menu.footer]]
+    identifier = "privacy-policy"
+    name = "개인정보처리방침"
+    url = "/privacy-policy/"
+    weight = 10
+
+    [[languages.ko.menu.footer]]
+    identifier = "contact"
+    name = "문의"
+    url = "/contact/"
+    weight = 20
+
+  [languages.en]
+  languageCode = 'en'
+  languageName = 'English'
+  weight = 2
+  title = 'Seunghan | Developer'
+
+    [languages.en.params]
+    env = "production"
+    title = "Seunghan"
+    description = "Tech blog by Seunghan — sharing debugging stories and dev experiences with Flutter, iOS, and Rails."
+    keywords = ["Developer", "Flutter", "iOS", "Rails", "Mobile Development", "Debugging", "Tech Blog"]
+    images = ["/og-image.png"]
+    author = "Seunghan"
+    DateFormat = "2006-01-02"
+    defaultTheme = "auto"
+    disableThemeToggle = false
+    ShowReadingTime = true
+    ShowShareButtons = false
+    comments = true
+    ShowPostNavLinks = true
+    ShowBreadCrumbs = true
+    ShowCodeCopyButtons = true
+    ShowWordCount = false
+    ShowRssButtonInSectionTermList = false
+    UseHugoToc = true
+    disableSpecialTitlePostfix = true
+
+      [languages.en.params.homeInfoParams]
+      Title = "Seunghan"
+      Content = """
+👋 Hi, I'm Seunghan, a software developer.
+
+I build mobile apps and web services.
+I'm passionate about improving user experiences and solving real-world problems.
+"""
+
+    [[languages.en.params.socialIcons]]
+    name = "github"
+    url = "https://github.com/seunghan91"
+
+    [[languages.en.menu.main]]
+    identifier = "about"
+    name = "About"
+    url = "/about/"
+    weight = 10
+
+    [[languages.en.menu.main]]
+    identifier = "projects"
+    name = "Projects"
+    url = "/projects/"
+    weight = 20
+
+    [[languages.en.menu.main]]
+    identifier = "blog"
+    name = "Blog"
+    url = "/posts/"
+    weight = 30
+
+    [[languages.en.menu.main]]
+    identifier = "new"
+    name = "New"
+    url = "/new/"
+    weight = 40
+
+    [[languages.en.menu.footer]]
+    identifier = "privacy-policy"
+    name = "Privacy Policy"
+    url = "/privacy-policy/"
+    weight = 10
+
+    [[languages.en.menu.footer]]
+    identifier = "contact"
+    name = "Contact"
+    url = "/contact/"
+    weight = 20
 
 [params.assets]
 favicon = "/favicon.ico"
@@ -57,9 +178,9 @@ favicon32x32 = "/favicon-32x32.png"
 apple_touch_icon = "/apple-touch-icon.png"
 
 [params.cover]
-hidden = true
-hiddenInList = true
-hiddenInSingle = true
+hidden = false
+hiddenInList = false
+hiddenInSingle = false
 
 [params.schema]
 publisherType = "Person"
@@ -68,9 +189,8 @@ sameAs = ["https://github.com/seunghan91"]
 [params.analytics.google]
 SiteVerificationTag = "Tj5KeqDb_o5Mo8LDJZj05lAeGCz4kYYv3Gh5QpIDngs"
 
-# TODO: Naver Search Advisor에서 메타 태그 인증 코드를 발급받아 입력
 [params.analytics.naver]
-SiteVerificationTag = ""
+SiteVerificationTag = "4aff3baeafe680ba320dbda5a51bc963b58356c3"
 
 [params.fuseOpts]
 isCaseSensitive = false
@@ -80,42 +200,6 @@ distance = 1000
 threshold = 0.4
 minMatchCharLength = 0
 keys = ["title", "permalink", "summary", "content"]
-
-[[menu.main]]
-identifier = "about"
-name = "About"
-url = "/about/"
-weight = 10
-
-[[menu.main]]
-identifier = "projects"
-name = "Projects"
-url = "/projects/"
-weight = 20
-
-[[menu.main]]
-identifier = "blog"
-name = "Blog"
-url = "/posts/"
-weight = 30
-
-[[menu.main]]
-identifier = "new"
-name = "New"
-url = "/new/"
-weight = 40
-
-[[menu.footer]]
-identifier = "privacy-policy"
-name = "개인정보처리방침"
-url = "/privacy-policy/"
-weight = 10
-
-[[menu.footer]]
-identifier = "contact"
-name = "문의"
-url = "/contact/"
-weight = 20
 
 [outputs]
 home = ["HTML", "RSS", "JSON"]

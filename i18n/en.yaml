@@ -1,0 +1,15 @@
+- id: read_time
+  translation:
+    one: "{{ .Count }} min read"
+    other: "{{ .Count }} min read"
+
+- id: words
+  translation:
+    one: "{{ .Count }} word"
+    other: "{{ .Count }} words"
+
+- id: prev_page
+  translation: "Previous"
+
+- id: next_page
+  translation: "Next"

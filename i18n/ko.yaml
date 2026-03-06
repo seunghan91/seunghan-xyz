@@ -1,0 +1,15 @@
+- id: read_time
+  translation:
+    one: "{{ .Count }}분 소요"
+    other: "{{ .Count }}분 소요"
+
+- id: words
+  translation:
+    one: "{{ .Count }}자"
+    other: "{{ .Count }}자"
+
+- id: prev_page
+  translation: "이전 글"
+
+- id: next_page
+  translation: "다음 글"

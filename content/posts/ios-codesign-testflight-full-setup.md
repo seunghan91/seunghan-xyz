@@ -1,9 +1,13 @@
 ---
 title: "iOS 배포 인증서 전체 세팅: Distribution Cert → APNs → Provisioning Profile → TestFlight"
-date: 2026-02-24
+date: 2025-06-18
 draft: false
 tags: ["iOS", "Flutter", "Xcode", "TestFlight", "Provisioning", "배포"]
 description: "Distribution 인증서부터 APNs 인증서, Provisioning Profile 생성, xcodebuild API Key 빌드까지 iOS 배포 전체 흐름 정리"
+cover:
+  image: "/images/og/ios-codesign-testflight-full-setup.png"
+  alt: "Ios Codesign Testflight Full Setup"
+  hidden: true
 ---
 
 Flutter 앱을 TestFlight에 올리는 과정에서 코드 서명 관련 설정을 처음부터 다시 잡으면서 정리한 내용이다. Xcode 자동 서명이 아닌 수동 + App Store Connect API Key 방식으로 진행했다.

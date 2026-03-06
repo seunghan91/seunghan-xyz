@@ -1,9 +1,13 @@
 ---
 title: "RFC 3161 TSA 타임스탬프 + 블록체인 Merkle 앵커링: Rails에서 삽질 기록"
-date: 2026-03-06
+date: 2026-02-06
 draft: false
 tags: ["Rails", "Ruby", "OpenSSL", "블록체인", "RFC 3161", "TSA", "Merkle Tree", "디버깅", "마이그레이션"]
 description: "Rails 8 + Ruby 4.0 환경에서 RFC 3161 TSA 타임스탬프와 블록체인 Merkle Tree 앵커링을 구현하면서 만난 삽질들. OpenSSL API 변경, multi-database 마이그레이션 충돌, 테스트 환경 꼬임까지."
+cover:
+  image: "/images/og/rails-rfc3161-tsa-blockchain-merkle-debugging.png"
+  alt: "Rails Rfc3161 Tsa Blockchain Merkle Debugging"
+  hidden: true
 ---
 
 전자계약 보관 시스템에 **법적 증거력**을 부여하기 위해 두 가지를 동시에 구현해야 했다:

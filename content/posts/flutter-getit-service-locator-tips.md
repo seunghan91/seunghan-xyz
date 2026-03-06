@@ -1,9 +1,13 @@
 ---
 title: "Flutter GetIt service_locator - Feature 늘어날수록 관리가 힘든 이유"
-date: 2026-02-25
+date: 2025-07-23
 draft: false
 tags: ["Flutter", "GetIt", "DI", "의존성 주입"]
 description: "GetIt으로 의존성 주입 관리하다가 Feature가 늘면서 생기는 문제들 - 등록 순서, 토큰 타이밍, lazy vs eager 선택 기준"
+cover:
+  image: "/images/og/flutter-getit-service-locator-tips.png"
+  alt: "Flutter Getit Service Locator Tips"
+  hidden: true
 ---
 
 Flutter에서 `GetIt`으로 의존성 주입을 관리하다 보면, Feature가 5개일 때는 괜찮다가 15개가 넘으면 슬슬 힘들어진다.

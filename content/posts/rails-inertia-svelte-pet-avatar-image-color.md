@@ -1,9 +1,13 @@
 ---
 title: "Rails + Inertia + Svelte 5: 아바타 이미지/색상 선택 기능 구현에서 삽질한 것들"
-date: 2026-03-02
+date: 2025-11-15
 draft: false
 tags: ["Rails", "Inertia.js", "Svelte 5", "ActiveRecord", "Migration", "Seeds", "디버깅"]
 description: "DB에 색상을 저장하지 않고 인덱스로 계산하던 로직을 고치면서, API 컨트롤러와 Web 컨트롤러 분리, 시드 업데이트 패턴, 프리셋 이미지 처리까지 삽질한 내용을 정리한다."
+cover:
+  image: "/images/og/rails-inertia-svelte-pet-avatar-image-color.png"
+  alt: "Rails Inertia Svelte Pet Avatar Image Color"
+  hidden: true
 ---
 
 Rails 8 + Inertia.js + Svelte 5 스택으로 펫(반려동물) 프로필 아바타를 이미지 또는 색상으로 선택하는 기능을 구현하면서 겪은 문제들을 정리한다.

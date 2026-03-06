@@ -1,9 +1,13 @@
 ---
 title: "Flutter 앱 Google OAuth 동의 화면 인증 셋업 정리"
-date: 2026-02-24
+date: 2025-06-11
 draft: false
 tags: ["Flutter", "OAuth", "Google", "앱개발"]
 description: "Google Cloud Console OAuth 동의 화면 구성 및 인증 제출 과정에서 겪은 삽질 정리"
+cover:
+  image: "/images/og/google-oauth-keeps.png"
+  alt: "Google Oauth Keeps"
+  hidden: true
 ---
 
 Flutter 앱에 Google 로그인을 붙이면서 OAuth 동의 화면 인증까지 진행한 과정을 정리한다.

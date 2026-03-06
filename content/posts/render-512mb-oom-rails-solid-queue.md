@@ -1,9 +1,13 @@
 ---
 title: "Render 512MB Starter에서 Rails OOM 삽질 — render.yaml이 범인이었다"
-date: 2026-03-05
+date: 2026-01-13
 draft: false
 tags: ["Rails", "Render", "Solid Queue", "Puma", "배포", "메모리"]
 description: "puma.rb 아무리 고쳐도 OOM이 안 잡힌 이유 — render.yaml 환경변수가 코드 기본값을 덮어쓰고 있었다"
+cover:
+  image: "/images/og/render-512mb-oom-rails-solid-queue.png"
+  alt: "Render 512Mb Oom Rails Solid Queue"
+  hidden: true
 ---
 
 Rails 8 앱을 Render Starter 플랜(512MB)에 올리고 나서 주기적으로 메모리 초과로 서비스가 다운됐다. puma.rb의 스레드 수를 줄이고, queue.yml도 최적화했는데 효과가 없었다. 한참 삽질하고 나서야 진짜 원인을 찾았다.

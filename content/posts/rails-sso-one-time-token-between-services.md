@@ -1,9 +1,13 @@
 ---
 title: "Rails 서비스 간 SSO 직접 구현하기: One-Time Token + HMAC 방식"
-date: 2026-03-06
+date: 2026-02-10
 draft: false
-tags: ["Rails", "SSO", "인증", "Devise", "Svelte", "Render", "보안", "서비스간연동"]
+tags: ["Rails", "SSO", "Devise", "Svelte", "Render", "보안", "서비스간연동"]
 description: "OAuth2 없이 두 Rails 앱 사이에 SSO를 직접 구현한 과정. One-Time Token + HMAC 서명 방식으로 외부 라이브러리 없이 사용자 인증을 위임하고, Render 배포까지 연결한 기록."
+cover:
+  image: "/images/og/rails-sso-one-time-token-between-services.png"
+  alt: "Rails Sso One Time Token Between Services"
+  hidden: true
 ---
 
 두 개의 Rails 앱이 있다. 하나는 **내부 직원용** 앱(OTP 로그인, 특정 도메인 전용), 다른 하나는 **심사/관리 시스템**으로 Devise + JWT 기반이다. 내부 직원이 심사 시스템에도 접근해야 하는데, 계정을 따로 만들어 관리하기 싫었다.

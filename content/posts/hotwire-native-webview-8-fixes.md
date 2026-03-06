@@ -1,9 +1,13 @@
 ---
 title: "Hotwire Native WebView 삽질 모음 — 네이티브 앱에 Rails WebView 래핑할 때 자주 겪는 8가지 문제"
-date: 2026-03-03
+date: 2025-11-25
 draft: false
 tags: ["Rails", "Hotwire", "Turbo Native", "iOS", "Android", "WebView", "WKWebView"]
 description: "Rails + Hotwire Native로 iOS/Android 앱을 만들 때 WebView에서 터지는 대표 8가지 UX 버그와 CSS·path configuration으로 해결한 방법을 정리했다."
+cover:
+  image: "/images/og/hotwire-native-webview-8-fixes.png"
+  alt: "Hotwire Native Webview 8 Fixes"
+  hidden: true
 ---
 
 Rails 앱을 Hotwire Native(Turbo Native)로 래핑해서 iOS/Android 네이티브 앱을 만들다 보면,
