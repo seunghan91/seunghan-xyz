@@ -24,7 +24,7 @@ minifyOutput = true
     [languages.ko.params]
     env = "production"
     title = "Seunghan"
-    description = "모바일 앱 개발자 승한의 기술 블로그. Flutter, iOS, Rails 개발 경험과 디버깅 노하우를 공유합니다."
+    description = "AI-Native Engineer 승한의 기술 블로그. Flutter, iOS, Rails 개발 경험과 AI 활용 노하우를 공유합니다."
     keywords = ["Developer", "Flutter", "iOS", "Rails", "모바일 개발", "앱 개발", "디버깅", "개발 블로그"]
     images = ["/og-image.png"]
     author = "Seunghan"
@@ -45,9 +45,9 @@ minifyOutput = true
       [languages.ko.params.homeInfoParams]
       Title = "Seunghan"
       Content = """
-👋 안녕하세요, 개발자 승한입니다.
+👋 안녕하세요, AI-Native Engineer 승한입니다.
 
-모바일 앱과 웹 서비스를 만들고 있습니다.
+AI를 활용해 모바일 앱과 웹 서비스를 빠르게 만들고 있습니다.
 사용자 경험을 개선하고 실생활 문제를 해결하는 것에 관심이 있습니다.
 """
 
@@ -110,7 +110,7 @@ minifyOutput = true
     [languages.en.params]
     env = "production"
     title = "Seunghan"
-    description = "Tech blog by Seunghan — sharing debugging stories and dev experiences with Flutter, iOS, and Rails."
+    description = "Tech blog by Seunghan, AI-Native Engineer — sharing AI-powered development stories with Flutter, iOS, and Rails."
     keywords = ["Developer", "Flutter", "iOS", "Rails", "Mobile Development", "Debugging", "Tech Blog"]
     images = ["/og-image.png"]
     author = "Seunghan"
@@ -131,10 +131,10 @@ minifyOutput = true
       [languages.en.params.homeInfoParams]
       Title = "Seunghan"
       Content = """
-👋 Hi, I'm Seunghan, a software developer.
+👋 Hi, I'm Seunghan, an AI-Native Engineer.
 
-I build mobile apps and web services.
-I'm passionate about improving user experiences and solving real-world problems.
+I build mobile apps and web services powered by AI.
+Passionate about improving user experiences and solving real-world problems.
 """
 
     [[languages.en.params.socialIcons]]
