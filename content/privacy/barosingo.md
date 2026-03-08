@@ -2,6 +2,12 @@
 title: "바로신고 — 개인정보 처리방침"
 date: 2026-03-07
 draft: false
+_build:
+  list: never
+  render: always
+sitemap:
+  priority: 0
+  changefreq: never
 ---
 
 # 바로신고 개인정보 처리방침

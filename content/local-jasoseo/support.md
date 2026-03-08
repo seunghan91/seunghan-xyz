@@ -3,6 +3,12 @@ title: "로컬 자소서 지원"
 date: 2026-03-08
 draft: false
 description: "로컬 자소서 앱 지원 페이지 - 자주 묻는 질문, 문의 안내"
+_build:
+  list: never
+  render: always
+sitemap:
+  priority: 0
+  changefreq: never
 hidemeta: true
 ShowBreadCrumbs: false
 ShowReadingTime: false

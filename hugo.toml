@@ -77,12 +77,6 @@ minifyOutput = true
     url = "/posts/"
     weight = 30
 
-    [[languages.ko.menu.main]]
-    identifier = "new"
-    name = "New"
-    url = "/new/"
-    weight = 40
-
     [[languages.ko.menu.footer]]
     identifier = "privacy-policy"
     name = "개인정보처리방침"
@@ -90,10 +84,22 @@ minifyOutput = true
     weight = 10
 
     [[languages.ko.menu.footer]]
+    identifier = "terms"
+    name = "이용약관"
+    url = "/terms/"
+    weight = 20
+
+    [[languages.ko.menu.footer]]
+    identifier = "disclaimer"
+    name = "면책조항"
+    url = "/disclaimer/"
+    weight = 30
+
+    [[languages.ko.menu.footer]]
     identifier = "contact"
     name = "문의"
     url = "/contact/"
-    weight = 20
+    weight = 40
 
   [languages.en]
   languageCode = 'en'
@@ -153,12 +159,6 @@ I'm passionate about improving user experiences and solving real-world problems.
     url = "/posts/"
     weight = 30
 
-    [[languages.en.menu.main]]
-    identifier = "new"
-    name = "New"
-    url = "/new/"
-    weight = 40
-
     [[languages.en.menu.footer]]
     identifier = "privacy-policy"
     name = "Privacy Policy"
@@ -166,10 +166,22 @@ I'm passionate about improving user experiences and solving real-world problems.
     weight = 10
 
     [[languages.en.menu.footer]]
+    identifier = "terms"
+    name = "Terms"
+    url = "/terms/"
+    weight = 20
+
+    [[languages.en.menu.footer]]
+    identifier = "disclaimer"
+    name = "Disclaimer"
+    url = "/disclaimer/"
+    weight = 30
+
+    [[languages.en.menu.footer]]
     identifier = "contact"
     name = "Contact"
     url = "/contact/"
-    weight = 20
+    weight = 40
 
 [params.assets]
 favicon = "/favicon.ico"

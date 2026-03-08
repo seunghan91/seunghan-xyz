@@ -3,6 +3,12 @@ title: "로컬 자소서 개인정보처리방침"
 date: 2026-03-08
 draft: false
 description: "로컬 자소서 앱 개인정보처리방침 - 수집 정보 없음, 완전 로컬 저장"
+_build:
+  list: never
+  render: always
+sitemap:
+  priority: 0
+  changefreq: never
 hidemeta: true
 ShowBreadCrumbs: false
 ShowReadingTime: false

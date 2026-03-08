@@ -4,6 +4,12 @@ date: 2026-02-24
 lastmod: 2026-03-01
 draft: false
 description: "PassPass 간편인증 자동입력 Chrome 확장프로그램 개인정보처리방침"
+_build:
+  list: never
+  render: always
+sitemap:
+  priority: 0
+  changefreq: never
 hidemeta: true
 ShowBreadCrumbs: false
 ShowReadingTime: false

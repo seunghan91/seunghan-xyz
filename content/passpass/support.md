@@ -3,6 +3,12 @@ title: "PassPass 지원 & FAQ"
 date: 2026-02-24
 draft: false
 description: "PassPass 간편인증 자동입력 확장프로그램 지원 페이지 - FAQ, 버그 제보, 사이트 추가 요청"
+_build:
+  list: never
+  render: always
+sitemap:
+  priority: 0
+  changefreq: never
 hidemeta: true
 ShowBreadCrumbs: false
 ShowReadingTime: false

@@ -3,6 +3,12 @@ title: "PassPass - 간편인증 자동입력"
 date: 2026-02-24
 draft: false
 description: "공공기관·금융 사이트의 간편인증 팝업에서 이름·생년월일·휴대폰번호를 자동 입력하는 Chrome 확장프로그램"
+_build:
+  list: never
+  render: always
+sitemap:
+  priority: 0
+  changefreq: never
 hidemeta: true
 ShowBreadCrumbs: false
 ShowReadingTime: false
