@@ -3,7 +3,7 @@ defaultContentLanguage = 'ko'
 defaultContentLanguageInSubdir = false
 title = 'Seunghan | Developer'
 theme = 'PaperMod'
-googleAnalytics = 'G-XXXXXXXXXX'
+googleAnalytics = 'G-Q86C08FHZJ'
 
 enableRobotsTXT = true
 buildDrafts = false
