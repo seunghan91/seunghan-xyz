@@ -13,6 +13,7 @@ sitemap:
 hidemeta: true
 ShowBreadCrumbs: false
 ShowReadingTime: false
+robotsNoIndex: true
 ShowShareButtons: false
 ShowPostNavLinks: false
 ---
