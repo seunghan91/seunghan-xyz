@@ -1,7 +1,7 @@
 ---
 title: "Hello World — seunghan.xyz 블로그를 시작합니다"
 date: 2025-01-01
-draft: false
+draft: true
 tags: ["Blog"]
 description: "Flutter, Rails, React 등 모바일/웹 개발 경험과 사이드 프로젝트 이야기를 공유하는 개발 블로그 seunghan.xyz를 시작합니다"
 cover:

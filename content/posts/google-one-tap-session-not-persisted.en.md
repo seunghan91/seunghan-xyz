@@ -1,7 +1,7 @@
 ---
 title: "Google One Tap Returns 200 But Session Doesn't Persist"
 date: 2026-03-08
-draft: false
+draft: true
 tags: ["Rails", "Devise", "Google One Tap", "OAuth", "Session", "Debugging"]
 description: "Google One Tap login returns 200 OK, but navigating to the dashboard redirects back to the sign-in page. The root cause was setting session[:user_id] directly instead of using Devise's sign_in method."
 ---

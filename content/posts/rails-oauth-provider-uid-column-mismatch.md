@@ -1,7 +1,7 @@
 ---
 title: "Rails OAuth: PG::UndefinedColumn users.uid 에러 — 컬럼명 불일치"
 date: 2025-09-06
-draft: false
+draft: true
 tags: ["Rails", "OAuth", "PostgreSQL", "Apple Sign-In", "디버깅"]
 description: "Rails OAuth 컨트롤러에서 uid 컬럼을 참조했지만 실제 DB 컬럼명이 provider_uid인 경우 PG::UndefinedColumn 에러가 발생한다. 로그로 확인하는 방법과 수정 방법을 정리한다."
 cover:

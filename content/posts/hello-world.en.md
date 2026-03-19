@@ -1,7 +1,7 @@
 ---
 title: "Hello World — Starting the seunghan.xyz Blog"
 date: 2025-01-01
-draft: false
+draft: true
 tags: ["Blog"]
 description: "Starting a dev blog at seunghan.xyz to share mobile/web development experiences with Flutter, Rails, React, and side project stories."
 cover:

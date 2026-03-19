@@ -1,7 +1,7 @@
 ---
 title: "Two Back-to-Back TestFlight Build Errors After Adding Sign In with Apple"
 date: 2025-09-10
-draft: false
+draft: true
 tags: ["Flutter", "iOS", "TestFlight", "Xcode", "Sign In with Apple", "Deployment"]
 description: "After enabling Sign In with Apple in Apple Developer Portal and regenerating provisioning profiles, resolving two consecutive entitlement errors in the build."
 cover:

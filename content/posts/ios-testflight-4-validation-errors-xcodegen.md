@@ -1,7 +1,7 @@
 ---
 title: "iOS TestFlight 업로드 4가지 검증 오류 — xcodegen 프로젝트 완전 해결"
 date: 2025-12-09
-draft: false
+draft: true
 tags: ["iOS", "TestFlight", "xcodegen", "App Store Connect", "altool"]
 description: "altool 업로드 후 나오는 CFBundleIconName 누락, 120x120 아이콘 없음, iPad 멀티태스킹 오리엔테이션, Assets.xcassets 경로 문제 4가지를 xcodegen project.yml 기준으로 해결한 기록"
 cover:

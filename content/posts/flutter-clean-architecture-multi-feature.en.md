@@ -1,7 +1,7 @@
 ---
 title: "Flutter Clean Architecture in Practice - Adding Multiple Features at Once"
 date: 2025-07-09
-draft: false
+draft: true
 tags: ["Flutter", "Clean Architecture", "BLoC", "GetIt"]
 description: "Folder structure and dependency management lessons from adding Calendar, Laws, Legal Precedents, Q&A and other features using Clean Architecture."
 cover:

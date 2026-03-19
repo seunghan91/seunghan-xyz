@@ -1,7 +1,7 @@
 ---
 title: "Flutter TestFlight Build Number Mismatch: pubspec.yaml Says +9 but TestFlight Shows Build 11"
 date: 2025-08-13
-draft: false
+draft: true
 tags: ["Flutter", "iOS", "TestFlight", "Xcode", "Build Number", "CFBundleVersion"]
 description: "Why pubspec.yaml set to +9 shows as build 11 in TestFlight, and how to keep build numbers consistent going forward."
 cover:

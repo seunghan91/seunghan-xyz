@@ -1,7 +1,7 @@
 ---
 title: "Flutter GetIt service_locator - Feature 늘어날수록 관리가 힘든 이유"
 date: 2025-07-23
-draft: false
+draft: true
 tags: ["Flutter", "GetIt", "DI", "의존성 주입"]
 description: "GetIt으로 의존성 주입 관리하다가 Feature가 늘면서 생기는 문제들 - 등록 순서, 토큰 타이밍, lazy vs eager 선택 기준"
 cover:

@@ -1,7 +1,7 @@
 ---
 title: "Flutter SSO 로그인 실패 + Rails 서버 크래시 동시 디버깅 기록"
 date: 2025-10-01
-draft: false
+draft: true
 tags: ["Flutter", "Rails", "TestFlight", "SSO", "Render", "디버깅"]
 description: "TestFlight 앱에서 SSO 로그인이 localhost에 연결을 시도하며 실패하고, 동시에 Rails 서버가 uninitialized constant로 크래시되는 문제를 두 개 동시에 잡은 기록."
 cover:

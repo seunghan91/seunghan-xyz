@@ -1,7 +1,7 @@
 ---
 title: "Flutter TestFlight 크래시 - Firebase.initializeApp() 누락"
 date: 2025-08-16
-draft: false
+draft: true
 tags: ["Flutter", "Firebase", "iOS", "TestFlight", "크래시"]
 description: "firebase_core를 추가했는데 Firebase.initializeApp()을 호출하지 않으면 릴리즈 빌드에서 크래시가 난다. 디버그에서는 괜찮다가 TestFlight에서만 터지는 이유와 해결법."
 cover:

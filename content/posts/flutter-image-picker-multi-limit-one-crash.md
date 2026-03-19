@@ -1,7 +1,7 @@
 ---
 title: "Flutter image_picker pickMultiImage에 limit: 1 넘기면 나는 크래시"
 date: 2026-03-08
-draft: false
+draft: true
 tags: ["Flutter", "iOS", "image_picker", "디버깅", "Dart"]
 description: "사진 추가 버튼을 누르면 'cannot be lower 2:1' 에러가 발생하는 원인과 해결법. pickMultiImage의 limit 파라미터는 2 이상이어야 한다."
 ---

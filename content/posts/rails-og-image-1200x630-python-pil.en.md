@@ -1,7 +1,7 @@
 ---
 title: "Rails OG Image Optimization — Generating 1200x630 with Python PIL + Complete Meta Tags"
 date: 2025-12-23
-draft: false
+draft: true
 tags: ["Rails", "OG Image", "Open Graph", "Python", "PIL", "SEO", "KakaoTalk"]
 description: "Replacing square icon og:image with dedicated 1200x630 images, and completing meta tags including og:url, og:site_name, and Twitter Card."
 cover:

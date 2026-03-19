@@ -1,7 +1,7 @@
 ---
 title: "HotwireNative iOS Black Screen Debug — What Happens When You Forget navigator.start()"
 date: 2026-03-16
-draft: false
+draft: true
 tags: ["iOS", "HotwireNative", "Swift", "Turbo Native", "Debugging"]
 description: "Launched a HotwireNative iOS app on the simulator and got a completely black screen. Network was fine, Rails server was responding — so why was nothing showing? The culprit was one missing line."
 ---

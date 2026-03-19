@@ -1,7 +1,7 @@
 ---
 title: "Flutter google_sign_in CocoaPods GTMSessionFetcher Version Conflict Resolution"
 date: 2025-07-27
-draft: false
+draft: true
 tags: ["Flutter", "iOS", "CocoaPods", "Google Sign-In", "Troubleshooting"]
 description: "When adding google_sign_in package to a Flutter project and building, a GTMSessionFetcher/Core version conflict can occur in CocoaPods. Cause and solution."
 cover:

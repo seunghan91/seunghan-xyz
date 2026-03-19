@@ -1,7 +1,7 @@
 ---
 title: "When Google OAuth Client ID Project Number Differs from Firebase Project Number"
 date: 2025-06-15
-draft: false
+draft: true
 tags: ["Google OAuth", "Firebase", "GCP", "Troubleshooting"]
 description: "Experience where the Google OAuth Client ID stored in .env had a different project number from the Firebase project, causing secret lookup failures."
 cover:

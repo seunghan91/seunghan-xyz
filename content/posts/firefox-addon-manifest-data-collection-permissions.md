@@ -1,7 +1,7 @@
 ---
 title: "Firefox 확장 프로그램 AMO 제출 시 data_collection_permissions 오류 해결"
 date: 2025-09-17
-draft: false
+draft: true
 tags: ["Firefox", "Browser Extension", "AMO", "Manifest V3", "Chrome Extension"]
 description: "Firefox Add-ons(AMO)에 확장 프로그램을 제출할 때 data_collection_permissions 필수 오류와 manifest.json 설정 방법 정리"
 cover:

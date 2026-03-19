@@ -1,7 +1,7 @@
 ---
 title: "Flutter icloud_storage_sync iOS Setup Complete Guide"
 date: 2025-07-30
-draft: false
+draft: true
 tags: ["Flutter", "iCloud", "iOS", "entitlements", "Xcode"]
 description: "For icloud_storage_sync to work on real devices, entitlements, Xcode Capability, and containerId must all be correct. Missing any one causes crashes."
 cover:

@@ -1,7 +1,7 @@
 ---
 title: "Rails OAuth: PG::UndefinedColumn users.uid Error — Column Name Mismatch"
 date: 2025-09-06
-draft: false
+draft: true
 tags: ["Rails", "OAuth", "PostgreSQL", "Apple Sign-In", "Debugging"]
 description: "When Rails OAuth controller references uid column but the actual DB column is provider_uid, PG::UndefinedColumn error occurs. How to verify with logs and fix."
 cover:

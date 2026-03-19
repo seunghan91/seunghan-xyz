@@ -1,7 +1,7 @@
 ---
 title: "Android AGP 9.0 + Hotwire Native 1.2.5 Build Error Collection"
 date: 2025-11-29
-draft: false
+draft: true
 tags: ["Android", "Hotwire Native", "Kotlin", "AGP", "Gradle", "Build Error"]
 description: "A record of resolving cascading build errors from kotlin-android plugin, kotlinOptions, HotwireWebBridgeFragment, and more after upgrading to AGP 9.0"
 cover:

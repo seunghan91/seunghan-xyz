@@ -1,7 +1,7 @@
 ---
 title: "App Store Connect ITMS-90683: Missing Info.plist Permission Purpose String Error Fix"
 date: 2025-08-27
-draft: false
+draft: true
 tags: ["Flutter", "iOS", "App Store Connect", "TestFlight", "Info.plist", "Permissions"]
 description: "How to fix ITMS-90683 error emails after TestFlight upload. Handling missing permission description strings like NSPhotoLibraryUsageDescription, NSCameraUsageDescription."
 cover:

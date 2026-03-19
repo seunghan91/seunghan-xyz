@@ -1,7 +1,7 @@
 ---
 title: "Firebase Phone Auth Platform Setup Complete Guide - Android SHA-1, iOS APNs"
 date: 2025-06-29
-draft: false
+draft: true
 tags: ["Firebase", "Android", "iOS", "APNs", "SHA-1", "Phone Auth"]
 description: "Complete process for registering Android SHA-1 fingerprint and iOS APNs key setup to make Firebase phone authentication work on real devices."
 cover:

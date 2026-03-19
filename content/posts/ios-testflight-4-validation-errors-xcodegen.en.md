@@ -1,7 +1,7 @@
 ---
 title: "iOS TestFlight Upload 4 Validation Errors — Complete Fix with xcodegen"
 date: 2025-12-09
-draft: false
+draft: true
 tags: ["iOS", "TestFlight", "xcodegen", "App Store Connect", "altool"]
 description: "Fixing 4 validation errors after altool upload: missing CFBundleIconName, no 120x120 icon, iPad multitasking orientation, and Assets.xcassets path issues, all in xcodegen project.yml."
 cover:

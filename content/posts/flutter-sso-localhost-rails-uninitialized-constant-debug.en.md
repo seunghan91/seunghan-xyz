@@ -1,7 +1,7 @@
 ---
 title: "Flutter SSO Login Failure + Rails Server Crash Simultaneous Debugging Record"
 date: 2025-10-01
-draft: false
+draft: true
 tags: ["Flutter", "Rails", "TestFlight", "SSO", "Render", "Debugging"]
 description: "TestFlight app's SSO login connecting to localhost and failing, while Rails server simultaneously crashes with uninitialized constant — debugging both at once."
 cover:

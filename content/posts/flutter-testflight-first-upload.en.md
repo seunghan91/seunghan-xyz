@@ -1,7 +1,7 @@
 ---
 title: "Flutter App TestFlight First Upload — Common Pitfalls"
 date: 2026-03-09
-draft: false
+draft: true
 tags: ["Flutter", "iOS", "TestFlight", "AppStoreConnect", "Xcode"]
 description: "A collection of pitfalls encountered when uploading a Flutter app to TestFlight for the first time: wrong DEVELOPMENT_TEAM, ASC REST API limitations, export compliance warnings, and build number conflicts."
 ---

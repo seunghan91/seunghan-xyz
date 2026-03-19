@@ -1,7 +1,7 @@
 ---
 title: "3 Rails AASA Routing Traps: proc vs lambda, Missing Paths, Git Untracked"
 date: 2025-09-03
-draft: false
+draft: true
 tags: ["Rails", "iOS", "Universal Links", "AASA", "Routing", "Debugging"]
 description: "Three problems that can occur simultaneously when serving Apple App Site Association (AASA) files from Rails: proc usage, path omission, and git untracked files."
 cover:

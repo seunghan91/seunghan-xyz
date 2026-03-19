@@ -1,7 +1,7 @@
 ---
 title: "Flutter iOS Google Sign-In: GIDClientID가 Info.plist에 없을 때"
 date: 2025-08-23
-draft: false
+draft: true
 tags: ["Flutter", "iOS", "Google Sign-In", "OAuth", "Info.plist"]
 description: "GoogleService-Info.plist 없이 직접 Google OAuth를 연동할 때 GIDClientID를 Info.plist에 별도로 추가해야 한다. 누락 시 'No active configuration' 에러가 발생한다."
 cover:

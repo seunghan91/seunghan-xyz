@@ -1,7 +1,7 @@
 ---
 title: "KRX AI — App Store 제출 정보 레퍼런스"
 date: 2025-12-30
-draft: false
+draft: true
 tags: ["KRX", "AppStore", "iOS", "제출", "레퍼런스"]
 description: "KRX AI 임직원 전용 앱 App Store Connect 제출 시 입력할 내용 정리"
 cover:

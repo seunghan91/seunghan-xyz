@@ -1,7 +1,7 @@
 ---
 title: "Android AGP 9.0 + Hotwire Native 1.2.5 빌드 오류 모음"
 date: 2025-11-29
-draft: false
+draft: true
 tags: ["Android", "Hotwire Native", "Kotlin", "AGP", "Gradle", "빌드 오류"]
 description: "AGP 9.0으로 올라가면서 kotlin-android 플러그인, kotlinOptions, HotwireWebBridgeFragment 등 줄줄이 터지는 빌드 오류 해결 기록"
 cover:

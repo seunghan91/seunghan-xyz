@@ -1,7 +1,7 @@
 ---
 title: "Flutter TestFlight Crash - Missing Firebase.initializeApp()"
 date: 2025-08-16
-draft: false
+draft: true
 tags: ["Flutter", "Firebase", "iOS", "TestFlight", "Crash"]
 description: "If you add firebase_core but don't call Firebase.initializeApp(), release builds crash. Why it works in debug but only crashes in TestFlight, and the fix."
 cover:

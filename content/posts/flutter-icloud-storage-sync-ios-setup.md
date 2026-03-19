@@ -1,7 +1,7 @@
 ---
 title: "Flutter icloud_storage_sync iOS 설정 완전 가이드"
 date: 2025-07-30
-draft: false
+draft: true
 tags: ["Flutter", "iCloud", "iOS", "entitlements", "Xcode"]
 description: "icloud_storage_sync 패키지를 실기기에서 동작시키려면 entitlements, Xcode Capability, containerId 세 가지가 모두 맞아야 한다. 하나라도 빠지면 실기기에서 크래시."
 cover:

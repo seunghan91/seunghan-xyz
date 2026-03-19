@@ -1,7 +1,7 @@
 ---
 title: "Firefox Extension AMO Submission: data_collection_permissions Error Fix"
 date: 2025-09-17
-draft: false
+draft: true
 tags: ["Firefox", "Browser Extension", "AMO", "Manifest V3", "Chrome Extension"]
 description: "Resolving the required data_collection_permissions error and manifest.json configuration when submitting extensions to Firefox Add-ons (AMO)."
 cover:

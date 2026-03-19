@@ -1,7 +1,7 @@
 ---
 title: "Flutter GetIt Service Locator - Why It Gets Hard to Manage as Features Grow"
 date: 2025-07-23
-draft: false
+draft: true
 tags: ["Flutter", "GetIt", "DI", "Dependency Injection"]
 description: "Problems that arise as features grow when managing dependency injection with GetIt - registration order, token timing, and lazy vs eager selection criteria."
 cover:

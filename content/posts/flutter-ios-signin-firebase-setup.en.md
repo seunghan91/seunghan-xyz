@@ -1,7 +1,7 @@
 ---
 title: "Why Both Google and Apple Login Fail in TestFlight Builds"
 date: 2025-08-03
-draft: false
+draft: true
 tags: ["Flutter", "iOS", "Firebase", "Google Sign-In", "Sign In with Apple", "TestFlight"]
 description: "Google and Apple login both failing in TestFlight builds was caused by missing CLIENT_ID in GoogleService-Info.plist and unconfigured Firebase Apple provider."
 cover:

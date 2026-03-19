@@ -1,7 +1,7 @@
 ---
 title: "Flutter TestFlight Upload Automation - One-Line with Makefile"
 date: 2025-08-20
-draft: false
+draft: true
 tags: ["Flutter", "TestFlight", "iOS", "Makefile", "Automation", "Deployment"]
 description: "How to handle everything from flutter build ipa to xcrun altool upload in a single Makefile line, and the common IPA filename trap."
 cover:

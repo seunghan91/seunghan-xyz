@@ -1,7 +1,7 @@
 ---
 title: "Flutter 앱 TestFlight 첫 업로드 — 삽질 모음"
 date: 2026-03-09
-draft: false
+draft: true
 tags: ["Flutter", "iOS", "TestFlight", "AppStoreConnect", "Xcode"]
 description: "Flutter 앱을 TestFlight에 처음 올리면서 마주친 DEVELOPMENT_TEAM 오류, ASC REST API 제한, 수출 규정 경고, 빌드 번호 중복 문제를 정리한다."
 ---

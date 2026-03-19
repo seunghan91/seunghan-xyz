@@ -1,7 +1,7 @@
 ---
 title: "Flutter image_picker Crash: Don't Pass limit: 1 to pickMultiImage"
 date: 2026-03-08
-draft: false
+draft: true
 tags: ["Flutter", "iOS", "image_picker", "Debugging", "Dart"]
 description: "Hitting 'cannot be lower 2:1' when tapping the photo button? The pickMultiImage limit parameter must be 2 or more. Here's why and how to fix it."
 ---

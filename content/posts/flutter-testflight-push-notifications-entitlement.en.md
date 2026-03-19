@@ -1,7 +1,7 @@
 ---
 title: "Flutter TestFlight Build Error: Push Notifications Entitlement Issue"
 date: 2025-06-08
-draft: false
+draft: true
 tags: ["Flutter", "iOS", "TestFlight", "Xcode", "Deployment"]
 description: "Resolving provisioning profile / aps-environment errors encountered while uploading a Flutter iOS app to TestFlight."
 cover:

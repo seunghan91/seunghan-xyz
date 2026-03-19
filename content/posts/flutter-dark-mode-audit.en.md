@@ -1,7 +1,7 @@
 ---
 title: "Flutter Dark Mode Audit — Finding Hardcoded Colors"
 date: 2026-03-09
-draft: false
+draft: true
 tags: ["Flutter", "DarkMode", "ThemeData", "ColorScheme", "UI"]
 description: "A systematic audit of hardcoded color patterns in Flutter apps that break dark mode, with theme-adaptive replacements for each."
 ---

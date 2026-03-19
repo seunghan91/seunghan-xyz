@@ -1,7 +1,7 @@
 ---
 title: "Flutter App Google OAuth Consent Screen Setup Guide"
 date: 2025-06-11
-draft: false
+draft: true
 tags: ["Flutter", "OAuth", "Google", "App Development"]
 description: "Google Cloud Console OAuth consent screen configuration and the certification submission process troubles."
 cover:

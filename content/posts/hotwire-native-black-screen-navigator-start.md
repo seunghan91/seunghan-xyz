@@ -1,7 +1,7 @@
 ---
 title: "HotwireNative iOS 검정 화면(Black Screen) 디버깅 — navigator.start()를 빠뜨리면 생기는 일"
 date: 2026-03-16
-draft: false
+draft: true
 tags: ["iOS", "HotwireNative", "Swift", "Turbo Native", "Debugging"]
 description: "HotwireNative iOS 앱을 시뮬레이터에서 실행했는데 완전한 검정 화면만 나왔다. 네트워크는 연결되고, Rails 서버도 정상인데 왜 아무것도 안 보이는 걸까. 원인은 단 한 줄의 누락이었다."
 ---

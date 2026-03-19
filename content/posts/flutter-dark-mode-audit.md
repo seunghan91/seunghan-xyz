@@ -1,7 +1,7 @@
 ---
 title: "Flutter 앱 다크 모드 전수 점검 — 하드코딩 색상 잡아내기"
 date: 2026-03-09
-draft: false
+draft: true
 tags: ["Flutter", "DarkMode", "ThemeData", "ColorScheme", "UI"]
 description: "Flutter 앱의 다크 모드를 전수 점검하면서 발견한 하드코딩 색상 패턴과 theme-adaptive 코드로 바꾸는 방법을 정리한다."
 ---

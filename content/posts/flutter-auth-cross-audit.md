@@ -1,7 +1,7 @@
 ---
 title: "7개 Flutter 앱 인증 보안 크로스 감사 - iOS 제출 전 점검"
 date: 2025-10-21
-draft: false
+draft: true
 tags: ["Flutter", "보안", "SecureStorage", "SharedPreferences", "Authentication"]
 description: "iOS 1.0 제출 전 7개 Flutter 앱의 인증/보안을 일괄 점검하여 SharedPreferences 평문 저장, 401 갱신 미구현, PII 노출 3가지 패턴을 발견하고 수정한 기록"
 cover:

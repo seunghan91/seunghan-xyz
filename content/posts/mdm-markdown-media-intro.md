@@ -1,7 +1,7 @@
 ---
 title: "MDM: HWP·DOCX를 마크다운으로 변환할 때 미디어를 어떻게 표현할까"
 date: 2026-03-13
-draft: false
+draft: true
 tags: ["Markdown", "Parser", "Rust", "Python", "JavaScript", "Open Source", "HWP"]
 description: "![[]] 문법으로 이미지·비디오를 제어하는 마크다운 슈퍼셋 MDM을 만들게 된 이유와 구조"
 cover:

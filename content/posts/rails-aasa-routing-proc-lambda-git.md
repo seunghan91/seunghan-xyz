@@ -1,7 +1,7 @@
 ---
 title: "Rails AASA 라우팅 3가지 함정: proc vs lambda, 경로 누락, git 미추적"
 date: 2025-09-03
-draft: false
+draft: true
 tags: ["Rails", "iOS", "Universal Links", "AASA", "라우팅", "디버깅"]
 description: "Rails에서 Apple App Site Association(AASA) 파일을 서빙할 때 proc 사용, 경로 누락, git 미추적 3가지 문제가 동시에 발생할 수 있다. 각각의 원인과 수정 방법을 정리한다."
 cover:

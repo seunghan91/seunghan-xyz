@@ -1,7 +1,7 @@
 ---
 title: "Firebase Phone Auth 플랫폼 설정 완전 정복 - Android SHA-1, iOS APNs"
 date: 2025-06-29
-draft: false
+draft: true
 tags: ["Firebase", "Android", "iOS", "APNs", "SHA-1", "Phone Auth"]
 description: "Firebase 전화 인증을 실기기에서 동작시키기 위한 Android SHA-1 지문 등록과 iOS APNs 키 설정 전체 과정"
 cover:

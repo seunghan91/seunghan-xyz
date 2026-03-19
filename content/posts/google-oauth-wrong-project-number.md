@@ -1,7 +1,7 @@
 ---
 title: "Google OAuth 클라이언트 ID의 프로젝트 번호가 Firebase 프로젝트 번호와 다른 경우"
 date: 2025-06-15
-draft: false
+draft: true
 tags: ["Google OAuth", "Firebase", "GCP", "삽질"]
 description: ".env에 저장된 Google OAuth Client ID의 프로젝트 번호가 Firebase 프로젝트 번호와 달라서 secret을 찾을 수 없었던 경험 정리"
 cover:

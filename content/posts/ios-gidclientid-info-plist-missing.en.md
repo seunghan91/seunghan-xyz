@@ -1,7 +1,7 @@
 ---
 title: "Flutter iOS Google Sign-In: When GIDClientID is Missing from Info.plist"
 date: 2025-08-23
-draft: false
+draft: true
 tags: ["Flutter", "iOS", "Google Sign-In", "OAuth", "Info.plist"]
 description: "When integrating Google OAuth directly without GoogleService-Info.plist, GIDClientID must be separately added to Info.plist. Missing it causes 'No active configuration' error."
 cover:

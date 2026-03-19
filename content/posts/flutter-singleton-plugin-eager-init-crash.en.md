@@ -1,7 +1,7 @@
 ---
 title: "Flutter Singleton with Eager iOS Plugin Initialization Causes Crash"
 date: 2025-08-10
-draft: false
+draft: true
 tags: ["Flutter", "iOS", "Plugin", "Singleton", "Crash", "Initialization"]
 description: "Eagerly creating native plugin instances in singleton class fields causes crashes because plugin channels open before Flutter engine initialization. Solved with lazy initialization."
 cover:

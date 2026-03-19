@@ -1,7 +1,7 @@
 ---
 title: "Render 512MB Starter에서 Rails OOM 삽질 — render.yaml이 범인이었다"
 date: 2026-01-13
-draft: false
+draft: true
 tags: ["Rails", "Render", "Solid Queue", "Puma", "배포", "메모리"]
 description: "puma.rb 아무리 고쳐도 OOM이 안 잡힌 이유 — render.yaml 환경변수가 코드 기본값을 덮어쓰고 있었다"
 cover:

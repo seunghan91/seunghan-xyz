@@ -1,7 +1,7 @@
 ---
 title: "Google One Tap 로그인 200인데 세션 유지 안 되는 버그"
 date: 2026-03-08
-draft: false
+draft: true
 tags: ["Rails", "Devise", "Google One Tap", "OAuth", "세션", "디버깅"]
 description: "Google One Tap 로그인이 200 OK를 반환하지만 대시보드로 이동하면 다시 로그인 페이지로 튕기는 버그. session[:user_id]와 Devise warden 세션의 차이가 원인이었다."
 ---

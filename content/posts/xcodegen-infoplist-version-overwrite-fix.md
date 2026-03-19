@@ -1,7 +1,7 @@
 ---
 title: "XcodeGen이 Info.plist 버전을 매번 덮어쓰는 문제 — 근본 해결법"
 date: 2026-03-12
-draft: false
+draft: true
 tags: ["iOS", "XcodeGen", "Xcode", "TestFlight", "WidgetKit", "CI/CD"]
 description: "XcodeGen으로 프로젝트를 재생성할 때마다 Info.plist의 CFBundleVersion이 하드코딩 값으로 리셋되는 문제. project.yml에 변수 참조를 명시하면 영구적으로 해결된다."
 ---

@@ -1,7 +1,7 @@
 ---
 title: "Flutter iOS Crash: workmanager BGTaskScheduler NSException Not Caught by Dart try-catch"
 date: 2025-08-06
-draft: false
+draft: true
 tags: ["Flutter", "iOS", "workmanager", "BGTaskScheduler", "crash"]
 description: "When using workmanager on iOS, BGTaskScheduler throws ObjC NSExceptions that can't be caught by Dart try-catch, causing app crashes. Root cause analysis and solution."
 cover:

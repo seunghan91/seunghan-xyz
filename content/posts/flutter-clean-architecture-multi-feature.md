@@ -1,7 +1,7 @@
 ---
 title: "Flutter Clean Architecture 실전 - Feature 여러 개 한 번에 추가하기"
 date: 2025-07-09
-draft: false
+draft: true
 tags: ["Flutter", "Clean Architecture", "BLoC", "GetIt"]
 description: "달력, 법령, 판례, Q&A 등 여러 Feature를 Clean Architecture 구조로 한 번에 추가하면서 겪은 폴더 구조와 의존성 관리 정리"
 cover:

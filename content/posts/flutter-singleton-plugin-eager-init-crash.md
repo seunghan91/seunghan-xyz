@@ -1,7 +1,7 @@
 ---
 title: "Flutter 싱글톤에서 iOS 플러그인 인스턴스를 즉시 생성하면 크래시가 난다"
 date: 2025-08-10
-draft: false
+draft: true
 tags: ["Flutter", "iOS", "플러그인", "싱글톤", "크래시", "초기화"]
 description: "싱글톤 클래스 필드에서 네이티브 플러그인 인스턴스를 즉시 생성하면, Flutter 엔진 초기화 이전에 플러그인 채널이 열려서 크래시가 발생한다. Lazy initialization으로 해결한다."
 cover:

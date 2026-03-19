@@ -1,7 +1,7 @@
 ---
 title: "KRX AI — App Store Submission Reference"
 date: 2025-12-30
-draft: false
+draft: true
 tags: ["KRX", "AppStore", "iOS", "Submission", "Reference"]
 description: "Reference for App Store Connect submission information for the KRX AI employee-only app."
 cover:

@@ -1,7 +1,7 @@
 ---
 title: "Flutter TestFlight 빌드 오류: Push Notifications 엔트리포인트 문제"
 date: 2025-06-08
-draft: false
+draft: true
 tags: ["Flutter", "iOS", "TestFlight", "Xcode", "배포"]
 description: "Flutter iOS 앱을 TestFlight에 올리다 마주친 provisioning profile / aps-environment 오류 해결 과정"
 cover:

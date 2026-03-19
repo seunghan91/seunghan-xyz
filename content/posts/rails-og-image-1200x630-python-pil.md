@@ -1,7 +1,7 @@
 ---
 title: "Rails OG 이미지 최적화 — Python PIL로 1200×630 생성 + 메타태그 완전판"
 date: 2025-12-23
-draft: false
+draft: true
 tags: ["Rails", "OG Image", "Open Graph", "Python", "PIL", "SEO", "카카오톡"]
 description: "og:image를 정사각형 아이콘에서 1200x630 전용 이미지로 교체하고, og:url / og:site_name / Twitter Card까지 메타태그를 완성한 기록"
 cover:

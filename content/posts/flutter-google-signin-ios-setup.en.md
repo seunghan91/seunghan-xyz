@@ -1,7 +1,7 @@
 ---
 title: "Flutter Google Sign-In iOS Setup: Missing CLIENT_ID in GoogleService-Info.plist"
 date: 2025-06-04
-draft: false
+draft: true
 tags: ["Flutter", "iOS", "Google Sign-In", "Firebase", "OAuth"]
 description: "When integrating google_sign_in package on iOS, login won't work if GoogleService-Info.plist is missing CLIENT_ID. Setup instructions."
 cover:

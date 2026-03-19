@@ -1,7 +1,7 @@
 ---
 title: "Cross-Audit of Authentication Security Across 7 Flutter Apps - Pre-iOS Submission Check"
 date: 2025-10-21
-draft: false
+draft: true
 tags: ["Flutter", "Security", "SecureStorage", "SharedPreferences", "Authentication"]
 description: "Bulk audit of auth/security across 7 Flutter apps before iOS 1.0 submission, discovering and fixing 3 patterns: SharedPreferences plaintext storage, missing 401 refresh, and PII exposure."
 cover:

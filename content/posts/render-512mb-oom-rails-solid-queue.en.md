@@ -1,7 +1,7 @@
 ---
 title: "Rails OOM on Render 512MB Starter — render.yaml Was the Culprit"
 date: 2026-01-13
-draft: false
+draft: true
 tags: ["Rails", "Render", "Solid Queue", "Puma", "Deployment", "Memory"]
 description: "Why OOM wasn't fixed no matter how much puma.rb was tuned — render.yaml environment variables were overriding code defaults."
 cover:

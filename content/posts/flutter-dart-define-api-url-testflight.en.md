@@ -1,7 +1,7 @@
 ---
 title: "Flutter TestFlight Build Where API URL is Stuck on localhost"
 date: 2025-07-13
-draft: false
+draft: true
 tags: ["Flutter", "TestFlight", "dart-define", "iOS", "Deployment"]
 description: "If you don't add --dart-define=API_URL to flutter build ipa, TestFlight builds use localhost as the API server, causing all requests to fail. Managing this with Makefile."
 cover:

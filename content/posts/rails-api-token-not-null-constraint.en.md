@@ -1,7 +1,7 @@
 ---
 title: "Rails API Token Creation: Errors from Missing NOT NULL Columns"
 date: 2025-06-22
-draft: false
+draft: true
 tags: ["Rails", "API", "Authentication", "Debugging"]
 description: "Errors that occur when creating API tokens directly with create! in Rails while missing NOT NULL columns, and why you should use Service objects."
 cover:
