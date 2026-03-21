@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-oauth-provider-uid-column-mismatch.png"
   alt: "Rails Oauth Provider Uid Column Mismatch"
   hidden: true
+categories: ["Rails"]
 ---
 
 Apple Sign-In / Google Sign-In 연동 후 클라이언트에서는 500 에러만 보이는데, 서버 로그를 보면 실제 원인이 다른 경우가 있다. 오늘 마주친 케이스를 정리한다.

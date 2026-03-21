@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-sso-one-time-token-between-services.png"
   alt: "Rails Sso One Time Token Between Services"
   hidden: true
+categories: ["Rails"]
 ---
 
 

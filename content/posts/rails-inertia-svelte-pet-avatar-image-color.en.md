@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-inertia-svelte-pet-avatar-image-color.png"
   alt: "Rails Inertia Svelte Pet Avatar Image Color"
   hidden: true
+categories: ["Rails"]
 ---
 
 

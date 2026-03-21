@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-project-health-check-553-tests.png"
   alt: "Rails Project Health Check 553 Tests"
   hidden: true
+categories: ["Rails"]
 ---
 
 운영 중인 Rails 8 API 서버를 점검하기로 했다. 기능은 대부분 동작하고 있었지만, 테스트 커버리지가 3%밖에 안 되는 상태. "동작하니까 괜찮겠지"라는 생각이 얼마나 위험한지 확인하는 과정이었다.

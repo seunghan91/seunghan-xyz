@@ -8,6 +8,7 @@ cover:
   image: "/images/og/mcp-flutter-rails-system-category-debug.png"
   alt: "Mcp Flutter Rails System Category Debug"
   hidden: true
+categories: ["Rails"]
 ---
 
 MCP 도구로 서버 사이드에 카테고리를 생성했다.

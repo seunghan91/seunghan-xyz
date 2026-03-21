@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-oauth-provider-uid-column-mismatch.png"
   alt: "Rails Oauth Provider Uid Column Mismatch"
   hidden: true
+categories: ["Rails"]
 ---
 
 

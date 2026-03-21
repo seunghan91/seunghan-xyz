@@ -8,6 +8,7 @@ cover:
   image: "/images/og/slack-file-to-activestorage-rails-seeds.png"
   alt: "Slack File To Activestorage Rails Seeds"
   hidden: true
+categories: ["Rails"]
 ---
 
 팀원들이 Slack 채널에 HTML 파일을 과제로 제출하고 있었다. Rails 앱의 제출 상세 페이지에서 이 파일들을 인라인으로 미리보기할 수 있게 만들어야 했다. "URL 저장하면 되겠지"라는 생각으로 시작했다가 세 번의 방향 전환을 거쳤다.

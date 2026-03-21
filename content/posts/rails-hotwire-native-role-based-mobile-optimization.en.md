@@ -4,6 +4,8 @@ date: 2026-03-17
 draft: false
 tags: ["Rails", "Hotwire Native", "iOS", "WKWebView", "Tailwind", "i18n", "RBAC", "Stimulus"]
 description: "From fixing distorted layouts in a mobile WebView to designing a per-tournament staff permission system — a day of cascading fixes"
+categories: ["Hotwire Native", "Rails"]
+series: ["Hotwire Native Mobile App"]
 ---
 
 Running an iOS app built with Rails 8 + Hotwire Native, I hit a series of issues in a single day. What started as a small UI distortion spiraled into a full permission system redesign. Here's the record.

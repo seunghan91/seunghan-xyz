@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-sso-turbo-drive-debugging.png"
   alt: "Rails Sso Turbo Drive Debugging"
   hidden: true
+categories: ["Rails", "Hotwire"]
 ---
 
 Rails 앱 간 SSO(Single Sign-On)를 HMAC 기반으로 구현하던 중 예상치 못한 두 가지 버그를 만났다. 둘 다 Turbo Drive와 ERB의 동작 방식에서 비롯된 문제였다.

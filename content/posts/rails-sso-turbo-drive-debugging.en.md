@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-sso-turbo-drive-debugging.png"
   alt: "Rails Sso Turbo Drive Debugging"
   hidden: true
+categories: ["Rails", "Hotwire"]
 ---
 
 

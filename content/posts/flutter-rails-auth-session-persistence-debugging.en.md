@@ -8,6 +8,7 @@ cover:
   image: "/images/og/flutter-rails-auth-session-persistence-debugging.png"
   alt: "Flutter Rails Auth Session Persistence Debugging"
   hidden: true
+categories: ["Rails"]
 ---
 
 

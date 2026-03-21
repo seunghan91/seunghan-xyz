@@ -8,6 +8,7 @@ cover:
   image: "/images/og/tailwindv4-css-variable-theme-grand-slam.png"
   alt: "Tailwind v4 CSS Variable Theme System"
   hidden: true
+categories: ["Rails", "Frontend"]
 ---
 
 When you think about implementing a theme system, the first instinct is to add conditional classes to every component. But what if you could swap the entire app's color palette by changing a single CSS block — without touching any HTML? In Tailwind v4, that's exactly what you can do.

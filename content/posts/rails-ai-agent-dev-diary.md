@@ -9,6 +9,7 @@ cover:
   alt: "AI 에이전트 개발 과정"
   hidden: true
 slug: "rails-ai-agent-dev-diary"
+categories: ["Rails"]
 ---
 
 AI가 글을 검수해주는 시스템을 Rails 8로 만들고 있다. 4개의 AI 에이전트가 각자 관점에서 원고를 분석하고, 스토리 데이터베이스와 연동해서 일관성까지 체크하는 구조.

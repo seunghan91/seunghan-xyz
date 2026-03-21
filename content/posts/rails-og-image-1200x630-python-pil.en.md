@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-og-image-1200x630-python-pil.png"
   alt: "Rails Og Image 1200X630 Python Pil"
   hidden: true
+categories: ["Rails"]
 ---
 
 

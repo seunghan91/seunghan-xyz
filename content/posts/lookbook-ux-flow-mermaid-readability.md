@@ -4,6 +4,7 @@ date: 2026-03-10
 draft: false
 tags: ["Rails", "Lookbook", "ViewComponent", "Mermaid", "UX", "Design System", "개발 문서화"]
 description: "Lookbook 컴포넌트 프리뷰에서 UX Flow를 문서화할 때 가독성이 떨어지는 문제를 Mermaid.js 순서도와 Step 템플릿 리디자인으로 해결한 기록"
+categories: ["Rails", "Frontend"]
 ---
 
 Rails + Lookbook으로 UX Flow를 문서화하다가 "이게 뭔가..." 싶은 순간이 왔다. 각 Step이 와이어프레임 조각으로만 나오니, Lookbook 목록에서 봤을 때 전체 흐름이 전혀 안 보이는 것이다.

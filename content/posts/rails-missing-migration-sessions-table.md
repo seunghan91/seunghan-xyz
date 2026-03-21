@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-missing-migration-sessions-table.png"
   alt: "Rails Missing Migration Sessions Table"
   hidden: true
+categories: ["Rails"]
 ---
 
 회원가입, 로그인이 전부 안 된다는 제보를 받았다. 앱에서는 "예상하지 못한 오류가 발생했습니다"만 반복.

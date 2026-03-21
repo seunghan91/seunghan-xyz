@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-flutter-server-health-check-4-issues.png"
   alt: "Rails Flutter Server Health Check 4 Issues"
   hidden: true
+categories: ["Rails"]
 ---
 
 

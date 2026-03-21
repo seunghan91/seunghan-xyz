@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-ruby3-kwargs-dispatch-integration-debug.png"
   alt: "Rails Ruby3 Kwargs Dispatch Integration Debug"
   hidden: true
+categories: ["Rails"]
 ---
 
 AI 에이전트가 Rails API 서버를 호출해서 티켓을 자동 배정하는 디스패처를 만들었다. 로직 자체는 간단한데 붙이는 과정에서 예상치 못한 곳에서 계속 막혔다. 겪은 것들을 기록해 둔다.

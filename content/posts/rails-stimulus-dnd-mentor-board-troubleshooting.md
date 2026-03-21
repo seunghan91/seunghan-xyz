@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-stimulus-dnd-mentor-board-troubleshooting.png"
   alt: "Rails Stimulus DnD Mentor Board Troubleshooting"
   hidden: true
+categories: ["Rails", "Hotwire"]
 ---
 
 Rails 8 앱에서 멘토-팀 배정을 드래그앤드롭으로 관리하는 보드를 만들었다. Stimulus 컨트롤러 + `fetch` + 서버 사이드 HTML 교체 방식이었는데, "되는 줄 알았던" 기능들이 프로덕션에서 하나씩 터졌다.

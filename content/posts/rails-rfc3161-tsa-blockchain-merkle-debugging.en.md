@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-rfc3161-tsa-blockchain-merkle-debugging.png"
   alt: "Rails Rfc3161 Tsa Blockchain Merkle Debugging"
   hidden: true
+categories: ["Rails"]
 ---
 
 

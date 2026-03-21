@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-flutter-iap-unimplemented-features-audit.png"
   alt: "Rails Flutter Iap Unimplemented Features Audit"
   hidden: true
+categories: ["Rails"]
 ---
 
 

@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-sso-one-time-token-between-services.png"
   alt: "Rails Sso One Time Token Between Services"
   hidden: true
+categories: ["Rails"]
 ---
 
 두 개의 Rails 앱이 있다. 하나는 **내부 직원용** 앱(OTP 로그인, 특정 도메인 전용), 다른 하나는 **심사/관리 시스템**으로 Devise + JWT 기반이다. 내부 직원이 심사 시스템에도 접근해야 하는데, 계정을 따로 만들어 관리하기 싫었다.

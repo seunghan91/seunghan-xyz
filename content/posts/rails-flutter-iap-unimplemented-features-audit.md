@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-flutter-iap-unimplemented-features-audit.png"
   alt: "Rails Flutter Iap Unimplemented Features Audit"
   hidden: true
+categories: ["Rails"]
 ---
 
 음성 메시지 기반 소셜 앱을 출시 준비하면서 미구현 항목을 전수 점검했다. route는 있는데 controller action이 없거나, Flutter UI는 완성됐는데 결제 로직이 `// TODO` 로 막혀 있는 경우들이 꽤 있었다. 정리하고 하나씩 구현한 기록.

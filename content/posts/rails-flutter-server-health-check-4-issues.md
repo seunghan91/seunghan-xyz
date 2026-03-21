@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-flutter-server-health-check-4-issues.png"
   alt: "Rails Flutter Server Health Check 4 Issues"
   hidden: true
+categories: ["Rails"]
 ---
 
 앱 테스트 빌드를 올리고 직접 돌려보니 한꺼번에 4가지가 안 됐다. Google 로그인 실패, AI 일정 생성이 엉뚱한 결과, 알림 버튼 누르면 크래시, 인기 여행지 섹션이 텅 비어있음. 하나씩 원인을 찾고 고친 과정을 정리한다.

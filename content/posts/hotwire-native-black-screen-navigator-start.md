@@ -4,6 +4,8 @@ date: 2026-03-16
 draft: true
 tags: ["iOS", "HotwireNative", "Swift", "Turbo Native", "Debugging"]
 description: "HotwireNative iOS 앱을 시뮬레이터에서 실행했는데 완전한 검정 화면만 나왔다. 네트워크는 연결되고, Rails 서버도 정상인데 왜 아무것도 안 보이는 걸까. 원인은 단 한 줄의 누락이었다."
+categories: ["Hotwire Native", "Rails"]
+series: ["Hotwire Native Mobile App"]
 ---
 
 HotwireNative로 iOS 앱을 개발하던 중 시뮬레이터에서 앱을 실행했을 때 완전한 검정 화면만 보이는 현상을 만났다.

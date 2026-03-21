@@ -8,6 +8,8 @@ cover:
   image: ""
   alt: "Hotwire Native Dashboard UX Optimization"
   hidden: true
+categories: ["Hotwire Native", "Rails"]
+series: ["Hotwire Native Mobile App"]
 ---
 
 Rails 8 + Hotwire Native으로 만든 모바일 앱의 대시보드 페이지를 Render에 배포한 뒤 실기기에서 점검하면서 만난 삽질 7가지를 정리했다. WKWebView 위에서 돌아가는 하이브리드 앱 특성상, 데스크톱 브라우저에서는 발견되지 않는 함정들이 많았다.

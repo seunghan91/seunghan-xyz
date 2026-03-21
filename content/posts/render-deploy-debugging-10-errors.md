@@ -8,6 +8,7 @@ cover:
   image: "/images/og/render-deploy-debugging-10-errors.png"
   alt: "Render Deploy Debugging"
   hidden: true
+categories: ["Rails", "DevOps"]
 ---
 
 오늘 Rails 앱 배포가 `build_failed`로 떨어졌다. 처음엔 단순한 에러 하나겠지 싶었는데, 고칠 때마다 새 에러가 튀어나왔다. 결국 10개의 에러를 순서대로 해결하고 나서야 `live` 상태가 됐다. 연속 디버깅의 기록을 남긴다.

@@ -8,6 +8,7 @@ cover:
   image: "/images/og/bracket-fab-audit-log-rails.png"
   alt: "Bracket FAB Audit Log Rails"
   hidden: true
+categories: ["Rails"]
 ---
 
 When you're designing three features simultaneously, they start bleeding into each other. This time I added the following to a tournament bracket management app:

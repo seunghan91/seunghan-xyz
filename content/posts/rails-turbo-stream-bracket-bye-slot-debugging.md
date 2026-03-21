@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-turbo-stream-bracket-bye-slot-debugging.png"
   alt: "Rails Turbo Stream Bracket BYE Slot Debugging"
   hidden: true
+categories: ["Rails", "Hotwire"]
 ---
 
 대진표 관리 앱에서 두 가지 버그가 동시에 나왔다.

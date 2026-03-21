@@ -4,6 +4,8 @@ date: 2026-03-17
 draft: false
 tags: ["iOS", "Rails", "HotwireNative", "TurboStreams", "Swift", "Stimulus", "BridgeComponent", "ActionCable"]
 description: "End-to-end implementation of real-time notification badge updates using Rails 8 Turbo Streams and Hotwire Native Bridge for iOS app icon and bell button. Also covers the dynamic URL navigation problem in native side menus."
+categories: ["Hotwire Native", "Rails"]
+series: ["Hotwire Native Mobile App"]
 ---
 
 Two problems solved while building a Rails 8 + Hotwire Native iOS app.

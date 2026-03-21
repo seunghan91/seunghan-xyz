@@ -8,6 +8,7 @@ cover:
   image: "/images/og/render-multi-service-error-fix-deploy.png"
   alt: "Render Multi Service Error Fix Deploy"
   hidden: true
+categories: ["Rails", "DevOps"]
 ---
 
 Render에 올려둔 Rails 서비스 6개가 전부 각자 다른 에러를 토해내고 있었다. 하나씩 로그를 까보니 공통 패턴도 있고, 프로젝트마다 고유한 문제도 있었다. 한 세션에서 전부 수정하고 배포까지 마친 과정을 정리한다.

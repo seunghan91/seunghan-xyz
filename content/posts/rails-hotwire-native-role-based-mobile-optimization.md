@@ -4,6 +4,8 @@ date: 2026-03-17
 draft: false
 tags: ["Rails", "Hotwire Native", "iOS", "WKWebView", "Tailwind", "i18n", "RBAC", "Stimulus"]
 description: "데스크톱 레이아웃이 모바일 WebView에서 뭉개지는 문제부터, 역할 기반 네비게이션 분리, 운영진 권한 체계 설계까지 하루 동안의 삽질 기록"
+categories: ["Hotwire Native", "Rails"]
+series: ["Hotwire Native Mobile App"]
 ---
 
 Rails 8 + Hotwire Native 조합으로 iOS 앱을 운영하는 중에, 하루 동안 발생한 여러 문제를 연쇄적으로 해결한 기록이다. 작은 UI 깨짐에서 시작해서 권한 체계 재설계까지 이어진 과정을 정리한다.

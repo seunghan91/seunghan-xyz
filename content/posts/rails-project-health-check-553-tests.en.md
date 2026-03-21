@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-project-health-check-553-tests.png"
   alt: "Rails Project Health Check 553 Tests"
   hidden: true
+categories: ["Rails"]
 ---
 
 

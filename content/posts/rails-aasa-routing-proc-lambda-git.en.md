@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-aasa-routing-proc-lambda-git.png"
   alt: "Rails Aasa Routing Proc Lambda Git"
   hidden: true
+categories: ["Rails"]
 ---
 
 

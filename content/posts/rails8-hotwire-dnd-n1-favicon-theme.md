@@ -4,6 +4,7 @@ date: 2026-03-21
 draft: false
 tags: ["Rails 8", "Hotwire", "Turbo Stream", "Stimulus", "N+1", "Prosopite", "DnD", "Favicon", "iOS"]
 description: "Turbo Stream + Stimulus로 드래그앤드롭 선수 배정을 구현하면서 겪은 DOM 교체 후 이벤트 소실, 121 쿼리 N+1 문제 발견과 Prosopite 도입, 그리고 테마별 동적 Favicon/앱 아이콘 연동까지의 기록"
+categories: ["Rails"]
 ---
 
 Rails 8 + Hotwire로 실시간 대시보드를 만들면서 하루 동안 겪은 3가지 삽질과 해결 과정.

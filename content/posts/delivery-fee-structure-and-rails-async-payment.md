@@ -4,6 +4,7 @@ date: 2026-03-09
 draft: false
 tags: ["Rails", "Turbo Native", "ActionCable", "Stimulus", "결제", "PG", "아키텍처"]
 description: "배달앱 간편결제 수수료가 왜 자영업자에게 전가되는지 구조를 분석하고, Rails 8 + Turbo Native로 비동기 인보이스 결제 플로우를 설계한 기록"
+categories: ["Rails"]
 ---
 
 배달앱 수수료 문제를 파고들다가 결제 구조의 맹점을 발견했고, 이를 우회하는 방식으로 Rails 8 아키텍처를 설계한 기록이다.

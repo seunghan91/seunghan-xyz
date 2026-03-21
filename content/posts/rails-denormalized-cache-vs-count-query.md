@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-denormalized-cache-vs-count-query.png"
   alt: "Rails Denormalized Cache Vs Count Query"
   hidden: true
+categories: ["Rails"]
 ---
 
 Rails 앱에 데모용 씨드 데이터를 직접 삽입했는데, 화면에서 모든 퍼센트가 **0%** 로 표시되는 상황을 만났다.

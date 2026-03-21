@@ -4,6 +4,7 @@ date: 2026-03-19
 draft: false
 tags: ["Tailwind CSS", "CSS Variables", "디버깅", "테마", "Rails", "Propshaft"]
 description: "Tailwind v4에서 멀티 테마를 만들다 겪은 세 가지 삽질. arbitrary value 전수 교체, CSS 변수 우선순위 함정, Turbo 파싱 에러까지."
+categories: ["Rails", "Frontend"]
 ---
 
 Rails + Tailwind CSS v4 프로젝트에서 그랜드슬램 테마 시스템을 만들었다. 설정에서 Wimbledon(보라), Roland Garros(오렌지), US Open(네이비), Australian Open(스카이블루)을 고르면 앱 전체 색상이 바뀌는 기능이다.

@@ -8,6 +8,7 @@ cover:
   image: "/images/og/render-512mb-oom-rails-solid-queue.png"
   alt: "Render 512Mb Oom Rails Solid Queue"
   hidden: true
+categories: ["Rails"]
 ---
 
 Rails 8 앱을 Render Starter 플랜(512MB)에 올리고 나서 주기적으로 메모리 초과로 서비스가 다운됐다. puma.rb의 스레드 수를 줄이고, queue.yml도 최적화했는데 효과가 없었다. 한참 삽질하고 나서야 진짜 원인을 찾았다.

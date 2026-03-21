@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-api-token-not-null-constraint.png"
   alt: "Rails Api Token Not Null Constraint"
   hidden: true
+categories: ["Rails"]
 ---
 
 

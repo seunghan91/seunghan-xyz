@@ -8,6 +8,7 @@ cover:
   image: "/images/og/flutter-sso-localhost-rails-uninitialized-constant-debug.png"
   alt: "Flutter Sso Localhost Rails Uninitialized Constant Debug"
   hidden: true
+categories: ["Rails"]
 ---
 
 TestFlight에서 소셜 로그인(Apple, Google)이 전부 실패하는 버그를 잡다가 서버도 크래시되고 있다는 걸 같이 발견했다. 각각 원인이 달랐고 둘 다 잡아야 앱이 정상 동작했다.

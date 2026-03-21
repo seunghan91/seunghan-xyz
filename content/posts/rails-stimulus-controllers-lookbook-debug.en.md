@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-stimulus-controllers-lookbook-debug.png"
   alt: "Rails Stimulus Controllers Lookbook Debug"
   hidden: true
+categories: ["Rails", "Hotwire"]
 ---
 
 

@@ -8,6 +8,7 @@ cover:
   image: "/images/og/flutter-rails-auth-session-persistence-debugging.png"
   alt: "Flutter Rails Auth Session Persistence Debugging"
   hidden: true
+categories: ["Rails"]
 ---
 
 Flutter BLoC 앱에서 로그인을 해도 세션이 자꾸 풀린다. 분명 SecureStorage에 토큰도 저장하고, Dio 인터셉터로 401 시 자동 갱신도 구현했는데 왜?

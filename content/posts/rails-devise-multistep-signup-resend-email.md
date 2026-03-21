@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-devise-multistep-signup-resend-email.png"
   alt: "Rails Devise Multistep Signup Resend Email"
   hidden: true
+categories: ["Rails"]
 ---
 
 Rails 8 + Inertia.js + Svelte 5 스택에서 역할별 다단계 회원가입과 Resend 이메일 서비스를 연동하면서 겪은 문제들을 정리한다.

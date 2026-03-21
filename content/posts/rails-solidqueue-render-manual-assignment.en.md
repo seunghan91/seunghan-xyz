@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-solidqueue-render-manual-assignment.png"
   alt: "Rails Solidqueue Render Manual Assignment"
   hidden: true
+categories: ["Rails"]
 ---
 
 

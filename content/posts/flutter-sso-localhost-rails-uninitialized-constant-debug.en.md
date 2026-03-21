@@ -8,6 +8,7 @@ cover:
   image: "/images/og/flutter-sso-localhost-rails-uninitialized-constant-debug.png"
   alt: "Flutter Sso Localhost Rails Uninitialized Constant Debug"
   hidden: true
+categories: ["Rails"]
 ---
 
 

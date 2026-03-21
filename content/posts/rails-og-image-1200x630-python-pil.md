@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-og-image-1200x630-python-pil.png"
   alt: "Rails Og Image 1200X630 Python Pil"
   hidden: true
+categories: ["Rails"]
 ---
 
 카카오톡에 링크를 붙여넣으니 아이콘이 작고 이상하게 나왔다. 원인은 `og:image`가 512×512 정사각형 앱 아이콘을 그대로 쓰고 있었기 때문이다.

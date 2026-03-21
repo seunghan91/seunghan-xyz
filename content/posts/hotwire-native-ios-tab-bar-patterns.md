@@ -8,6 +8,8 @@ cover:
   image: "/images/og/hotwire-native-ios-tab-bar-patterns.png"
   alt: "Hotwire Native Ios Tab Bar Patterns"
   hidden: true
+categories: ["Hotwire Native", "Rails"]
+series: ["Hotwire Native Mobile App"]
 ---
 
 Rails 앱을 Hotwire Native로 래핑할 때 단일 Navigator 대신 **HotwireTabBarController** 패턴으로 전환하면서 생긴 문제들을 정리한다.

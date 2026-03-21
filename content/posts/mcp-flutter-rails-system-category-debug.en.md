@@ -8,6 +8,7 @@ cover:
   image: "/images/og/mcp-flutter-rails-system-category-debug.png"
   alt: "Mcp Flutter Rails System Category Debug"
   hidden: true
+categories: ["Rails"]
 ---
 
 

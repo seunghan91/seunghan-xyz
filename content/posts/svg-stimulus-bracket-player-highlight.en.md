@@ -4,6 +4,7 @@ date: 2026-03-17
 draft: false
 tags: ["Rails 8", "Stimulus.js", "SVG", "ViewComponent", "Hotwire", "Tournament", "Interaction"]
 description: "Click a player in an SVG-rendered tournament bracket to highlight all their matches. Three-layer design: data attributes, hidden highlight rects, transparent click overlays — plus pre-deployment test fixes."
+categories: ["Rails", "Hotwire"]
 ---
 
 I added click-to-highlight interactivity to an SVG-based tournament bracket built with Rails 8 and ViewComponent. Here's what I ran into.

@@ -8,6 +8,8 @@ cover:
   image: "/images/og/rails-sso-universal-links-hotwire-native.png"
   alt: "Rails Sso Universal Links Hotwire Native"
   hidden: true
+categories: ["Hotwire Native", "Rails"]
+series: ["Hotwire Native Mobile App"]
 ---
 
 두 개의 Rails 8 서비스가 있다. 하나는 메인 앱(IdP 역할), 다른 하나는 연동 서비스(RP 역할). 연동 서비스 로그인 페이지에 "메인 앱으로 로그인" 버튼을 넣고, SSO로 인증 후 돌아오는 플로우를 구현했다.

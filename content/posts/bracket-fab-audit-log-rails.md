@@ -8,6 +8,7 @@ cover:
   image: "/images/og/bracket-fab-audit-log-rails.png"
   alt: "Bracket FAB Audit Log Rails"
   hidden: true
+categories: ["Rails"]
 ---
 
 한 번에 세 가지 기능을 동시에 설계하다 보면 서로 얽히는 부분이 생긴다. 이번에는 대진표 관리 앱에 다음을 추가했다.

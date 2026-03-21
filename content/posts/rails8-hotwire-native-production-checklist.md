@@ -8,6 +8,8 @@ cover:
   image: "/images/og/rails8-hotwire-native-production-checklist.png"
   alt: "Rails 8 Hotwire Native Production Checklist"
   hidden: true
+categories: ["Hotwire Native", "Rails"]
+series: ["Hotwire Native Mobile App"]
 ---
 
 Rails 8 + Hotwire Native로 iOS 앱을 만들면서 겪은 실전 이슈들을 정리했다. 공식 문서에 안 나오는 것들 위주로.

@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-inertia-svelte-pet-avatar-image-color.png"
   alt: "Rails Inertia Svelte Pet Avatar Image Color"
   hidden: true
+categories: ["Rails"]
 ---
 
 Rails 8 + Inertia.js + Svelte 5 스택으로 펫(반려동물) 프로필 아바타를 이미지 또는 색상으로 선택하는 기능을 구현하면서 겪은 문제들을 정리한다.

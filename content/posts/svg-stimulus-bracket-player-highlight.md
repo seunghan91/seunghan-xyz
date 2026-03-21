@@ -4,6 +4,7 @@ date: 2026-03-17
 draft: false
 tags: ["Rails 8", "Stimulus.js", "SVG", "ViewComponent", "Hotwire", "토너먼트", "인터랙션"]
 description: "SVG로 렌더링된 토너먼트 대진표에서 선수를 클릭하면 해당 선수가 출전하는 모든 경기를 하이라이트하는 기능. data-* 속성, Stimulus targets, 투명 클릭 rect 레이어 설계."
+categories: ["Rails", "Hotwire"]
 ---
 
 Rails 8 + ViewComponent로 만든 SVG 기반 토너먼트 대진표에 인터랙션을 추가하면서 겪은 내용을 정리했다.

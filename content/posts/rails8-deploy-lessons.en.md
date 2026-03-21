@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails8-deploy-lessons.png"
   alt: "Rails8 Deploy Lessons"
   hidden: true
+categories: ["Rails"]
 ---
 
 

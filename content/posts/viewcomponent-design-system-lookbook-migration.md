@@ -8,6 +8,7 @@ cover:
   image: "/images/og/viewcomponent-design-system-lookbook-migration.png"
   alt: "ViewComponent Design System Lookbook Migration"
   hidden: true
+categories: ["Rails", "Frontend"]
 ---
 
 Rails 8에서 47개 ViewComponent 기반 디자인 시스템을 warm orange 테마로 전환하고, Lookbook 프리뷰를 전면 구축하면서 만난 삽질들을 정리했다.

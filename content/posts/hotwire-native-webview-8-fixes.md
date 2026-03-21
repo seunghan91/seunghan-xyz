@@ -8,6 +8,8 @@ cover:
   image: "/images/og/hotwire-native-webview-8-fixes.png"
   alt: "Hotwire Native Webview 8 Fixes"
   hidden: true
+categories: ["Hotwire Native", "Rails"]
+series: ["Hotwire Native Mobile App"]
 ---
 
 Rails 앱을 Hotwire Native(Turbo Native)로 래핑해서 iOS/Android 네이티브 앱을 만들다 보면,

@@ -4,6 +4,7 @@ date: 2026-03-10
 draft: false
 tags: ["Rails", "Render", "SolidQueue", "Puma", "배포", "디버깅"]
 description: "Render에 Rails 앱을 배포했더니 인스턴스가 계속 죽었다. 원인은 Solid Queue 플러그인의 Ruby truthy 체크 버그 하나였다. 그리고 render.yaml 최소화 빌드 구성까지 정리한 기록."
+categories: ["Rails"]
 ---
 
 Render에 Rails 앱을 새로 배포했다. 빌드는 성공했고 "Deploy live" 메시지도 떴다.

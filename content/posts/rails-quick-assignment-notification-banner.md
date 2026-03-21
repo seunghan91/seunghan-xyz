@@ -8,6 +8,7 @@ cover:
   image: ""
   alt: "Rails Quick Assignment Notification Banner"
   hidden: true
+categories: ["Rails"]
 ---
 
 스터디를 운영하다 보면 세션 중간에 즉석으로 과제를 내야 할 때가 있다. 기존 관리자 페이지를 통하면 여러 단계를 거쳐야 하고, 멘티들은 새 과제가 생긴 걸 바로 알 수 없다는 문제가 있었다.

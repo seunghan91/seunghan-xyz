@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-rfc3161-tsa-blockchain-merkle-debugging.png"
   alt: "Rails Rfc3161 Tsa Blockchain Merkle Debugging"
   hidden: true
+categories: ["Rails"]
 ---
 
 전자계약 보관 시스템에 **법적 증거력**을 부여하기 위해 두 가지를 동시에 구현해야 했다:

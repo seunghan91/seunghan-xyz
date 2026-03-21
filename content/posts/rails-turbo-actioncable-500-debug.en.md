@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-turbo-actioncable-500-debug.png"
   alt: "Rails Turbo Actioncable 500 Debug"
   hidden: true
+categories: ["Rails", "Hotwire"]
 ---
 
 

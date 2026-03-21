@@ -8,6 +8,8 @@ cover:
   image: ""
   alt: "Hotwire Native Rails 8 Dashboard UX Optimization"
   hidden: true
+categories: ["Hotwire Native", "Rails"]
+series: ["Hotwire Native Mobile App"]
 ---
 
 If you're building a mobile app with **Hotwire Native** and **Rails 8**, you'll eventually hit issues that don't show up in development but break things in production — especially on real iOS devices running inside WKWebView.

@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails8-cross-project-patterns-and-improvements.png"
   alt: "Rails8 Cross Project Patterns And Improvements"
   hidden: true
+categories: ["Rails"]
 ---
 
 

@@ -8,6 +8,7 @@ cover:
   image: "/images/og/stimulus-dnd-collapse-dashboard.png"
   alt: "Stimulus DnD Collapse Dashboard"
   hidden: true
+categories: ["Rails", "Hotwire"]
 ---
 
 I was adding two features to the dashboard of a sports tournament management app:

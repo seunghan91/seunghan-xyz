@@ -8,6 +8,7 @@ cover:
   image: "/images/og/viewcomponent-design-system-lookbook-migration.png"
   alt: "ViewComponent Design System Lookbook Migration"
   hidden: true
+categories: ["Rails", "Frontend"]
 ---
 
 I migrated 47 ViewComponents in a Rails 8 project to a warm orange theme and built a full Lookbook preview system. Here are the real issues I ran into.

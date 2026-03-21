@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails8-deploy-lessons.png"
   alt: "Rails8 Deploy Lessons"
   hidden: true
+categories: ["Rails"]
 ---
 
 Rails 8 프로젝트를 처음 클라우드 서비스에 배포하면서 하루 동안 연속으로 5가지 문제를 만났다. 각각 독립적인 문제처럼 보였지만, 하나를 고치면 다음 문제가 드러나는 패턴이었다. 기록으로 남긴다.

@@ -4,6 +4,8 @@ date: 2026-03-07
 draft: false
 tags: ["iOS", "Hotwire Native", "Rails", "TestFlight", "XcodeGen", "삽질"]
 description: "Rails 8 웹앱을 Hotwire Native iOS로 감싸서 App Store Connect에 올리기까지 겪은 에러들과 해결법"
+categories: ["Hotwire Native", "Rails"]
+series: ["Hotwire Native Mobile App"]
 ---
 
 Rails 8로 만든 긴급 신고 웹앱 **바로신고**를 Hotwire Native으로 iOS 앱으로 감싸서 TestFlight에 올리기까지의 과정을 정리합니다.

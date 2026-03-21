@@ -8,6 +8,8 @@ cover:
   image: "/images/og/android-agp9-hotwire-native-build-errors.png"
   alt: "Android Agp9 Hotwire Native Build Errors"
   hidden: true
+categories: ["Hotwire Native", "Rails"]
+series: ["Hotwire Native Mobile App"]
 ---
 
 While building a Rails + Hotwire Native app for Android, errors poured out from the AGP (Android Gradle Plugin) 9.0 and Hotwire Native 1.2.5 combination. Here's the record of fixing them one by one.

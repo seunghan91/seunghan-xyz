@@ -8,6 +8,8 @@ cover:
   image: "/images/og/hotwire-native-ios-tab-bar-patterns.png"
   alt: "Hotwire Native Ios Tab Bar Patterns"
   hidden: true
+categories: ["Hotwire Native", "Rails"]
+series: ["Hotwire Native Mobile App"]
 ---
 
 

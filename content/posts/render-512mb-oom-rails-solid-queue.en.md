@@ -8,6 +8,7 @@ cover:
   image: "/images/og/render-512mb-oom-rails-solid-queue.png"
   alt: "Render 512Mb Oom Rails Solid Queue"
   hidden: true
+categories: ["Rails"]
 ---
 
 

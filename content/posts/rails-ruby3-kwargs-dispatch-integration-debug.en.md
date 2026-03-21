@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-ruby3-kwargs-dispatch-integration-debug.png"
   alt: "Rails Ruby3 Kwargs Dispatch Integration Debug"
   hidden: true
+categories: ["Rails"]
 ---
 
 

@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-aasa-routing-proc-lambda-git.png"
   alt: "Rails Aasa Routing Proc Lambda Git"
   hidden: true
+categories: ["Rails"]
 ---
 
 iOS 유니버설 링크(Universal Links)를 설정하려면 `/.well-known/apple-app-site-association` 경로에서 JSON을 반환해야 한다. Rails에서 이걸 라우팅할 때 흔히 빠지는 함정 3가지를 정리한다.

@@ -8,6 +8,7 @@ cover:
   image: "/images/og/stimulus-dnd-collapse-dashboard.png"
   alt: "Stimulus DnD Collapse Dashboard"
   hidden: true
+categories: ["Rails", "Hotwire"]
 ---
 
 스포츠 대회 관리 앱의 대시보드에 두 가지 기능을 추가하는 작업이었다.

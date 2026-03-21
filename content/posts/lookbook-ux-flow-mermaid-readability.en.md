@@ -4,6 +4,7 @@ date: 2026-03-10
 draft: false
 tags: ["Rails", "Lookbook", "ViewComponent", "Mermaid", "UX", "Design System", "Documentation"]
 description: "How I fixed poor readability in Lookbook component previews for UX Flow documentation using Mermaid.js flowcharts and a full step template redesign"
+categories: ["Rails", "Frontend"]
 ---
 
 While documenting UX flows with Rails + Lookbook, I hit a moment of "something feels off." Each Step only showed wireframe fragments, so looking at the Lookbook list gave zero sense of the overall flow.

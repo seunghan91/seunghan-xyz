@@ -8,6 +8,8 @@ cover:
   image: "/images/og/rails-sso-universal-links-hotwire-native.png"
   alt: "Rails Sso Universal Links Hotwire Native"
   hidden: true
+categories: ["Hotwire Native", "Rails"]
+series: ["Hotwire Native Mobile App"]
 ---
 
 

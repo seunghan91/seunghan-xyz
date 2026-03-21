@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-stimulus-controllers-lookbook-debug.png"
   alt: "Rails Stimulus Controllers Lookbook Debug"
   hidden: true
+categories: ["Rails", "Hotwire"]
 ---
 
 Rails + ViewComponent + Lookbook 조합으로 컴포넌트 라이브러리를 만들 때, Stimulus 컨트롤러가 전부 스텁(빈 껍데기) 상태로 남아있는 상황을 맞닥뜨렸다. 13개 컨트롤러 중 3개만 동작하고 나머지 10개는 `connect() {}` 한 줄짜리였다. 이걸 전부 구현하면서 겪은 삽질을 정리한다.

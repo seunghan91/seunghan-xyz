@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-api-token-not-null-constraint.png"
   alt: "Rails Api Token Not Null Constraint"
   hidden: true
+categories: ["Rails"]
 ---
 
 Rails API 서버에서 소셜 로그인(SSO) 후 토큰을 발급하는 로직을 작성하다가 발생한 문제를 정리한다.

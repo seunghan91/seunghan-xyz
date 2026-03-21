@@ -8,6 +8,7 @@ cover:
   image: "/images/og/tailwindv4-css-variable-theme-grand-slam.png"
   alt: "Tailwind v4 CSS Variable Theme System"
   hidden: true
+categories: ["Rails", "Frontend"]
 ---
 
 테마 시스템을 구현할 때 흔히 생각하는 방법은 컴포넌트마다 조건부 클래스를 추가하는 것이다. 하지만 기존 코드를 건드리지 않고 CSS 변수 한 블록만으로 앱 전체 색상을 바꿀 수 있다면? Tailwind v4에서는 그게 가능하다.

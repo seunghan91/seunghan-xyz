@@ -8,6 +8,7 @@ cover:
   image: "/images/og/render-multi-service-error-fix-deploy.png"
   alt: "Render Multi Service Error Fix Deploy"
   hidden: true
+categories: ["Rails", "DevOps"]
 ---
 
 

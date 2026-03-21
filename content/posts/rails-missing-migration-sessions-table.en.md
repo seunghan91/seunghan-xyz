@@ -8,6 +8,7 @@ cover:
   image: "/images/og/rails-missing-migration-sessions-table.png"
   alt: "Rails Missing Migration Sessions Table"
   hidden: true
+categories: ["Rails"]
 ---
 
 
