@@ -11,34 +11,35 @@ cover:
 categories: ["Rails"]
 ---
 
+When running two Rails 8 projects in parallel, patterns carefully built in one project often end up missing in the other. When implementing features, you naturally focus on the immediate requirements at hand — and it is easy to overlook a well-crafted solution from a sibling project that would save you significant time and headaches.
 
-두 개의 Rails 8 프로젝트를 병렬로 운영하다 보면 한쪽에서 공들여 만든 패턴이 다른 쪽에는 빠져있는 경우가 자주 생긴다. 기능을 구현할 때는 당장의 요구사항에 집중하다 보니 다른 프로젝트의 좋은 구현을 챙기지 못하는 것이다.
-
-이번에 두 프로젝트를 나란히 놓고 비교하면서 빠진 부분을 서로 채워주는 작업을 했다. 주로 보안, PWA 경험, 에러 추적, 푸시 알림 인프라에 관한 내용이다.
-
----
-
-## 비교 분석 방법
-
-두 프로젝트의 주요 파일을 나열하고 대조했다.
-
-```
-확인 항목
-├── Gemfile (gem 목록)
-├── config/initializers/ (설정 파일)
-├── app/javascript/controllers/ (Stimulus 컨트롤러)
-├── app/views/layouts/application.html.erb (레이아웃)
-├── db/schema.rb (DB 스키마)
-└── ios/ (iOS 네이티브 설정)
-```
-
-결과적으로 아래 6가지를 양방향으로 이식했다.
+This time I deliberately placed both projects side by side and did a systematic cross-pollination pass. The focus was on security hardening, progressive web app experience, error tracking, and push notification infrastructure — the kind of foundational plumbing that rarely makes it into sprint planning but matters enormously in production.
 
 ---
 
-## 1. rack-attack — API 남용 방지
+## Comparison Methodology
 
-한 프로젝트에는 `rack-attack`이 있었고 다른 쪽에는 없었다. 투표, 댓글, OTP 발송 등 남용될 수 있는 엔드포인트가 있음에도 rate limit이 없는 상태였다.
+The first step was generating a structured checklist of the key files to compare across both projects. Rather than doing an ad-hoc scan, I made the comparison explicit:
+
+```
+Checklist
+├── Gemfile (gem list)
+├── config/initializers/ (initializer files)
+├── app/javascript/controllers/ (Stimulus controllers)
+├── app/views/layouts/application.html.erb (layout)
+├── db/schema.rb (DB schema)
+└── ios/ (iOS native configuration)
+```
+
+Going through each category systematically made gaps obvious. Something like a missing `rack_attack.rb` initializer is trivially visible when you compare two Gemfiles line by line, but easy to miss when you only ever work on one project at a time.
+
+The result was six items that needed to be cross-applied in both directions.
+
+---
+
+## 1. rack-attack — Preventing API Abuse
+
+One project had `rack-attack` configured, the other did not. The unprotected project had endpoints for voting, commenting, and OTP code sending — all of them susceptible to abuse — but no rate limiting whatsoever. Without rate limiting, a bad actor can hammer the OTP endpoint to exhaust SMS quotas, flood voting endpoints to skew results, or simply degrade the service for legitimate users.
 
 **Gemfile**
 
@@ -58,17 +59,17 @@ config.middleware.use Rack::Attack
 class Rack::Attack
   Rack::Attack.enabled = !Rails.env.development?
 
-  # OTP 발송: IP당 10분에 5회
+  # OTP sending: 5 requests per IP per 10 minutes
   throttle("auth/send_code", limit: 5, period: 10.minutes) do |req|
     req.ip if req.path.start_with?("/sessions/send_code") && req.post?
   end
 
-  # 핵심 행동(투표, 댓글): IP당 분당 20~30회
+  # Core actions (voting, commenting): 30 requests per IP per minute
   throttle("core/action", limit: 30, period: 1.minute) do |req|
     req.ip if req.path.match?(%r{/core_action}) && req.post?
   end
 
-  # 일반 API: IP당 분당 120회
+  # General API: 120 requests per IP per minute
   throttle("api/general", limit: 120, period: 1.minute) do |req|
     req.ip unless req.path.start_with?("/assets")
   end
@@ -77,24 +78,26 @@ class Rack::Attack
     req = Rack::Request.new(env)
     if req.path.start_with?("/api/")
       [429, { "Content-Type" => "application/json" },
-       [{ error: "요청이 너무 많습니다. 잠시 후 다시 시도해주세요." }.to_json]]
+       [{ error: "Too many requests. Please try again later." }.to_json]]
     else
       [429, { "Content-Type" => "text/html; charset=utf-8" },
-       ["<h1>429 Too Many Requests</h1><p>잠시 후 다시 시도해주세요.</p>"]]
+       ["<h1>429 Too Many Requests</h1><p>Please try again later.</p>"]]
     end
   end
 end
 ```
 
-API와 HTML 응답을 경로 기준으로 분기한 게 포인트다. API는 JSON, 웹은 HTML로 응답해야 클라이언트가 올바르게 처리한다.
+The key design decision here is branching the response format based on the request path. API clients expect JSON; browser requests expect HTML. Returning JSON for a web request causes a confusing user experience, and returning HTML to an API client breaks JSON parsing. Splitting on the path prefix handles both correctly.
 
-개발 환경에서는 `Rack::Attack.enabled = !Rails.env.development?`로 비활성화해야 테스트할 때 막히지 않는다.
+The `Rack::Attack.enabled = !Rails.env.development?` line is equally important. Leaving rate limiting active in development will cause your own requests to get blocked when running tests or doing rapid manual testing. Disable it in development, but keep it active in test and production environments.
+
+A practical note on the throttle limits: the numbers above are starting points. OTP throttling at 5 per 10 minutes is conservative — legitimate users rarely need to resend more than once or twice. The general API limit of 120 per minute is generous enough for normal usage but blocks scripted attacks effectively.
 
 ---
 
-## 2. PWA 설치 배너 (Stimulus 컨트롤러)
+## 2. PWA Install Banner (Stimulus Controller)
 
-한 프로젝트에서 꽤 공들여 만든 PWA 설치 배너 컨트롤러가 있었다. iOS Safari, Android Chrome, 카카오톡 인앱 브라우저를 각각 감지하는 로직이 포함되어 있다.
+One project had a polished PWA install banner controller that handled the three distinct browser environments you encounter in a Korean-market app: iOS Safari, Android Chrome, and KakaoTalk's in-app browser. The logic for each differs significantly, and naive implementations tend to break in at least one of these environments.
 
 ```javascript
 // app_banner_controller.js
@@ -108,19 +111,19 @@ export default class extends Controller {
   connect() {
     const ua = navigator.userAgent.toLowerCase()
 
-    // 카카오톡 인앱 브라우저 — PWA 설치 불가
+    // KakaoTalk in-app browser — PWA installation not possible
     if (ua.includes("kakaotalk")) return
 
-    // 이미 PWA로 실행 중
+    // Already running as a PWA (standalone mode)
     const isStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       window.navigator.standalone === true
     if (isStandalone) return
 
-    // Hotwire Native 앱 (body에 클래스 있음)
+    // Hotwire Native app (body has the turbo-native class)
     if (document.body.classList.contains("turbo-native")) return
 
-    // 이미 닫은 적 있음
+    // User has already dismissed the banner
     if (localStorage.getItem("pwa_banner_dismissed")) return
 
     const isIos = /iphone|ipad|ipod/.test(ua)
@@ -157,7 +160,15 @@ export default class extends Controller {
 }
 ```
 
-레이아웃에서는 Hotwire Native 앱일 때 배너를 렌더링하지 않도록 조건을 걸었다.
+A few points worth calling out in this implementation:
+
+**KakaoTalk early return**: KakaoTalk's in-app browser does not support the `beforeinstallprompt` event or the iOS standalone install flow. Showing an install banner in KakaoTalk would just confuse users, so the controller returns immediately when it detects the KakaoTalk user agent.
+
+**Standalone detection**: Checking `window.matchMedia("(display-mode: standalone)")` covers the Android/desktop PWA case. The `window.navigator.standalone` property is Apple-specific and returns `true` when the app is launched from the iOS home screen. Both checks together ensure you never show the install banner to users who have already installed the app.
+
+**iOS vs. Android divergence**: Android Chrome fires the `beforeinstallprompt` event when the browser determines the site is installable. iOS Safari has no such event — you can only show a manual instruction prompt directing users to tap the share button and select "Add to Home Screen." The controller handles both paths.
+
+In the layout, the banner is conditionally rendered to skip Hotwire Native app sessions entirely:
 
 ```erb
 <% unless turbo_native_app? %>
@@ -165,26 +176,26 @@ export default class extends Controller {
     <div data-app-banner-target="pwaBanner" hidden class="fixed top-0 ...">
       ...
       <p data-app-banner-target="iosBanner" hidden>
-        Safari 하단 공유 버튼 → 홈 화면에 추가
+        Tap the Share button at the bottom of Safari, then select "Add to Home Screen"
       </p>
       <button data-app-banner-target="androidBanner" hidden
-              data-action="click->app-banner#installPwa">설치</button>
-      <button data-action="click->app-banner#dismiss">✕</button>
+              data-action="click->app-banner#installPwa">Install</button>
+      <button data-action="click->app-banner#dismiss">&#x2715;</button>
     </div>
   </div>
 <% end %>
 ```
 
-`Rails 8 + importmap`에서 `pin_all_from "app/javascript/controllers"` 설정이 되어 있으면 파일만 추가하면 자동으로 등록된다. 별도 import 추가 불필요.
+With `Rails 8 + importmap`, if you have `pin_all_from "app/javascript/controllers"` configured in `config/importmap.rb`, adding the controller file to the directory is all you need — no manual import registration required.
 
 ---
 
-## 3. 모바일 키보드 겹침 보정 (visualViewport)
+## 3. Mobile Keyboard Overlap Compensation (visualViewport)
 
-모바일에서 댓글 입력창이 하단에 고정되어 있을 때, 소프트 키보드가 올라오면 입력창을 가리는 문제가 있다. iOS Safari는 특히 `window.innerHeight`가 키보드 높이를 반영하지 않아서 `window.visualViewport`를 별도로 써야 한다.
+When a comment input or reply composer is pinned to the bottom of the viewport, the soft keyboard on mobile can overlap it. On Android, browsers typically resize `window.innerHeight` to account for the keyboard, so a simple CSS calculation works. iOS Safari is the problematic case: `window.innerHeight` does not shrink when the keyboard appears. You have to listen to `window.visualViewport` instead.
 
 ```javascript
-// comment_form_controller.js (일부)
+// comment_form_controller.js (excerpt)
 connect() {
   if (document.body.classList.contains("turbo-native")) {
     this._onViewportChange = this._syncOffset.bind(this)
@@ -206,20 +217,22 @@ _syncOffset() {
   const viewportHeight = window.visualViewport?.height ?? window.innerHeight
   const overlap = Math.max(0, Math.ceil(rect.bottom - viewportHeight))
   const ua = navigator.userAgent
-  // iOS 탭바 49px, Android 56px 기본 오프셋
+  // iOS tab bar: 49px, Android nav bar: 56px base offset
   const baseOffset = /iPad|iPhone|iPod/.test(ua) ? 49 : /Android/.test(ua) ? 56 : 52
   const offset = Math.max(baseOffset, overlap)
   this.composerTarget.style.setProperty("--comment-input-bottom-offset", `${offset}px`)
 }
 ```
 
-Hotwire Native 앱에서만 실행되도록 `turbo-native` 클래스 체크가 중요하다. 웹 브라우저에서는 불필요하고 성능 낭비가 된다.
+Scoping this to `turbo-native` only is deliberate. The `visualViewport` resize event fires frequently during scrolling on some browsers — running this on every web page load would add unnecessary listener overhead. Hotwire Native app users are the ones with bottom-pinned UI that overlaps the native tab bar, so restricting it to that context keeps the code focused and the web experience unaffected.
+
+The base offset values (49px for iOS, 56px for Android) correspond to the default heights of native tab bars on each platform. When the keyboard is not visible, the offset needs to clear the tab bar at minimum. When the keyboard is visible, the overlap calculation takes over and pushes the composer above the keyboard.
 
 ---
 
-## 4. Sentry 에러 추적
+## 4. Sentry Error Tracking
 
-한 프로젝트에 Sentry가 없어서 추가했다.
+One project had no Sentry integration. In production, this means errors disappear silently — you only find out about them when a user reports something is broken, or when you happen to notice an anomaly in your logs. Adding Sentry gives you immediate visibility into both expected errors (routing errors, record not found) and genuine bugs.
 
 **Gemfile**
 
@@ -236,10 +249,10 @@ Sentry.init do |config|
   config.breadcrumbs_logger = [:active_support_logger, :http_logger]
   config.enabled_environments = %w[production staging]
 
-  # production에서 5% 트랜잭션만 추적 (비용 절감)
+  # Only trace 5% of transactions in production to control costs
   config.traces_sample_rate = Rails.env.production? ? 0.05 : 0.0
 
-  # 내부 서비스 → 개인정보 전송 안 함
+  # Do not send personally identifiable information to Sentry
   config.send_default_pii = false
 
   config.before_send = lambda do |event, _hint|
@@ -259,27 +272,33 @@ Sentry.init do |config|
 end
 ```
 
-주의할 점:
+Three points deserve particular attention:
 
-1. `enabled_environments`를 production/staging으로 제한하지 않으면 개발 중 매번 Sentry에 이벤트가 쌓인다.
-2. `excluded_exceptions`에 `Rack::Attack::Throttled`를 넣어야 rate limit 자체가 에러로 보고되지 않는다.
-3. `send_default_pii = false`는 기본값이지만 명시적으로 쓰는 게 낫다. Sentry 공식 문서는 `true`를 예시로 보여주는데, 내부 서비스에서 무심코 쓰면 사용자 IP나 세션 쿠키가 외부로 나간다.
+**1. Restrict `enabled_environments` explicitly.** Without this, every error that occurs during local development gets reported to Sentry. This pollutes your error feed with noise from routine development work and makes it harder to spot real production issues. Restricting to `production` and `staging` keeps the signal-to-noise ratio high.
 
-Render 배포라면 환경변수 업데이트 후 자동 재배포를 확인하면 된다.
+**2. Add `Rack::Attack::Throttled` to `excluded_exceptions`.** This one is easy to miss. When rack-attack throttles a request, it raises `Rack::Attack::Throttled`. Without this exclusion, Sentry captures every rate-limited request as an error, which floods your Sentry dashboard with events that are not bugs — they are expected behaviour. These events can also consume your Sentry quota quickly during any moderate traffic spike.
+
+**3. Be explicit about `send_default_pii = false`.** This is the default, but Sentry's own official documentation examples sometimes show `send_default_pii = true`. If you copy-paste from those examples into an internal service, you will inadvertently send user IP addresses, session cookies, and request bodies to Sentry's servers. Being explicit in the config makes the intent clear and prevents accidental drift.
+
+The `before_send` lambda adds a second layer of protection by scrubbing specific request fields. Even with `send_default_pii = false`, the request body can still contain sensitive fields depending on the exception context. Deleting `email`, `code`, `token`, and `password` from the event data ensures those values never leave your infrastructure.
+
+For Render deployments, after adding `SENTRY_DSN` to the environment variables, trigger a manual deploy or wait for the next auto-deploy. Verify the integration is working by intentionally triggering a test error or using `Sentry.capture_message("test")` in a console.
 
 ---
 
-## 5. FCM 토큰 테이블 분리 (멀티디바이스)
+## 5. FCM Token Table Separation (Multi-Device)
 
-한 프로젝트에서 Firebase 푸시 알림 토큰을 users 테이블의 단일 컬럼(`firebase_token`)으로 관리하고 있었다. 이 방식의 문제:
+One project was storing the Firebase Cloud Messaging push token as a single `firebase_token` column on the `users` table. This approach has a fundamental limitation: it only supports one device per user at a time. Each new login overwrites the previous token, which means only the most recently used device receives notifications.
 
-- 기기를 2대 이상 쓰면 마지막 로그인 기기에만 알림이 간다
-- 기기 교체 시 이전 토큰을 추적하거나 무효화할 방법이 없다
-- 웹/iOS/Android 구분도 불가능하다
+The specific failure modes are:
 
-별도 테이블로 분리했다.
+- A user with a phone and a tablet only receives notifications on whichever device they logged in on last.
+- When a user gets a new phone, their old phone may still receive notifications until the FCM token expires.
+- There is no way to distinguish web push tokens from iOS APNs bridge tokens from Android FCM tokens, making device-specific notification routing impossible.
 
-**마이그레이션**
+The fix is to extract FCM tokens into their own table.
+
+**Migration**
 
 ```ruby
 create_table :fcm_tokens do |t|
@@ -296,7 +315,9 @@ add_index :fcm_tokens, :token, unique: true
 add_index :fcm_tokens, [:user_id, :active]
 ```
 
-**모델**
+The `device_name` column is optional but useful for debugging — you can store something like `"iPhone 15 Pro"` or `"Chrome on macOS"` to make the token list human-readable in an admin panel.
+
+**Model**
 
 ```ruby
 class FcmToken < ApplicationRecord
@@ -322,10 +343,12 @@ class FcmToken < ApplicationRecord
 end
 ```
 
-**FcmService에 유저 단위 발송 추가**
+The `register` method uses `find_or_initialize_by` rather than `find_or_create_by` to avoid a race condition. If the same token is registered twice — which can happen when a user opens the app on the same device twice in quick succession — the second call updates the existing record rather than raising a uniqueness validation error.
+
+**Adding user-level broadcast to FcmService**
 
 ```ruby
-# 유저의 모든 활성 기기로 발송
+# Send to all active devices for a user
 def self.send_to_user(user:, title:, body:, data: {})
   tokens = user.fcm_tokens.active.pluck(:token)
   return if tokens.blank?
@@ -333,7 +356,9 @@ def self.send_to_user(user:, title:, body:, data: {})
 end
 ```
 
-FCM API에서 404 응답이 오면 (만료된 토큰) 자동으로 비활성화하는 처리도 추가했다.
+**Automatic deactivation of expired tokens**
+
+FCM returns a 404 status code when you attempt to send to a token that has been invalidated — for example, when a user uninstalls the app or revokes notification permissions. Catching this response and deactivating the token immediately keeps your token table clean and prevents repeated failed send attempts:
 
 ```ruby
 if response.status == 404 && (token = message.dig(:token))
@@ -341,11 +366,13 @@ if response.status == 404 && (token = message.dig(:token))
 end
 ```
 
+Without this cleanup, expired tokens accumulate over time, and every broadcast to a large user base will include a growing tail of dead tokens. This degrades send performance and inflates Firebase API usage.
+
 ---
 
-## 6. iOS URL Scheme 딥링크 (Info.plist)
+## 6. iOS URL Scheme Deep Links (Info.plist)
 
-Hotwire Native iOS 앱에서 외부 앱(결제, 인증 등)이 돌아올 때 쓸 커스텀 URL scheme을 Info.plist에 추가해야 한다. 이게 없으면 외부 앱에서 돌아올 수가 없다.
+Hotwire Native iOS apps frequently need to hand off to external apps — payment processors, authentication providers, OAuth flows — and then receive control back when the external flow completes. Without a registered custom URL scheme in `Info.plist`, the external app has no way to return to your app. The user ends up stranded in Safari or the payment app with no path back.
 
 ```xml
 <key>CFBundleURLTypes</key>
@@ -361,19 +388,45 @@ Hotwire Native iOS 앱에서 외부 앱(결제, 인증 등)이 돌아올 때 쓸
 </array>
 ```
 
-SceneController에서 해당 scheme을 수신하는 처리를 추가하면 완성이다.
+The `CFBundleURLName` is a reverse-DNS identifier for your scheme and should match your bundle identifier. The `CFBundleURLSchemes` array contains the actual scheme strings. When the external app calls `yourappscheme://callback?result=success`, iOS routes that URL back to your app.
+
+On the Swift side, handle the incoming URL in `SceneDelegate`:
+
+```swift
+func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+    guard let url = URLContexts.first?.url else { return }
+    // Route the URL to your Hotwire navigator or handle the callback
+    navigator.route(url)
+}
+```
+
+If you are using XcodeGen (via a `project.yml`), add the URL type under the `Info` key of the relevant target rather than editing `Info.plist` directly. Editing `Info.plist` directly gets overwritten on the next `xcodegen generate` run.
 
 ---
 
 ## Summary
 
-| 항목 | 핵심 포인트 |
-|------|-------------|
-| rack-attack | 개발 환경 비활성화, API/HTML 응답 분기, Throttled 예외는 Sentry 제외 |
-| PWA 배너 | iOS/Android/카카오톡 분기, turbo-native 환경 제외, localStorage 상태 관리 |
-| 키보드 오프셋 | `window.visualViewport` 사용, turbo-native 앱에서만 활성화 |
-| Sentry | `send_default_pii = false`, production/staging만 활성화, 5% 샘플링 |
-| FCM 토큰 | 단일 컬럼 → 별도 테이블, upsert 패턴, 404 자동 비활성화 |
-| iOS 딥링크 | `CFBundleURLTypes` Info.plist 추가 필수 |
+| Item | Key Points |
+|------|------------|
+| rack-attack | Disable in development, branch API/HTML responses, exclude `Throttled` from Sentry |
+| PWA banner | Handle iOS/Android/KakaoTalk separately, skip turbo-native sessions, manage state with localStorage |
+| Keyboard offset | Use `window.visualViewport`, activate only in turbo-native apps |
+| Sentry | `send_default_pii = false`, restrict to production/staging, 5% sampling rate |
+| FCM tokens | Single column → separate table, upsert pattern, auto-deactivate on 404 |
+| iOS deep links | `CFBundleURLTypes` in Info.plist is required for external app callbacks |
 
-Rails 프로젝트가 여러 개면 주기적으로 나란히 놓고 비교하는 습관이 도움이 된다. 한쪽에서 해결한 문제를 다른 쪽에서 다시 삽질하는 일을 막을 수 있다.
+---
+
+## Key Takeaways
+
+Running multiple Rails projects in parallel creates a knowledge divergence problem that gets worse over time. Each project accumulates its own solutions, and without a deliberate synchronization step, the gap between them widens with every sprint.
+
+A few practices that help:
+
+**Schedule periodic cross-project audits.** Even a 30-minute pass of comparing Gemfiles and initializer directories between projects catches most divergence early, before it becomes a production incident.
+
+**Keep a personal reference list of foundational patterns.** Things like rack-attack configuration, Sentry setup, and FCM token management are solved problems. Codifying the solution once and applying it consistently across projects is significantly less work than re-deriving the solution from scratch or debugging a production issue because the pattern was missing.
+
+**Treat security and observability as non-optional infrastructure.** Rate limiting, error tracking, and push notification reliability are not features — they are the floor that features stand on. The cost of adding them early is low. The cost of adding them after a production incident is high.
+
+The six items covered in this post are all in the category of "solved problems that should exist in every project." Cross-applying them took less than a day, and the result is two projects that are both more secure, more observable, and more reliable than they were before.

@@ -11,14 +11,13 @@ cover:
 categories: ["Rails"]
 ---
 
-
-While fixing a bug where social login (Apple, Google) was failing entirely on TestFlight, I also discovered the server was crashing. The causes were different, and both had to be fixed for the app to work properly.
+While fixing a bug where social login (Apple, Google) was failing entirely on TestFlight, I also discovered the server was crashing at the same time. The causes were completely independent of each other, and both had to be resolved for the app to work properly. This post walks through the full investigation process, root causes, and fixes for each issue.
 
 ---
 
 ## Symptoms
 
-Pressing the Apple Login or Google Login button on the real device (TestFlight) showed the following errors:
+Pressing the Apple Login or Google Login button on a real device running a TestFlight build showed the following errors:
 
 ```
 Apple login failed: DioException [connection error]: The connection errored:
@@ -33,10 +32,12 @@ Google login failed: DioException [connection error]: ...
 address = localhost, port = 56839
 ```
 
-Two things were odd:
+Two things immediately stood out as wrong:
 
-1. It was trying to connect to `localhost` -- not the production server URL
-2. The ports were random high ports like 56837 and 56839 -- not the baseUrl's port 3000
+1. It was trying to connect to `localhost` — not the production server URL
+2. The ports were random high ports like 56837 and 56839 — not port 3000 from the baseUrl
+
+The first observation was the important one. A real device running a TestFlight build has no local Rails server to connect to. `localhost` on an iPhone refers to the device itself, not the developer's Mac. So any attempt to connect there will always refuse.
 
 ---
 
@@ -52,13 +53,19 @@ class ApiService {
 }
 ```
 
-It was set to point at the local server during development and was never changed to the production URL before uploading the TestFlight build.
+It was set to point at the local development server and was never updated to the production URL before uploading the TestFlight build.
+
+This is an easy mistake to make during active development. You add SSO, test it against your local Rails server, everything works fine in the simulator, and you ship the build — only to have it fail immediately on a real device because it is still pointing at your laptop.
 
 ### Why the Port Number Was 56837
 
-The `baseUrl` was `localhost:3000` but the error showed 56837, which was confusing. What actually happened was that when `api.post('/sso/apple', ...)` tried to connect to localhost, iOS internally output an ephemeral socket port in the error message. It is socket-level error information, not the destination port. The key point is that it was attempting to connect to `localhost` at all.
+The `baseUrl` was `localhost:3000` but the error showed port 56837, which was initially confusing. The explanation is that when `api.post('/sso/apple', ...)` tries to connect to localhost, iOS assigns an ephemeral source port for the outgoing socket at the OS networking layer. That source port — the one the device opened on its end — is what gets printed in the `SocketException` error message. It is not the destination port (3000). The actual destination was still localhost:3000, but the socket never connected, and the error reported the source port.
 
-### Fix
+The practical takeaway: when you see a high ephemeral port like 56837 in a `SocketException`, ignore the port number and focus on the address. The address being `localhost` is the bug.
+
+### The Proper Fix: Environment-Based Configuration
+
+The minimal fix is to change the string:
 
 ```dart
 class ApiService {
@@ -68,11 +75,45 @@ class ApiService {
 }
 ```
 
+But this is also fragile — hardcoding the production URL is only marginally better. The real solution is to externalize environment configuration so the same codebase can target different servers without code changes.
+
+#### Option A: `--dart-define` at build time
+
+```bash
+# Development
+flutter run --dart-define=API_BASE_URL=http://localhost:3000
+
+# Production / TestFlight
+flutter build ipa --dart-define=API_BASE_URL=https://your-production-server.onrender.com
+```
+
+```dart
+class ApiService {
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://localhost:3000',
+  );
+}
+```
+
+#### Option B: Separate config files per flavor
+
+```dart
+// lib/config/env.dart
+abstract class Env {
+  static const String apiBaseUrl = String.fromEnvironment('API_BASE_URL');
+}
+```
+
+Using Flutter flavors (`--flavor development`, `--flavor production`) combined with `--dart-define-from-file` lets you manage all environment differences in a single JSON file per environment, keeping them out of source-controlled Dart code.
+
+Either approach ensures that a TestFlight or App Store build can never accidentally point at localhost.
+
 ---
 
 ## Cause 2: Rails Server Was Not Even Starting
 
-Fixing the Flutter URL was not the end. Checking the server logs revealed the server itself was crashing:
+Fixing the Flutter URL alone was not sufficient. Even with the correct production URL, the server was returning errors. Checking the Render logs revealed the server itself was crashing on startup:
 
 ```
 [128353] ! Unable to start worker
@@ -81,17 +122,24 @@ Fixing the Flutter URL was not the end. Checking the server logs revealed the se
 [128353] Early termination of worker
 ```
 
-During Rails eager loading, `Admin::BlockchainBatchesController` was trying to inherit from `Admin::BaseController`, but that class did not exist, so the server could not start at all.
+During Rails eager loading, `Admin::BlockchainBatchesController` was trying to inherit from `Admin::BaseController`, but that class did not exist anywhere in the codebase. Because Rails cannot resolve the constant, the worker process terminates before it can serve a single request.
 
-In other words, the server was down, so even if the Flutter URL had been correct, it would have returned 503.
+This meant the server was down entirely. Even if the Flutter URL had been perfectly configured pointing at the production server, every request would have returned a 503 or a connection refused — because no worker was alive to handle it.
 
-### Cause
+### Why This Did Not Appear in Development
 
-Controllers were added that inherited from `Admin::BaseController`, but the base controller itself was never created. In the development environment with lazy loading, the error went unnoticed because those controllers were never actually requested.
+This is one of the most common "works on my machine" failure modes in Rails: the difference between lazy loading and eager loading.
 
-Production Rails uses eager loading (`config.eager_load = true`) by default, so it loads all constants at startup and crashes immediately.
+| Environment | Loading strategy | When constants are resolved |
+|-------------|-----------------|----------------------------|
+| Development | Lazy loading | At the moment of the first request to that route |
+| Production  | Eager loading (`config.eager_load = true`) | At server startup, all at once |
 
-### Fix
+In development, if you never make a request to an admin route that hits `Admin::BlockchainBatchesController`, the missing `Admin::BaseController` constant is never resolved and never causes an error. The bug hides perfectly until you deploy.
+
+In production, Rails loads the entire application on startup. Every class, every module, every constant reference is resolved immediately. The missing base class surfaces instantly, before the server can accept a single connection.
+
+### The Fix: Create the Missing Base Controller
 
 Created `app/controllers/admin/base_controller.rb`:
 
@@ -132,33 +180,64 @@ module Admin
 end
 ```
 
+The base controller centralizes concerns shared by all admin controllers: API token authentication, current attributes setup, and common concerns like `ApiResponse` and `Paginatable`. Every child controller inheriting from this gets these behaviors automatically, which is exactly why forgetting to create it breaks everything.
+
+### Catching Eager Load Errors Locally
+
+You do not have to wait until production to catch this class of error. Running the following command locally simulates production eager loading:
+
+```bash
+RAILS_ENV=production bundle exec rails runner "puts 'Eager load OK'"
+```
+
+Or more directly:
+
+```bash
+bundle exec rails zeitwerk:check
+```
+
+The `zeitwerk:check` command (Rails 6+) verifies that all files in autoload paths can be loaded without errors. Running this as part of a pre-deploy checklist or CI step catches missing constants before they crash production.
+
 ---
 
-## How to Find Crashes in Server Logs
+## How to Find Crashes in Server Logs on Render
 
-When using Render, to quickly find key errors in logs:
+When using Render, the logs can contain a lot of noise from load balancers and health checks. To quickly find startup crash errors:
 
-- Filter by `type: ["app"]`
-- Look for keywords: `! Unable to start worker`, `uninitialized constant`, `Early termination`
+- Filter by `type: ["app"]` to exclude infrastructure-level logs
+- Look for these keywords: `! Unable to start worker`, `uninitialized constant`, `Early termination`
 
-The most common pattern where errors that do not appear in development crash in production:
+A crash at startup will typically show the same sequence:
 
-| Cause | Development | Production |
-|------|------|----------|
-| Eager loading | Lazy (loads on request) | Loads everything at startup |
-| Undefined constant | Not noticed if controller is unused | Crashes immediately on startup |
+```
+Unable to start worker
+<Ruby exception with backtrace>
+Early termination of worker
+```
+
+If you see `Early termination` without a matching `Started GET` or any request logs, the server never came up at all.
 
 ---
 
-## Final Fix Order
+## Debugging Order That Saved Time
+
+Working through two simultaneous bugs efficiently required checking the right things first. Server-side issues always take priority over client-side configuration because a dead server invalidates all client-side fixes anyway.
 
 ```
-1. Check server logs → Discover missing Admin::BaseController
-2. Create admin/base_controller.rb → push → Render auto-deploy
-3. Fix Flutter baseUrl → localhost:3000 → https://production-URL
-4. make build-testflight (includes auto build number increment)
-5. Upload to TestFlight with xcrun altool
+1. Check server logs on Render
+   → Identify "uninitialized constant Admin::BaseController"
+2. Create app/controllers/admin/base_controller.rb
+   → git push → Render auto-deploys → server comes up healthy
+3. Verify server responds to a health check or basic request
+4. Then investigate the Flutter error
+   → Identify "address = localhost" in DioException
+5. Fix Flutter baseUrl → localhost:3000 → https://production-URL
+6. Switch to --dart-define based env config for durability
+7. make build-testflight (includes auto build number increment)
+8. Upload to TestFlight with xcrun altool
 ```
+
+The order matters. Fixing the Flutter URL first and then noticing the server is still down wastes a build cycle and a TestFlight submission.
 
 ---
 
@@ -171,13 +250,17 @@ xcrun altool --upload-app --type ios \
   --apiIssuer YOUR_ISSUER_UUID
 ```
 
-The API key file must be at `~/.appstoreconnect/private_keys/AuthKey_KEYID.p8` for altool to find it automatically.
+The API key file must be located at `~/.appstoreconnect/private_keys/AuthKey_KEYID.p8` for `altool` to find it automatically. If the file is elsewhere, altool will prompt for a password instead of using the key.
+
+Note that `xcrun altool` is deprecated in favor of `xcrun notarytool` for notarization tasks, but for TestFlight uploads it still works as of Xcode 15. The replacement command for upload is `xcrun altool` itself or the newer `xcrun altool --upload-package` depending on Xcode version. Check Apple's release notes if you encounter deprecation warnings.
 
 ---
 
-## Lessons Learned
+## Key Takeaways
 
-- **Never hardcode Flutter API URLs** -- manage them with `--dart-define` or environment-specific config files
-- **When adding Rails admin controllers, create the BaseController first**
-- **Check production server logs before deploying to TestFlight** -- even if the app is correct, it is useless if the server is down
-- Even if the port number in the error message looks odd, the real issue is that it was trying to connect to `localhost` at all
+- **Never hardcode Flutter API URLs.** Use `--dart-define` or environment-specific config files. A hardcoded `localhost:3000` is invisible during simulator testing and catastrophic on real devices.
+- **A high ephemeral port in a `SocketException` is a red herring.** The address field (`localhost`) is what matters, not the port number.
+- **Rails eager loading is a production-only behavior by default.** Errors caused by missing constants, unresolved autoload paths, or circular dependencies will only surface at startup in production. Run `bundle exec rails zeitwerk:check` locally to catch them early.
+- **When adding Rails admin controllers, create the BaseController first.** Any controller that inherits from a non-existent class will silently pass all development tests and crash production on deploy.
+- **Check production server logs before investigating Flutter errors.** A dead server invalidates any client-side debugging. Confirm the server is healthy first, then work on the client.
+- **Two independent bugs can produce a single confusing failure.** SSO login failing on TestFlight looked like one issue — it was actually a client misconfiguration and a server crash at the same time. Fix both.

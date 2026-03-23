@@ -10,59 +10,64 @@ cover:
   hidden: true
 ---
 
+While running a web app built with Rails 8 + Inertia.js + Svelte 5, I noticed that even though the features were working correctly, the fine-grained UX felt inconsistent. This post is a record of a full audit and the four highest-priority issues I fixed.
 
-Rails 8 + Inertia.js + Svelte 5 조합으로 만든 웹앱을 운영하다가, 기능은 돌아가는데 세부 UX가 들쭉날쭉하다는 걸 느꼈다. 이번 글은 전수 점검 후 우선순위 높은 4가지를 직접 고친 기록이다.
+When you build features quickly, each screen tends to be developed independently, and you end up with situations where "the same feature works differently depending on where you are." From the user's perspective, this inconsistency makes the app feel unpolished. It is not a functional bug in the traditional sense, but it is absolutely a UX bug.
 
 ---
 
-## Problem 발견: 같은 기능인데 UI가 다르다
+## The Problem: Same Feature, Different UI
 
-가장 먼저 눈에 띈 건 **시작일 입력 UI가 화면마다 다르게 동작**하는 문제였다.
+The most obvious issue was that **the start date input UI behaved differently on every screen**.
 
-앱에는 할일을 만들 수 있는 진입점이 4곳이다.
+The app had four entry points for creating a task:
 
-- 대시보드 빠른 추가
-- 모달(생성)
-- 전체 페이지 생성
-- 모달(수정)
+- Dashboard quick-add
+- Create modal
+- Full-page creation form
+- Edit modal
 
-| 위치 | 시작일 동작 |
+| Location | Start date behavior |
 |------|------------|
-| 대시보드 빠른추가 | 피커가 항상 노출 + `+ 시작일` 버튼도 따로 존재 |
-| 생성 모달 | 마감일 설정 후 `+ 시작일 추가` 버튼 클릭 시 피커 표시 |
-| 전체 페이지 | 피커 항상 노출 |
-| 수정 모달 | 피커 항상 노출 |
+| Dashboard quick-add | Picker always visible + separate `+ Start date` button also present |
+| Create modal | `+ Add start date` button appears after setting a due date; picker shows on click |
+| Full-page form | Picker always visible |
+| Edit modal | Picker always visible |
 
-생성 모달만 UX가 깔끔했고, 나머지 3곳은 피커가 항상 보여서 폼이 불필요하게 복잡해 보였다. `+ 시작일` 버튼이 있는데 피커도 이미 떠 있으니 버튼의 의미가 모호했다.
+The create modal was the only one with a clean UX. The other three always showed the picker, making the form look unnecessarily complex. Having a `+ Start date` button while the picker was already visible made the button's purpose ambiguous.
 
-### Solution: 생성 모달 패턴으로 통일
+The root cause is straightforward. Each entry point component was built at different times, possibly by different mindsets. Without abstracting the logic into a shared component, divergence is inevitable.
+
+### Solution: Unify Around the Create Modal Pattern
+
+I used the create modal as the reference pattern and updated the other three locations to match. The core principle is **"only show it when it's needed."**
 
 ```svelte
-<!-- Before: 피커가 항상 보임 -->
+<!-- Before: picker always visible -->
 <div class="grid gap-2 sm:grid-cols-2">
   <div>
-    <Label>시작일</Label>
+    <Label>Start date</Label>
     {#if startDate}
-      <button onclick={() => startDate = ''}>제거</button>
+      <button onclick={() => startDate = ''}>Remove</button>
     {:else}
-      <button onclick={() => startDate = dueDate}>+ 시작일</button>
+      <button onclick={() => startDate = dueDate}>+ Start date</button>
     {/if}
-    <DueDatePicker value={...} />  <!-- 항상 렌더링 -->
+    <DueDatePicker value={...} />  <!-- always rendered -->
   </div>
   <div>
-    <Label>마감일</Label>
+    <Label>Due date</Label>
     <DueDatePicker value={...} />
   </div>
 </div>
 ```
 
 ```svelte
-<!-- After: 마감일 먼저, 시작일은 필요할 때만 -->
+<!-- After: due date first, start date only when needed -->
 <div>
   <div class="flex items-center justify-between mb-1">
-    <Label>마감일</Label>
+    <Label>Due date</Label>
     {#if dueDate && !startDate}
-      <button onclick={() => startDate = dueDate}>+ 시작일 추가</button>
+      <button onclick={() => startDate = dueDate}>+ Add start date</button>
     {/if}
   </div>
   <DueDatePicker value={...} />
@@ -71,92 +76,111 @@ Rails 8 + Inertia.js + Svelte 5 조합으로 만든 웹앱을 운영하다가, �
 {#if startDate}
   <div>
     <div class="flex items-center justify-between mb-1">
-      <Label>시작일</Label>
-      <button onclick={() => startDate = ''}>제거</button>
+      <Label>Start date</Label>
+      <button onclick={() => startDate = ''}>Remove</button>
     </div>
     <DueDatePicker value={...} />
   </div>
 {/if}
 ```
 
-변경 포인트:
-1. **마감일이 주된 필드**라는 걸 레이아웃으로 표현 (위에 배치)
-2. 마감일 설정 후에만 `+ 시작일 추가` 버튼 표시 → 흐름이 자연스러움
-3. 시작일 피커는 버튼 클릭 시에만 나타남 → 폼 복잡도 감소
+What changed:
+1. **Due date is the primary field**, expressed by placing it first in the layout
+2. The `+ Add start date` button only appears after a due date is set — the flow feels natural
+3. The start date picker only appears when the button is clicked — form complexity is reduced
+
+This pattern follows the **Progressive Disclosure** principle: only surface additional options at the moment the user actually needs them. When a form opens, the user should see what the task is (content) and when it is due (due date). Start date is optional and only meaningful once a due date exists.
 
 ---
 
-## 전수 점검: 44가지 UX 이슈
+## Full Audit: 44 UX Issues
 
-시작일 문제를 고치면서 다른 곳도 살펴봤다. 주요 카테고리별로 정리하면:
+While fixing the start date issue, I took the opportunity to review the rest of the app. Here is what I found, grouped by severity:
 
-### CRITICAL — 즉시 수정 필요
+### CRITICAL — Fix Immediately
 
-**이모지를 UI 아이콘으로 사용 (☀️🕐📝🔔⭐)**
-OS별 렌더링이 다르고, 스크린리더가 "별표 기호"로 읽어버린다. 크기 조절도 안 된다. SVG 아이콘(`lucide-svelte` 등)으로 교체해야 한다.
+**Emojis used as UI icons (☀️🕐📝🔔⭐)**
 
-**모달 포커스 트랩 없음**
-Dialog 컴포넌트에 `aria-modal="true"`는 있었지만 Tab 키로 모달 뒤 요소에 접근 가능한 상태였다. 스크린리더 사용자는 모달인지 모르고 뒤 콘텐츠와 상호작용하게 된다.
+Emoji rendering varies by OS. On macOS you get a colorful sun icon; on some Windows builds it looks different. More critically, screen readers announce them literally — a star emoji reads as "star sign" with no context about its function. You also cannot control their size with `font-size` reliably, which breaks responsive layouts. The fix is to replace all emoji icons with SVG icons such as those from `lucide-svelte`.
 
-**비밀번호 표시 토글 없음**
-타이핑 확인이 안 되니 오타 시 처음부터 다시 입력해야 한다. 로그인 실패의 흔한 원인.
+**No focus trap in modals**
 
-**네트워크 에러 시 무응답**
-`fetch()` 실패 시 `catch` 블록에서 state만 바꾸고 UI 피드백이 없었다. 사용자는 저장이 됐는지 안 됐는지 모른다.
+The Dialog component had `aria-modal="true"` but Tab key navigation could still reach elements behind the modal. A screen reader user could interact with background content without knowing they were inside a modal. `aria-modal="true"` alone is not enough — you need JavaScript to actually trap focus within the modal boundaries. Alternatively, using the native `<dialog>` HTML element gives you focus trapping for free.
 
-### HIGH — 이번 스프린트 수정
+**No password visibility toggle**
 
-- 터치 타겟 44px 미달 (Categories 편집/삭제 버튼 `p-1.5` ≈ 20px)
-- 제출 버튼 성공/실패 피드백 없음
-- `cursor-pointer` 누락
-- 아이콘 전용 버튼 `aria-label` 없음
+Without being able to see what you typed, a single typo means retyping the entire password from scratch. This is one of the most common reasons for failed login attempts. WCAG 2.1 Success Criterion 1.3.5 recommends providing a show/hide toggle for password fields.
+
+**Silent failure on network errors**
+
+When `fetch()` failed, the `catch` block only updated an internal state variable but showed no UI feedback. The user had no idea whether their data was saved or not. This is especially problematic for mobile users on unreliable networks.
+
+### HIGH — Fix This Sprint
+
+- Touch targets below 44px (Categories edit/delete buttons at `p-1.5` ≈ 20px)
+- No success/failure feedback on submit buttons
+- Missing `cursor-pointer` — users cannot tell if an element is clickable
+- Icon-only buttons have no `aria-label` — screen readers cannot describe the button's purpose
+
+### MEDIUM — Next Sprint
+
+- Color contrast ratio below WCAG AA standard (4.5:1) in some areas
+- No `prefers-reduced-motion` support — users sensitive to motion are not accommodated
+- No empty state UI — when there is no data, the app looks broken rather than empty
+- No optimistic updates — updating the UI before server confirmation improves perceived speed significantly
 
 ---
 
-## 이번에 실제로 고친 것
+## What I Actually Fixed This Time
 
-전체 이슈 중 이번 작업에서 고친 4가지를 상세히 기록한다.
+Here are the four issues I addressed in this work session in detail.
 
-### 1. Toast 알림 통일 (svelte-sonner)
+### 1. Unified Toast Notifications (svelte-sonner)
 
-이전엔 성공/실패 피드백이 제각각이었다.
-- 성공: `window.location.reload()` (조용히 새로고침)
-- 실패: 폼 상단에 텍스트만 표시, 일부는 `console.error()`만
+Previously, success and failure feedback was inconsistent across the app:
+- Success: `window.location.reload()` — a silent page refresh with no message
+- Failure: text-only error displayed at the top of the form; some handlers only called `console.error()`
 
-`svelte-sonner`가 이미 `AppLayout`에 `<Toaster>`로 마운트돼 있었는데 정작 모달에선 안 쓰고 있었다.
+`svelte-sonner` was already mounted as `<Toaster>` in `AppLayout`, but the modals were not using it at all. The library was there; nobody was calling it.
 
 ```svelte
-<!-- 기존 -->
+<!-- Before -->
 } catch (err) {
-  error = err?.message || '할 일 생성에 실패했습니다.';
+  error = err?.message || 'Failed to create task.';
 } finally {
   submitting = false;
 }
 ```
 
 ```svelte
-<!-- 개선 -->
+<!-- After -->
 import { toast } from 'svelte-sonner';
 
-// 성공 시
-toast.success('할 일이 생성되었습니다.');
+// On success
+toast.success('Task created successfully.');
 window.location.reload();
 
-// 실패 시
+// On failure
 } catch (err) {
-  const msg = err?.message || '할 일 생성에 실패했습니다.';
-  error = msg;       // 폼 내부 에러 유지
-  toast.error(msg);  // 토스트로도 표시
+  const msg = err?.message || 'Failed to create task.';
+  error = msg;       // keep inline form error for context
+  toast.error(msg);  // also show as toast for immediate visibility
 }
 ```
 
-적용 범위: 생성 모달, 수정 모달(저장/삭제), 대시보드 빠른 추가.
+There is a reason to keep both the inline `error` state and the toast. The inline error message provides context about which part of the form has a problem. The toast provides immediate, prominent feedback about what action failed. The two complement each other.
 
-### 2. 터치 타겟 44px 확대
+Applied to: create modal, edit modal (save and delete), dashboard quick-add.
 
-모바일에서 작은 버튼은 사용자를 화나게 만든다. WCAG 기준 최소 44×44px.
+The real benefit here is not just "a toast appears." The user now knows clearly whether they can proceed to their next action. Before this change, a user might reload the page or retry the submission wondering whether the first attempt had gone through.
 
-Categories 페이지의 편집/공유/삭제 버튼이 `p-1.5`(약 20px)였다.
+Every async operation has three states that must be handled: **loading**, **success**, and **error**. Handling only the happy path is one of the most common UX oversights in web development.
+
+### 2. Expanding Touch Targets to 44px
+
+Small buttons on mobile are a significant source of user frustration. The WCAG minimum is 44×44px.
+
+The edit, share, and delete buttons on the Categories page were using `p-1.5`, resulting in approximately 20px hit areas: 16px icon + 6px padding × 2 = 28px. That is less than two-thirds of the minimum.
 
 ```svelte
 <!-- Before -->
@@ -166,11 +190,15 @@ Categories 페이지의 편집/공유/삭제 버튼이 `p-1.5`(약 20px)였다.
 <button class="p-2.5 -m-1 text-text-sub hover:text-primary rounded-lg hover:bg-bg-grey transition cursor-pointer">
 ```
 
-`-m-1`을 함께 쓴 게 포인트. 패딩을 늘려도 **시각적 레이아웃은 그대로** 유지하면서 터치 영역만 확대된다.
+The key insight here is the `–m-1` negative margin. Increasing padding alone would shift surrounding layout. By adding negative margin to compensate, the **visual size stays the same** while the interactive area grows. This is a practical pattern for improving touch accessibility without touching the layout.
 
-### 3. 비밀번호 표시/숨기기 토글
+The math: `p-2.5` = 10px padding, so 16px icon + 10px × 2 = 36px. Combined with `-m-1` (4px negative margin on each side), the effective click area reaches approximately 44px without any layout change.
 
-Login과 Register 모두 적용. 상태 변수 하나로 `type` 속성을 토글한다.
+`cursor-pointer` was also added at the same time. The default CSS cursor is `default`, which gives no visual indication that an icon button is interactive. This is a small addition but reduces cognitive friction.
+
+### 3. Password Show/Hide Toggle
+
+Applied to both Login and Register screens. Svelte 5's `$state` rune manages the visibility flag.
 
 ```svelte
 let showPassword = $state(false);
@@ -190,50 +218,84 @@ let showPassword = $state(false);
     type="button"
     class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-text-sub hover:text-text-main cursor-pointer"
     onclick={() => (showPassword = !showPassword)}
-    aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
+    aria-label={showPassword ? 'Hide password' : 'Show password'}
     tabindex="-1"
   >
     {#if showPassword}
-      <!-- EyeOff SVG -->
+      <!-- EyeOff SVG icon -->
     {:else}
-      <!-- Eye SVG -->
+      <!-- Eye SVG icon -->
     {/if}
   </button>
 </div>
 ```
 
-`tabindex="-1"`이 중요한 디테일이다. Tab으로 폼 이동 시 토글 버튼에 걸리지 않도록 해서 Tab 흐름을 방해하지 않는다.
+Several details are worth highlighting:
 
-Register는 비밀번호 + 비밀번호 확인 두 필드 모두 각각 독립된 토글 상태를 가진다.
+**`tabindex="-1"`**: When the user presses Tab to move through the form, focus should not land on the toggle button. Password field → Tab → next field (or submit button) is the expected flow. The toggle is a supporting control, not a primary form element, so it should not interrupt keyboard navigation.
+
+**Dynamic `aria-label`**: An icon-only button without a label is invisible to screen readers. By changing the label dynamically based on the current state, screen reader users also know whether the password is currently visible or hidden.
+
+**`autocomplete="current-password"`**: This hint tells the browser and password managers how to handle this field correctly. It seems minor but makes a real difference for users who rely on password managers.
+
+For the Register form, which has both a password and a password confirmation field, each field gets its own independent state:
 
 ```svelte
 let showPassword = $state(false)
 let showPasswordConfirmation = $state(false)
 ```
 
+Sharing a single state between the two fields would toggle both simultaneously, which is confusing. Independent states allow users to reveal one field without affecting the other.
+
+### 4. Start Date UI Unification (continuation)
+
+The pattern described in the first section was applied to all three remaining locations: dashboard quick-add, full-page create form, and edit modal. The edit modal required one additional consideration: the initial value may already be set from a saved task.
+
+```svelte
+// Edit modal: initialize from server-side task data
+let startDate = $state(task.startDate ?? '')
+let dueDate = $state(task.dueDate ?? '')
+// If startDate is non-empty, the {#if startDate} block automatically
+// renders the picker without any additional logic needed.
+```
+
+The beauty of the conditional rendering approach is that the same template handles both "no start date" and "has start date" states correctly. There is no need for a separate `showStartDatePicker` boolean — the presence of an actual date value drives the UI state directly.
+
 ---
 
-## 점검 결과 요약 (44건)
+## Audit Summary (44 Issues)
 
-| 심각도 | 건수 | 주요 내용 |
+| Severity | Count | Key Areas |
 |--------|------|----------|
-| CRITICAL | 8 | 이모지 아이콘, 모달 포커스, 비번 토글, 에러 피드백, z-index |
-| HIGH | 12 | 터치 타겟, 로딩 상태, aria-label, 키보드 접근 |
-| MEDIUM | 16 | 대비율, prefers-reduced-motion, 빈 상태, 낙관적 업데이트 |
-| LOW | 8 | 스피너 통일, 키보드 드래그, overflow 처리 등 |
+| CRITICAL | 8 | Emoji icons, modal focus trap, password toggle, error feedback, z-index |
+| HIGH | 12 | Touch targets, loading states, aria-labels, keyboard access |
+| MEDIUM | 16 | Contrast ratio, prefers-reduced-motion, empty states, optimistic updates |
+| LOW | 8 | Spinner consistency, keyboard drag support, overflow handling, etc. |
+
+Four out of 44 issues were addressed in this session. However, three of those were CRITICAL issues — password toggle, error feedback via toast, and the date picker inconsistency — so the real-world improvement in user experience is proportionally larger than 4/44 would suggest. The remaining CRITICAL issues (emoji icon replacement and modal focus trap) are scheduled for the next sprint.
 
 ---
 
-## 느낀 점
+## Key Takeaways
 
-기능이 돌아가더라도 UX 체감은 작은 디테일에서 결정된다는 걸 다시 실감했다.
+Working through this audit reinforced that UX quality is determined by small details, not just working features.
 
-특히 이번에 배운 것들:
+**1. When the same feature has multiple entry points, consistent behavior is mandatory.**
 
-1. **같은 기능이 여러 진입점에 있으면 패턴 통일이 필수다.** 컴포넌트 단위로 뽑아두지 않으면 수정할 때 n곳을 다 찾아다녀야 한다.
+Without abstracting into a shared component, you will have to hunt down and update every location individually when something needs to change. The start date fix was exactly that case — four places with identical changes. The next step is to extract this into a shared `StartDateField` component.
 
-2. **피드백 없는 비동기는 항상 나쁘다.** `fetch()` 성공/실패에 항상 사용자가 인지할 수 있는 응답을 줘야 한다. `window.location.reload()`만 하면 사용자는 "저장이 된 건가?" 한 박자 불안해한다.
+**2. Async operations with no feedback are always a problem.**
 
-3. **터치 타겟은 눈에 안 보이는 영역이다.** 시각적으로 크기가 작아도 `padding + negative margin` 트릭으로 클릭 영역만 키울 수 있다. `-m-1`과 `p-2.5` 조합이 유용하다.
+Every `fetch()` call needs a user-visible response for both success and failure. A silent page reload leaves the user wondering whether the save worked. A toast notification eliminates that uncertainty immediately. Always handle loading, success, and error states explicitly.
 
-4. **`tabindex="-1"` 버튼은 의도적이다.** 보조 UI(토글, 지우기 등)를 Tab 순서에서 제외하면 키보드 사용자의 흐름이 자연스러워진다.
+**3. Touch targets are invisible but critical.**
+
+A button can look small visually while having a large interactive area. The `padding + negative margin` trick — specifically `p-2.5 -m-1` — expands the click area without changing the visual layout. This is a practical, low-effort way to meet WCAG touch target requirements without a design overhaul.
+
+**4. `tabindex="-1"` on supporting controls is intentional.**
+
+Removing secondary UI elements (toggles, clear buttons, etc.) from Tab order makes the keyboard navigation flow feel natural. Not every interactive element needs to be reachable via Tab. Supporting controls that complement the main flow are often better left accessible by pointer only.
+
+**5. Accessibility reviews need to be part of the development cycle.**
+
+Doing it all at once results in a list of 44 items. Building in `aria-label`, touch target sizing, and focus management at the time a component is created dramatically reduces the remediation work later. Treat each component as shipped only when these basics are in place.

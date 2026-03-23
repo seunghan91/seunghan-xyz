@@ -12,51 +12,56 @@ categories: ["Hotwire Native", "Rails"]
 series: ["Hotwire Native Mobile App"]
 ---
 
+I have two Rails 8 services. One is the main app acting as the Identity Provider (IdP), and the other is a partner service acting as the Relying Party (RP). I wanted to add a "Sign in with Main App" button to the partner service's login page, authenticate via SSO, and redirect back. Then I went one step further: if the user has the iOS Hotwire Native app installed, the authentication should open in the native app instead of the browser, via Universal Links.
 
-두 개의 Rails 8 서비스가 있다. 하나는 메인 앱(IdP 역할), 다른 하나는 연동 서비스(RP 역할). 연동 서비스 로그인 페이지에 "메인 앱으로 로그인" 버튼을 넣고, SSO로 인증 후 돌아오는 플로우를 구현했다.
-
-거기에 iOS Hotwire Native 앱이 설치돼 있으면, 브라우저 대신 네이티브 앱에서 인증이 진행되도록 Universal Links까지 붙였다.
-
----
-
-## 목표 플로우
-
-```
-[연동 서비스] "메인 앱으로 로그인" 클릭
-  → 메인 앱 /auth/sso/authorize 로 리다이렉트
-  → (앱 설치 시) iOS Universal Link → 네이티브 앱 열림
-  → (미설치 시) 브라우저에서 로그인
-  → 이미 로그인 상태면 바로 토큰 발급
-  → 미로그인이면 OTP 로그인 → 토큰 발급
-  → "인증 완료" 페이지 (2초 대기) → 콜백 URL로 리다이렉트
-  → 연동 서비스가 토큰 검증 → 로그인 완료
-```
+I did not use OAuth 2.0 or a third-party IdP like Auth0 or Cognito. Both services are internal systems I operate myself, so a full OAuth implementation would have been overkill. The core concepts — token issuance, back-channel verification, session management — are the same as any standard SSO flow.
 
 ---
 
-## 삽질 1: SSO 파라미터가 로그인 과정에서 유실됨
+## Target Flow
 
-### Problem
+```
+[RP Service] User clicks "Sign in with Main App"
+  → Redirect to IdP /auth/sso/authorize
+  → (App installed) iOS Universal Link → native app opens
+  → (App not installed) browser login
+  → Already signed in → issue token immediately
+  → Not signed in → OTP login → issue token
+  → "Authentication complete" page (2-second wait) → redirect to callback URL
+  → RP verifies token → login complete
+```
 
-SSO authorize 엔드포인트에 `before_action :require_authentication`을 걸어놨더니:
+On the RP side, clicking the login button generates a `state` parameter that gets stored in the session. When the callback comes back, the RP verifies the `state` to prevent CSRF attacks.
 
-1. 미로그인 상태에서 SSO authorize 접근
-2. `store_location`이 현재 URL을 `session[:return_to]`에 저장
-3. 로그인 페이지로 리다이렉트
-4. OTP 인증 완료
-5. `redirect_back_or(dashboard_path)`가 `/auth/sso/authorize`로 돌려보냄
-6. **하지만 query string(`client_id`, `redirect_uri`, `state`)이 날아감!**
+---
 
-`store_location`은 `request.fullpath`를 저장하니까 쿼리 파라미터도 포함되어야 하는데, OTP 인증 플로우가 여러 단계(코드 입력, 매직링크, 이메일 답장 등)를 거치면서 세션이 꼬이는 경우가 있었다.
+## Problem 1: SSO Parameters Lost During Multi-Step Login
 
-### Solution
+### The Problem
 
-`before_action :require_authentication`을 제거하고, SSO 파라미터를 명시적으로 세션에 저장하는 방식으로 변경했다:
+I had `before_action :require_authentication` on the SSO authorize endpoint. Here is what happened with unauthenticated users:
+
+1. User hits the SSO authorize endpoint without being signed in
+2. `store_location` saves the current URL to `session[:return_to]`
+3. User gets redirected to the login page
+4. User completes OTP authentication
+5. `redirect_back_or(dashboard_path)` sends them back to `/auth/sso/authorize`
+6. **But the query string (`client_id`, `redirect_uri`, `state`) is gone!**
+
+`store_location` stores `request.fullpath`, which should include query parameters — and it does on the first redirect. The problem is that multi-step authentication (OTP code entry, magic link click, email reply) involves multiple intermediate POST requests and page transitions. Some of those steps overwrite `session[:return_to]` with a new URL that no longer includes the original SSO parameters.
+
+Looking at the Rails `store_location` implementation directly: it stores `request.fullpath` unconditionally whenever it is called. Each authentication step that triggers a `require_authentication` guard resets the stored URL. By the time the user finishes OTP authentication, the original authorize URL with its SSO parameters has been replaced.
+
+### The Fix
+
+I removed `before_action :require_authentication` from the SSO controller and explicitly saved the SSO parameters to a dedicated session key:
 
 ```ruby
 # IdP: SSO Controller
 def authorize
-  # 파라미터 검증 (client_id, redirect_uri, state)
+  # Validate params (client_id allowlist, redirect_uri allowlist)
+  validate_sso_params!
+
   unless signed_in?
     session[:sso_params] = {
       redirect_uri: redirect_uri,
@@ -67,14 +72,18 @@ def authorize
     return
   end
 
-  # 토큰 발급 + 인증 완료 페이지
-  sso_token = SsoToken.create!(...)
+  # Issue token and render completion page
+  sso_token = SsoToken.create!(
+    user: current_user,
+    client_id: client_id,
+    expires_at: 5.minutes.from_now
+  )
   @callback_url = "#{redirect_uri}?token=#{CGI.escape(sso_token.token)}&state=#{CGI.escape(state)}"
   render :authorize_complete
 end
 ```
 
-로그인 완료 후 SSO 플로우를 재개하는 `complete` 액션 추가:
+Added a `complete` action to resume the SSO flow after login:
 
 ```ruby
 def complete
@@ -89,7 +98,7 @@ def complete
 end
 ```
 
-그리고 세션 컨트롤러의 모든 로그인 성공 경로에서 SSO 플로우를 체크:
+All login success paths in the session controller now check for a pending SSO flow:
 
 ```ruby
 private
@@ -103,72 +112,111 @@ def redirect_after_sign_in
 end
 ```
 
-**핵심**: 프레임워크의 `store_location`/`redirect_back_or`에 의존하지 말고, 중요한 컨텍스트는 명시적으로 세션에 저장할 것. 특히 다단계 인증 플로우(OTP, 매직링크 등)에서는 중간에 세션 데이터가 예상과 다르게 동작할 수 있다.
+I refactored every authentication method — OTP code entry, magic link, email reply — to call this shared method on success.
+
+**Key insight**: Do not rely on the framework's `store_location` / `redirect_back_or` for important context that must survive multi-step flows. Store critical state explicitly under a dedicated session key. The framework helpers are designed for simple one-step redirects, not multi-step authentication pipelines.
 
 ---
 
-## 삽질 2: 토큰 검증 시 HMAC 서명 불일치
+## Problem 2: HMAC Signature Mismatch During Token Verification
 
-### Problem
+### The Problem
 
-IdP가 발급한 SSO 토큰을 RP가 back-channel로 검증하는 구조:
+The RP verifies the SSO token issued by the IdP via back-channel:
 
 ```
 RP → POST /auth/sso/verify (token + HMAC signature) → IdP
-IdP → 서명 검증 + 토큰 유효성 확인 → 사용자 정보 반환
+IdP → verify signature + check token validity → return user info
 ```
 
-로컬에서는 잘 되는데 배포 환경에서 서명 불일치가 발생했다. 원인: **양쪽 서버의 `SSO_SHARED_SECRET` 환경변수가 달랐다.**
+Without back-channel verification, a man-in-the-middle could intercept the token from the browser redirect and impersonate a user. The HMAC signature proves that the request comes from a server that knows the shared secret.
 
-### Solution
+Everything worked locally but produced signature mismatches in the deployed environment. The cause: **the `SSO_SHARED_SECRET` environment variable had different values on the two servers.**
 
-배포 플랫폼 API로 양쪽 서비스에 동일한 시크릿을 설정:
+When setting environment variables manually through a deployment platform UI, it is easy to accidentally include leading or trailing whitespace during copy-paste. HMAC comparison is byte-for-byte — a single extra space character causes 100% mismatch every time.
+
+### The Fix
+
+Set the same secret on both services using the deployment platform API to avoid manual copy-paste errors:
 
 ```bash
-# 시크릿 생성
-openssl rand -hex 32
+# Generate the secret
+SECRET=$(openssl rand -hex 32)
+echo $SECRET  # Set this exact value on both services
 
-# 양쪽 서비스에 동일한 값 설정
-# (배포 플랫폼의 환경변수 관리 기능 사용)
+# Set on Render (run for both IdP and RP service IDs)
+curl -X PUT "https://api.render.com/v1/services/$SERVICE_ID/env-vars" \
+  -H "Authorization: Bearer $RENDER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '[{"key":"SSO_SHARED_SECRET","value":"'"$SECRET"'"}]'
 ```
 
-HMAC 검증 코드:
+HMAC verification code:
 
 ```ruby
-# RP → IdP 요청 시
+# RP side — build and send the signed request
 body = { token: token }.to_json
+shared_secret = ENV.fetch("SSO_SHARED_SECRET")
 signature = "sha256=#{OpenSSL::HMAC.hexdigest('SHA256', shared_secret, body)}"
 
-# IdP에서 검증
-expected = "sha256=#{OpenSSL::HMAC.hexdigest('SHA256', shared_secret, request.body.read)}"
-unless ActiveSupport::SecurityUtils.secure_compare(signature_header, expected)
-  render json: { error: "invalid_signature" }, status: :unauthorized
+response = HTTP.headers(
+  "Content-Type" => "application/json",
+  "X-SSO-Signature" => signature
+).post("#{IDP_URL}/auth/sso/verify", body: body)
+
+# IdP side — verify the signature and validate the token
+def verify
+  body = request.body.read  # read once and store — body IO can only be read once
+  shared_secret = ENV.fetch("SSO_SHARED_SECRET")
+  expected = "sha256=#{OpenSSL::HMAC.hexdigest('SHA256', shared_secret, body)}"
+  signature_header = request.headers["X-SSO-Signature"]
+
+  unless ActiveSupport::SecurityUtils.secure_compare(signature_header.to_s, expected)
+    render json: { error: "invalid_signature" }, status: :unauthorized
+    return
+  end
+
+  params = JSON.parse(body)
+  sso_token = SsoToken.find_by(token: params["token"])
+
+  if sso_token.nil? || sso_token.expires_at < Time.current || sso_token.used_at.present?
+    render json: { error: "invalid_token" }, status: :unauthorized
+    return
+  end
+
+  sso_token.update!(used_at: Time.current)
+  render json: { user: { id: sso_token.user.id, email: sso_token.user.email } }
 end
 ```
 
-**핵심**: `secure_compare`로 타이밍 공격 방지. 일반 `==` 비교는 문자열 길이에 따라 응답 시간이 달라져서 시크릿을 추론할 수 있다.
+**Key insights**:
+
+- Use `ActiveSupport::SecurityUtils.secure_compare` instead of `==`. A plain string comparison returns early as soon as it finds a mismatch, and the time difference is measurable. An attacker can use timing measurements to determine the correct secret character by character. `secure_compare` always takes the same amount of time regardless of where the mismatch occurs.
+- `request.body.read` can only be read once from the IO stream. Store the result in a variable before using it for both signature verification and JSON parsing.
 
 ---
 
-## 삽질 3: 인증 완료 후 사용자에게 아무 피드백 없이 리다이렉트
+## Problem 3: Immediate Redirect With No User Feedback
 
-### Problem
+### The Problem
 
-SSO 인증 성공 후 즉시 `redirect_to callback_url`을 하면:
-- 사용자 입장에서 "뭐가 된 거지?" 하고 혼란스러움
-- 특히 앱 간 전환 시 화면이 순간적으로 깜빡이기만 함
+Calling `redirect_to callback_url` immediately after SSO authentication succeeds creates a poor user experience:
 
-### Solution
+- Users have no idea what just happened — they see a flash of a screen and end up somewhere new
+- During app-to-app transitions the screen just blinks
+- If something goes wrong, errors are invisible because the page disappears too quickly to read
 
-"인증 완료" 중간 페이지를 추가하고 2초 후 자동 리다이렉트:
+### The Fix
+
+Add an intermediate "Authentication Complete" page with an automatic 2-second redirect:
 
 ```erb
 <div class="text-center">
-  <div class="checkmark-icon"><!-- 체크마크 SVG --></div>
-  <h2>인증 완료</h2>
-  <p><strong><%= current_user.name %></strong>님으로 인증되었습니다.</p>
-  <div class="spinner"><!-- 로딩 스피너 --></div>
-  <a href="<%= @callback_url %>">자동으로 이동하지 않으면 여기를 클릭하세요</a>
+  <div class="checkmark-icon"><!-- Checkmark SVG --></div>
+  <h2>Authentication Complete</h2>
+  <p>Signed in as <strong><%= current_user.name %></strong>.</p>
+  <div class="spinner"><!-- Loading spinner --></div>
+  <a href="<%= @callback_url %>">Click here if you are not redirected automatically</a>
 </div>
 
 <script>
@@ -178,25 +226,31 @@ SSO 인증 성공 후 즉시 `redirect_to callback_url`을 하면:
 </script>
 ```
 
+The `j` helper (`escape_javascript`) is important here. The callback URL contains query parameters including the SSO token. Without escaping, a crafted token value could break out of the JavaScript string literal and create an XSS vulnerability.
+
+This intermediate page also works well in the Hotwire Native app. When `window.location.href` changes after 2 seconds, Hotwire detects it and handles the navigation appropriately. The fallback link ensures users can always proceed even if JavaScript fails.
+
 ---
 
-## 삽질 4: iOS 앱이 설치돼 있어도 브라우저에서 열림
+## Problem 4: App Installed but Browser Opens Anyway
 
-### Problem
+### The Problem
 
-SSO 리다이렉트 URL이 `https://example.com/auth/sso/authorize?...`인데, iOS에서 이 URL을 열면 앱이 아닌 Safari가 열린다.
+The SSO redirect URL is `https://example.com/auth/sso/authorize?...`. On iOS, tapping this URL opens Safari even when the app is installed.
 
-### Cause
+### The Cause
 
-**Universal Links 설정이 없었다.** 3가지가 모두 필요하다:
+**Universal Links were not configured.** All three of the following must be in place:
 
-1. 서버: `/.well-known/apple-app-site-association` (AASA) 파일
-2. iOS 앱: `Associated Domains` entitlement
-3. Apple Developer Console: capability 활성화
+1. Server: `/.well-known/apple-app-site-association` (AASA) file
+2. iOS app: `Associated Domains` entitlement
+3. Apple Developer Console: capability enabled
 
-### Solution
+iOS downloads and caches the AASA file at app installation time and periodically afterward (via Apple's CDN). If the file is missing, has an incorrect format, or lists the wrong paths, Universal Links silently fall back to Safari. There is no error message, no log output, and no indication of what went wrong — it just opens the browser.
 
-**1단계: Rails에서 AASA 서빙**
+### The Fix
+
+**Step 1: Serve the AASA file from Rails**
 
 ```ruby
 # routes.rb
@@ -221,9 +275,11 @@ def apple_app_site_association
 end
 ```
 
-`paths`에 앱에서 열고 싶은 경로만 명시하는 게 중요하다. `["*"]`로 하면 모든 URL이 앱으로 열려서 웹 공유 링크 등에서 문제가 생긴다.
+Only list the paths you want the app to handle in the `paths` array. Using `["*"]` to match everything causes every URL on your domain to open in the app — including web-only share links and marketing pages — which breaks the web experience for users who have the app installed.
 
-**2단계: iOS Entitlements**
+The AASA file must be served over HTTPS without any redirects, and with `Content-Type: application/json`.
+
+**Step 2: Add the Associated Domains entitlement to the iOS app**
 
 ```xml
 <key>com.apple.developer.associated-domains</key>
@@ -233,7 +289,7 @@ end
 </array>
 ```
 
-XcodeGen 사용 시 `project.yml`:
+If you use XcodeGen, configure this in `project.yml`:
 
 ```yaml
 entitlements:
@@ -244,14 +300,14 @@ entitlements:
       - webcredentials:example.com
 ```
 
-**3단계: Apple Developer Console**
+**Step 3: Enable the capability in Apple Developer Console**
 
-App Store Connect API로 Associated Domains capability 활성화:
+You can do this manually in the Apple Developer Console web UI, or automate it using the App Store Connect API — useful for CI pipelines or new team members setting up from scratch:
 
 ```python
 import jwt, time, requests
 
-# JWT 토큰 생성
+# Generate a JWT for the App Store Connect API
 token = jwt.encode({
     'iss': ISSUER_ID,
     'iat': int(time.time()),
@@ -259,7 +315,7 @@ token = jwt.encode({
     'aud': 'appstoreconnect-v1'
 }, private_key, algorithm='ES256', headers={'kid': KEY_ID})
 
-# Bundle ID 조회
+# Look up the bundle ID record
 resp = requests.get(
     'https://api.appstoreconnect.apple.com/v1/bundleIds',
     params={'filter[identifier]': 'com.example.app'},
@@ -267,7 +323,7 @@ resp = requests.get(
 )
 bundle_id = resp.json()['data'][0]['id']
 
-# Associated Domains capability 추가
+# Enable the Associated Domains capability
 requests.post(
     'https://api.appstoreconnect.apple.com/v1/bundleIdCapabilities',
     headers={'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'},
@@ -283,14 +339,12 @@ requests.post(
 )
 ```
 
-Apple Developer Console 웹에서 수동으로 해도 되지만, API로 하면 CI에서 자동화할 수 있다.
-
-**4단계: Hotwire Native에서 Universal Link 수신 처리**
+**Step 4: Handle the Universal Link in Hotwire Native**
 
 ```swift
 // SceneController.swift
 
-// 앱이 이미 실행 중일 때
+// App is already running — handle the incoming Universal Link
 func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
     guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
           let url = userActivity.webpageURL,
@@ -298,7 +352,7 @@ func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
     tabBarController.activeNavigator.route(url)
 }
 
-// Cold start 시
+// Cold start — app was launched by tapping a Universal Link
 private func handleUniversalLinks(from connectionOptions: UIScene.ConnectionOptions) {
     if let userActivity = connectionOptions.userActivities.first(where: {
         $0.activityType == NSUserActivityTypeBrowsingWeb
@@ -310,24 +364,26 @@ private func handleUniversalLinks(from connectionOptions: UIScene.ConnectionOpti
 }
 ```
 
-cold start 시 0.5초 딜레이를 주는 이유: Hotwire Native의 WebView가 초기화되기 전에 route를 호출하면 무시된다.
+The 0.5-second delay on cold start is necessary because Hotwire Native's WebView has not finished initializing when `scene(_:willConnectTo:options:)` runs. Calling `route` before the WebView is ready silently discards the navigation. When the app is already running, the WebView is already initialized, so no delay is needed.
 
 ---
 
-## 삽질 5: SSO 콜백이 앱 내 WebView에서 열려서 세션이 안 맞음
+## Problem 5: SSO Callback Opens Inside WebView, Breaking Session
 
-### Problem
+### The Problem
 
-SSO 인증 완료 후 콜백 URL(`https://rp-app.com/auth/sso/callback?token=...`)로 리다이렉트될 때, IdP 앱의 WebView 안에서 열린다. RP 서비스의 세션 쿠키가 IdP 앱 WebView에는 없으므로 로그인이 안 된다.
+After SSO authentication completes, the callback URL (`https://rp-app.com/auth/sso/callback?token=...`) gets redirected to inside the IdP app's WebView. The RP service's session cookie does not exist in the IdP app's WKWebView, so the login fails.
 
-### Solution
+Hotwire Native handles all link taps inside its WKWebView by default. Since the RP domain is different from the IdP domain, the RP callback URL opens in the IdP app's WebView — which has no knowledge of the user's session on the RP service. WKWebView does not share cookies with Safari, so the RP's session cookie is unavailable.
 
-외부 URL은 시스템 브라우저(`UIApplication.shared.open`)로 열도록 변경:
+### The Fix
+
+Route external URLs to the system browser instead of the app's WebView:
 
 ```swift
 func handle(proposal: VisitProposal) -> ProposalResult {
     if !isAppURL(proposal.url) {
-        // 외부 HTTPS URL → 시스템 브라우저 (세션 쿠키 유지)
+        // External HTTPS URLs → system Safari (preserves session cookies)
         if proposal.url.scheme == "https" {
             UIApplication.shared.open(proposal.url)
         } else {
@@ -340,13 +396,15 @@ func handle(proposal: VisitProposal) -> ProposalResult {
 }
 ```
 
-`SFSafariViewController`는 앱 내에서 열리지만 쿠키가 앱과 격리되어 있다. `UIApplication.shared.open`은 시스템 Safari에서 열려서 RP 서비스의 기존 세션 쿠키를 사용할 수 있다.
+`SFSafariViewController` opens inside the app but uses a cookie store that is isolated from both the app's WKWebView and system Safari. `UIApplication.shared.open` opens in system Safari, which shares cookies with Safari — meaning the user's existing RP session cookie is available and the login completes successfully.
+
+With this in place, the complete SSO callback flow becomes: IdP app WebView → authentication complete page → system Safari opens RP callback URL → RP session cookie used → login complete.
 
 ---
 
 ## Android App Links
 
-Android은 `AndroidManifest.xml`에 intent-filter가 이미 있었고, 서버에 `assetlinks.json`만 추가하면 됐다:
+Android was simpler. The `AndroidManifest.xml` already had the intent-filter configured, so I only needed to add the `assetlinks.json` file on the server:
 
 ```ruby
 # routes.rb
@@ -367,64 +425,79 @@ def assetlinks
 end
 ```
 
-SHA256 fingerprint는 `keytool -list -v -keystore your.keystore`로 확인한다.
+Get the SHA256 fingerprint with: `keytool -list -v -keystore your.keystore`
+
+Unlike iOS AASA files (which are downloaded via Apple's CDN and cached), Android's `assetlinks.json` is fetched directly from your server. This means changes take effect immediately after deployment — no cache to worry about. The tradeoff is that a slow server response can cause App Links verification to fail.
 
 ---
 
-## 최종 아키텍처
+## Final Architecture
 
 ```
-[RP 서비스]                    [IdP 서비스]                [iOS 앱]
-    │                              │                         │
-    │  1. "메인 앱으로 로그인"       │                         │
-    │────────────────────────────→│                         │
-    │  GET /auth/sso/authorize    │                         │
-    │  (client_id, redirect_uri,  │                         │
-    │   state)                    │                         │
-    │                             │  Universal Link 감지     │
-    │                             │←────────────────────────│
-    │                             │  앱에서 WebView 로딩      │
-    │                             │                         │
-    │                             │  2. 로그인 (OTP)         │
-    │                             │  3. SSO 토큰 발급        │
-    │                             │  4. "인증 완료" 페이지     │
-    │                             │                         │
-    │  5. 콜백 (token + state)    │                         │
-    │←───────────────────────────│  시스템 브라우저로 열기     │
-    │                             │                         │
-    │  6. Back-channel 토큰 검증   │                         │
-    │────────────────────────────→│                         │
-    │  POST /auth/sso/verify      │                         │
-    │  (HMAC-SHA256 서명)          │                         │
-    │                             │                         │
-    │  7. 사용자 정보 반환          │                         │
-    │←───────────────────────────│                         │
-    │                             │                         │
-    │  8. 로그인 완료               │                         │
+[RP Service]                    [IdP Service]               [iOS App]
+    |                               |                            |
+    |  1. "Sign in with Main App"   |                            |
+    |-----------------------------→ |                            |
+    |  GET /auth/sso/authorize      |                            |
+    |  (client_id, redirect_uri,    |                            |
+    |   state)                      |                            |
+    |                               |  Universal Link detected   |
+    |                               | ←--------------------------|
+    |                               |  WebView loads in app      |
+    |                               |                            |
+    |                               |  2. Login (OTP)            |
+    |                               |  3. Issue SSO token        |
+    |                               |  4. "Auth complete" page   |
+    |                               |                            |
+    |  5. Callback (token + state)  |                            |
+    | ←-----------------------------|  Open via system browser   |
+    |                               |                            |
+    |  6. Back-channel verification |                            |
+    |-----------------------------→ |                            |
+    |  POST /auth/sso/verify        |                            |
+    |  (HMAC-SHA256 signature)       |                            |
+    |                               |                            |
+    |  7. Return user info          |                            |
+    | ←-----------------------------|                            |
+    |                               |                            |
+    |  8. Login complete            |                            |
 ```
 
 ---
 
-## 보안 체크리스트
+## Security Checklist
 
-- [x] State 파라미터로 CSRF 방지 (`SecureRandom.urlsafe_base64`)
-- [x] `secure_compare`로 타이밍 공격 방지
-- [x] SSO 토큰 5분 만료 + 일회용 (`used_at` 기록)
-- [x] `redirect_uri` 허용 목록 검증 (환경변수로 관리)
-- [x] HMAC-SHA256으로 back-channel 요청 서명
-- [x] SSO 세션 타임아웃 (10분)
-- [x] 토큰/state 값 URL 인코딩 (`CGI.escape`)
+- [x] CSRF prevention via `state` parameter (`SecureRandom.urlsafe_base64`)
+- [x] Timing attack prevention via `secure_compare`
+- [x] SSO tokens expire after 5 minutes and are single-use (`used_at` timestamp)
+- [x] `redirect_uri` validated against an allowlist (managed via environment variables)
+- [x] Back-channel requests signed with HMAC-SHA256
+- [x] SSO session timeout after 10 minutes
+- [x] Token and state values URL-encoded with `CGI.escape`
+- [x] AASA `paths` limited to specific routes (no wildcard `*` for everything)
+- [x] Token immediately invalidated after back-channel verification (`used_at` set)
 
 ---
 
-## 배운 것
+## Lessons Learned
 
-1. **다단계 인증 + SSO = 세션 관리가 핵심이다.** OTP, 매직링크, 이메일 답장 인증 등 여러 경로가 있으면 각각에서 SSO 컨텍스트를 유지해야 한다. 프레임워크의 `store_location`만으로는 부족하다.
+1. **Multi-step authentication plus SSO means session management is everything.** When there are multiple login paths — OTP, magic link, email reply — each one must preserve the SSO context. The framework's `store_location` is not designed for this.
 
-2. **Universal Links는 서버 + 앱 + Apple Console 3곳 모두 설정해야 한다.** 하나라도 빠지면 그냥 브라우저로 열린다. 에러 메시지도 없다.
+2. **Universal Links require three separate configurations, all correct.** Server AASA file, app entitlement, and Apple Developer Console capability. Any one missing and the link silently opens in the browser with no error.
 
-3. **앱 간 리다이렉트 시 쿠키 격리를 고려해야 한다.** IdP 앱의 WebView에서 RP 서비스 콜백을 열면 세션이 없다. 시스템 브라우저로 열어야 한다.
+3. **Cookie isolation between apps must be accounted for.** Opening the RP service callback inside the IdP app's WebView means there is no RP session cookie. Always route cross-domain callbacks to the system browser.
 
-4. **인증 완료 중간 페이지가 UX를 크게 개선한다.** 즉시 리다이렉트하면 사용자가 뭐가 된 건지 모른다. 2초 대기 + 체크마크 하나만 넣어도 체감이 다르다.
+4. **An intermediate "auth complete" page dramatically improves UX.** An immediate redirect leaves users confused about what happened. Two seconds and a checkmark make the transition feel intentional and trustworthy.
 
-5. **App Store Connect API로 capability를 코드로 관리할 수 있다.** Apple Developer Console 웹에서 클릭클릭하는 것보다 재현 가능하고 자동화할 수 있다.
+5. **App Store Connect API lets you manage capabilities as code.** Clicking through the Apple Developer Console web UI is slow and not reproducible. The API makes it scriptable and CI-friendly.
+
+---
+
+## Key Takeaways
+
+- **Save SSO parameters under a dedicated session key.** Store `client_id`, `redirect_uri`, and `state` in `session[:sso_params]` explicitly. This survives the multiple POST requests and page transitions that happen during multi-step authentication, whereas `store_location` / `redirect_back_or` will lose the original URL.
+- **Back-channel token verification with HMAC signing is non-negotiable.** Front-channel (browser redirect) token exchange alone is vulnerable to interception. The HMAC signature proves the verification request comes from a server that holds the shared secret.
+- **Universal Links debugging requires checking three places simultaneously.** AASA file (server), Associated Domains (app entitlement), and Apple Developer Console (capability). A failure at any single point causes a silent fallback to Safari with no error output from the OS.
+- **WKWebView does not share Safari cookies.** When a Hotwire Native app needs to complete an action on a different domain, use `UIApplication.shared.open` to open system Safari and preserve existing session cookies — not `SFSafariViewController`, which also isolates its cookie store.
+- **Account for WebView initialization time on cold start.** When a Universal Link launches the app from a cold start, wait approximately 0.5 seconds before calling the router. The WebView needs time to initialize; routing before it is ready silently discards the navigation.
+- **SSO tokens must be single-use.** Record a `used_at` timestamp when the token is first verified and reject any subsequent attempts. Combined with a short expiry window (5 minutes), this limits the damage from a stolen token.

@@ -11,35 +11,38 @@ cover:
 categories: ["Rails"]
 ---
 
-
-Rails 8 앱을 Render Starter 플랜(512MB)에 올리고 나서 주기적으로 메모리 초과로 서비스가 다운됐다. puma.rb의 스레드 수를 줄이고, queue.yml도 최적화했는데 효과가 없었다. 한참 삽질하고 나서야 진짜 원인을 찾았다.
+After deploying a Rails 8 app to Render's Starter plan (512MB), the service kept going down with periodic out-of-memory crashes. I reduced thread counts in puma.rb, tuned queue.yml, and redeployed multiple times — nothing helped. It took a couple of frustrating hours before I found the real cause.
 
 ---
 
 ## Symptoms
 
-Render 대시보드에서 OOM(Out of Memory) 이벤트가 반복됨. 메모리 사용량이 512MB를 넘기면서 프로세스가 강제 종료.
+OOM (Out of Memory) events were repeating in the Render dashboard. Memory usage would exceed 512MB, the process would get force-killed, Render would automatically restart it, and then a few minutes later the exact same pattern would play out again. Even with no traffic, memory would climb steadily over time until the process crashed.
+
+Looking at Render's metrics view, you could see the classic OOM graph: memory rising gradually, then dropping vertically right before 512MB — the process dying and restarting.
 
 ---
 
-## 첫 번째 시도 — puma.rb 수정
+## First Attempt — Editing puma.rb
 
-puma.rb의 스레드 기본값을 낮췄다.
+The first thing I suspected was the Puma configuration. More threads means more memory per worker, so reducing thread counts is the standard first move.
 
 ```ruby
 # config/puma.rb
-threads_count = ENV.fetch("RAILS_MAX_THREADS", 2)  # 3에서 2로
+threads_count = ENV.fetch("RAILS_MAX_THREADS", 2)  # reduced from 3 to 2
 threads threads_count, threads_count
 workers ENV.fetch("WEB_CONCURRENCY", 1)
 ```
 
-배포했는데 여전히 OOM 발생. 이상했다.
+Deployed. OOM still happening. The code had clearly changed, but nothing was different in production — which made it even more confusing.
+
+Next I looked at the Solid Queue configuration, reduced thread counts there too, and increased the polling interval. Still no effect.
 
 ---
 
-## 진짜 원인 — render.yaml이 코드보다 우선
+## The Real Cause — render.yaml Overrides Code Defaults
 
-render.yaml을 보니 이렇게 되어 있었다.
+After two hours of fruitless debugging, I finally opened render.yaml — a file I had set up early in the project and completely forgotten about.
 
 ```yaml
 envVars:
@@ -49,27 +52,31 @@ envVars:
     value: "5"
 ```
 
-**환경변수 우선순위: render.yaml > 코드 기본값**
+That was the problem.
 
-puma.rb에서 `ENV.fetch("RAILS_MAX_THREADS", 2)`라고 써도, render.yaml이 `RAILS_MAX_THREADS=5`로 주입하면 5가 적용된다. 코드 수정은 완전히 무의미했던 것.
+**Environment variable priority: render.yaml (externally injected) > code defaults**
 
-### 실제 메모리 계산
+`ENV.fetch("RAILS_MAX_THREADS", 2)` only falls back to `2` when the environment variable is absent. When render.yaml injects `RAILS_MAX_THREADS=5`, the code default is completely ignored. No matter how many times I edited puma.rb, those changes were irrelevant as long as render.yaml was setting the values.
 
-`WEB_CONCURRENCY=2`, `RAILS_MAX_THREADS=5` 상태에서:
+This isn't a quirk of Rails or Puma — it's the 12-Factor App configuration principle. Processes read configuration from the environment, not from code. Render injects environment variables into the container this way, so values declared in render.yaml always take precedence over code-level defaults.
 
-| 항목 | 예상 메모리 |
-|------|------------|
+### Actual Memory Breakdown
+
+With `WEB_CONCURRENCY=2` and `RAILS_MAX_THREADS=5`, here's what was running:
+
+| Component | Estimated Memory |
+|-----------|-----------------|
 | Puma master | ~50MB |
 | Puma worker × 2 | ~300MB |
 | Solid Queue dispatcher | ~50MB |
 | Solid Queue worker | ~100MB |
-| **합계** | **~500MB+** |
+| **Total** | **~500MB+** |
 
-스파이크 한 번에 512MB를 넘는 구조였다.
+At idle, the app was already sitting at 500MB. Any single memory spike — an ActiveRecord query loading a large dataset, rendering a complex email, processing a file upload — would push it over 512MB and kill the process. That explains why it was crashing periodically even under light traffic.
 
 ---
 
-## Solution — render.yaml 수정
+## Fix — Updating render.yaml
 
 ```yaml
 envVars:
@@ -81,44 +88,74 @@ envVars:
     value: "2"
 ```
 
-`MALLOC_ARENA_MAX=2`는 코드 변경 없이 glibc의 메모리 단편화를 줄여주는 환경변수다. Render 같은 제한된 환경에서 체감 효과가 크다.
+`MALLOC_ARENA_MAX=2` is an environment variable that reduces glibc memory fragmentation without any code changes. By default, glibc creates multiple memory arenas proportional to the number of CPU cores — in a container environment, this can cause memory that is effectively used by a single process to become scattered across arenas and never returned to the OS. Setting `MALLOC_ARENA_MAX=2` limits this behavior, visibly reducing real memory usage in constrained environments like Render's Starter plan.
 
-### 최적화 후 메모리
+### Memory After Optimization
 
-| 항목 | 예상 메모리 |
-|------|------------|
+| Component | Estimated Memory |
+|-----------|-----------------|
 | Puma master | ~50MB |
 | Puma worker × 1 | ~150MB |
 | Solid Queue dispatcher | ~40MB |
 | Solid Queue worker (threads=1) | ~60MB |
-| **합계** | **~300MB** |
+| **Total** | **~300MB** |
 
-512MB에서 여유 있게 운영 가능한 수준.
+That leaves roughly 200MB of headroom within the 512MB limit — enough to absorb most memory spikes without crashing.
 
 ---
 
-## 보너스 — Solid Queue 크래시 루프
+## Debugging Tips — How to Confirm Actual Memory Usage
 
-같은 날 다른 Rails 앱에서 `Bad Gateway`가 발생했다. 로그를 보니:
+Before touching render.yaml, it helps to understand what memory is actually being used.
+
+**Render dashboard**: Go to your service → Metrics tab. The memory graph shows you when OOM events occur and whether usage grows over time (memory leak) or spikes suddenly.
+
+**Rails console — check current process memory**:
+```ruby
+puts `ps -o rss= -p #{Process.pid}`.to_i / 1024
+# => outputs memory in MB
+```
+
+**Render SSH (paid plans)**:
+```bash
+# See all Ruby processes and their memory
+ps aux | grep ruby
+```
+
+**Verify which environment variable values are actually active** — do this after every deploy:
+```ruby
+# In Rails console
+puts ENV["RAILS_MAX_THREADS"]
+puts ENV["WEB_CONCURRENCY"]
+puts ENV["MALLOC_ARENA_MAX"]
+```
+
+If you edited render.yaml, redeploy and confirm the values are correct before assuming the fix worked.
+
+---
+
+## Bonus — Solid Queue Crash Loop
+
+On the same day, a different Rails app started returning `Bad Gateway`. The logs showed:
 
 ```
 Solid Queue has gone away
 Puma stopping...
 ```
 
-Solid Queue가 죽자 Puma puma 플러그인이 이를 감지하고 Puma까지 종료하는 패턴이었다.
+When Solid Queue died, the Puma plugin detected it and shut Puma down as well.
 
-원인은 `config/queue.yml` 구조 오류였다.
+The root cause was a structural error in `config/queue.yml`.
 
 ```yaml
-# 잘못된 구조 — dispatchers가 workers 안에 중첩됨
+# Wrong structure — dispatchers nested inside workers
 production:
   workers:
     - queues: [default]
       dispatchers:
         polling_interval: 1
 
-# 올바른 구조
+# Correct structure
 production:
   dispatchers:
     - polling_interval: 1
@@ -128,20 +165,55 @@ production:
       threads: 1
 ```
 
-`SolidQueue::Configuration#ensure_configured_processes`가 검증에 실패하면서 Solid Queue가 `exit 1`로 죽고, Puma 플러그인이 이를 감지해 Puma도 종료. 결과적으로 Bad Gateway.
+`SolidQueue::Configuration#ensure_configured_processes` fails validation with this wrong nesting, causing Solid Queue to exit with code 1. The Puma plugin detects this and shuts Puma down too. Result: Bad Gateway.
 
-Solid Queue 설정 오류가 있거나 안정성이 중요하다면 puma.rb에서 플러그인을 비활성화하고 별도 프로세스로 분리하는 게 낫다.
+### Decoupling the Puma Plugin Dependency
+
+If Solid Queue configuration errors or brief queue outages shouldn't take down the web server, you can decouple them by disabling the Puma plugin and running Solid Queue as a separate process.
 
 ```ruby
 # config/puma.rb
-# plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"]  # 주석 처리
+# plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"]  # comment this out
 ```
+
+Then add a separate worker service in render.yaml:
+
+```yaml
+services:
+  - type: web
+    name: myapp-web
+    env: ruby
+    buildCommand: bundle exec rails assets:precompile
+    startCommand: bundle exec puma -C config/puma.rb
+
+  - type: worker
+    name: myapp-worker
+    env: ruby
+    startCommand: bundle exec rails solid_queue:start
+    envVars:
+      - key: RAILS_MAX_THREADS
+        value: "1"
+```
+
+With this setup, if Solid Queue crashes, the web server stays up. The tradeoff is that a separate worker service costs extra on Render.
+
+On the 512MB Starter plan, running a second service may not be feasible. In that case, keep the plugin approach but validate your queue.yml structure carefully before deploying.
 
 ---
 
 ## Summary
 
-1. **render.yaml의 환경변수가 코드보다 우선**한다. puma.rb 기본값을 고쳐도 render.yaml에 같은 키가 있으면 의미 없다.
-2. **512MB에서 WEB_CONCURRENCY=2는 위험**하다. 워커 1개 + 스레드 2개가 현실적인 최대치.
-3. **MALLOC_ARENA_MAX=2**는 환경변수 하나로 메모리 단편화를 줄이는 가장 쉬운 최적화.
-4. **queue.yml 들여쓰기/구조**는 런타임에 검증되므로 배포 전에 눈으로 꼼꼼히 확인해야 한다.
+1. **render.yaml environment variables override code defaults.** Editing puma.rb defaults has no effect if render.yaml sets the same keys. Always verify which values are active in the deployed environment after a change.
+2. **WEB_CONCURRENCY=2 is dangerous on 512MB.** One worker plus two threads is a realistic upper bound. Keeping the idle memory footprint under 300MB leaves enough headroom for traffic spikes.
+3. **MALLOC_ARENA_MAX=2 is the easiest memory optimization with no code changes.** It reduces glibc memory fragmentation in Ruby/Puma environments with essentially no downside.
+4. **queue.yml indentation and structure are validated at runtime.** Review it carefully before deploying. `dispatchers` must be at the same level as `workers`, not nested inside it.
+5. **The Solid Queue + Puma plugin combination is convenient but has a single point of failure.** If Solid Queue crashes, Puma goes down with it. For higher reliability, run them as separate services.
+
+---
+
+## Key Takeaways
+
+- When debugging Render deployments, check environment variables before touching code. A mismatch between your local `rails s` behavior and production almost always points to environment variable differences.
+- For Rails + Solid Queue on the 512MB Starter plan, the proven starting point is: `WEB_CONCURRENCY=1`, `RAILS_MAX_THREADS=2`, `MALLOC_ARENA_MAX=2`.
+- When editing environment variables on Render, check both the dashboard's Environment tab and render.yaml. If both are set, render.yaml takes precedence. After any change, confirm the deployed values with `ENV["KEY"]` in the Rails console.
+- Memory fragmentation in Ruby processes running inside Linux containers is a known issue. `MALLOC_ARENA_MAX=2` is a widely used, low-risk mitigation that is worth adding to any memory-constrained deployment.

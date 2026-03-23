@@ -1,0 +1,30 @@
+{{ printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  {{- range .Data.Pages -}}
+    {{- if and (eq .Lang "en") (or (eq .Kind "taxonomy") (eq .Kind "term")) -}}
+      {{- /* Skip en taxonomy/term pages from sitemap */ -}}
+    {{- else if and (ne .Lang "en") (eq .Kind "term") (le (len .Pages) 3) -}}
+      {{- /* Skip ko term pages with 3 or fewer posts */ -}}
+    {{- else -}}
+  <url>
+    <loc>{{ .Permalink }}</loc>
+    {{- if not .Lastmod.IsZero }}
+    <lastmod>{{ .Lastmod.Format "2006-01-02T15:04:05-07:00" | safeHTML }}</lastmod>
+    {{- end }}
+    {{- range .Translations }}
+    <xhtml:link
+                rel="alternate"
+                hreflang="{{ .Lang }}"
+                href="{{ .Permalink }}"
+                />
+    {{- end }}
+    <xhtml:link
+                rel="alternate"
+                hreflang="{{ .Lang }}"
+                href="{{ .Permalink }}"
+                />
+  </url>
+    {{- end -}}
+  {{- end -}}
+</urlset>

@@ -1,9 +1,15 @@
 {{- /* PaperMod custom head extension point. */ -}}
 <meta name="naver-site-verification" content="4aff3baeafe680ba320dbda5a51bc963b58356c3" />
-{{- /* noindex for thin taxonomy pages (tags/categories with few posts) */ -}}
-{{- if .Data.Terms }}{{- /* taxonomy list page (e.g. /tags/, /categories/) */ -}}
-{{- else if and (eq .Kind "term") (le (len .Pages) 1) }}
+{{- /* noindex for taxonomy pages that hurt SEO */ -}}
+{{- if eq .Lang "en" -}}
+  {{- if or (eq .Kind "taxonomy") (eq .Kind "term") -}}
 <meta name="robots" content="noindex, follow" />
+  {{- end -}}
+{{- else -}}
+  {{- if .Data.Terms }}{{- /* taxonomy list page (e.g. /tags/, /categories/) */ -}}
+  {{- else if and (eq .Kind "term") (le (len .Pages) 3) }}
+<meta name="robots" content="noindex, follow" />
+  {{- end -}}
 {{- end -}}
 {{- partial "faq-schema.html" . }}
 {{- /* Google Analytics 4 */ -}}

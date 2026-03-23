@@ -11,67 +11,66 @@ cover:
 categories: ["Rails", "DevOps"]
 ---
 
-
-Render에 올려둔 Rails 서비스 6개가 전부 각자 다른 에러를 토해내고 있었다. 하나씩 로그를 까보니 공통 패턴도 있고, 프로젝트마다 고유한 문제도 있었다. 한 세션에서 전부 수정하고 배포까지 마친 과정을 정리한다.
-
----
-
-## 전체 상황
-
-Render API로 서비스 6개의 로그를 일괄 조회했다. 결과:
-
-| 서비스 | 주요 에러 |
-|--------|-----------|
-| 서비스 A | ERB 문법 에러로 500 (이미 커밋됐지만 미배포) |
-| 서비스 B | Stoplight `Light#run` 블록 에러 + Telegram 파싱 에러 |
-| 서비스 C | `solid_cache_entries` 테이블 누락 |
-| 서비스 D | `PG::UndefinedColumn` + solid_cache 누락 |
-| 서비스 E | `PG::DuplicateTable` sessions + Sentry 초기화 에러 |
-| 서비스 F | `TaskCleanupJob` FK 위반 + Puma deprecated 경고 |
-
-**공통 패턴**: Rails 8의 Solid Stack (SolidCache, SolidQueue, SolidCable) 초기 설정 문제가 여러 프로젝트에서 반복됐다.
+Six Rails services deployed on Render were all throwing different errors at the same time. Going through the logs one by one revealed both common patterns and service-specific issues. This post documents how all of them were fixed and deployed within a single session.
 
 ---
 
-## Problem 1: Stoplight 5.x API 변경 — `Light#run` 블록 전달
+## Overview
 
-### 현상
+Instead of SSH-ing into each service individually, I used the Render API to pull logs from all six services at once via a local script. The results:
+
+| Service | Primary Error |
+|---------|---------------|
+| Service A | ERB syntax error causing 500s (code was committed but never deployed) |
+| Service B | Stoplight `Light#run` block error + Telegram parsing error |
+| Service C | `solid_cache_entries` table missing |
+| Service D | `PG::UndefinedColumn` + solid_cache table missing |
+| Service E | `PG::DuplicateTable` on sessions + Sentry initialization error |
+| Service F | `TaskCleanupJob` FK violation + Puma deprecated callback warnings |
+
+**Common pattern**: Rails 8's Solid Stack (SolidCache, SolidQueue, SolidCable) initial setup was broken across multiple projects. The root cause was using a single PostgreSQL instance on Render's free/starter plan while Solid Stack's install generator assumes a multi-database configuration.
+
+---
+
+## Problem 1: Stoplight 5.x API Change — Block Passing in `Light#run`
+
+### Symptom
 
 ```
 BizRouter API Error: nothing to run. Please, pass a block into `Light#run`
 ```
 
-5분마다 반복 발생. API 호출이 전부 실패.
+Occurring every 5 minutes. Every external API call was failing, taking down all endpoints that communicate with third-party services.
 
 ### Cause
 
-Stoplight 5.x에서 API가 바뀌었다. 기존 패턴이 더 이상 작동하지 않는다:
+Stoplight is a circuit breaker library for Ruby. When external API calls fail repeatedly, it opens the circuit and stops attempting calls for a cooldown period, then allows a probe request to test recovery. In Stoplight 5.x, the way you pass a block changed. The old pattern no longer works:
 
 ```ruby
-# Stoplight 4.x (구 패턴) - 작동 안 함
+# Stoplight 4.x (old pattern) — no longer works
 Stoplight('api-call') {
   HTTParty.get(url)
 }.run
 
-# Stoplight 5.x (신 패턴) - 이렇게 바꿔야 함
+# Stoplight 5.x (new pattern) — block goes to .run
 Stoplight('api-call').run {
   HTTParty.get(url)
 }
 ```
 
-차이는 미묘하다. `Stoplight()` 에 전달한 블록은 5.x에서 무시되고, `.run`에 블록을 전달해야 한다. 에러 메시지가 정확히 이 상황을 설명하는데, 처음 보면 "블록을 넘겼는데 왜?" 싶다.
+The difference is subtle. In 5.x, a block passed to `Stoplight()` is silently ignored, and the block must be passed to `.run` instead. The error message spells this out exactly, but when you're looking at it for the first time it's confusing — you passed a block, so why is it complaining? If you updated the gem without checking the changelog, this is exactly the kind of breaking change you'd miss.
 
-### Solution
+### Fix
 
 ```ruby
-# 수정 전
+# Before
 def call_api(path, params = {})
   Stoplight("biz-router-#{path}") {
     connection.get(path, params)
   }.run
 end
 
-# 수정 후
+# After
 def call_api(path, params = {})
   Stoplight("biz-router-#{path}").run {
     connection.get(path, params)
@@ -79,26 +78,32 @@ def call_api(path, params = {})
 end
 ```
 
-**교훈**: 서킷 브레이커 라이브러리를 업데이트했으면 블록 전달 방식이 바뀌었는지 반드시 확인할 것.
+This single change brought all external API calls back to normal. One line of code, wide blast radius.
+
+**Takeaway**: Whenever you update a circuit breaker library, always check whether the block-passing convention changed. Stoplight 5.x documents this in the CHANGELOG, but it's easy to miss until something breaks in production.
 
 ---
 
-## Problem 2: Telegram Bot MarkdownV2 파싱 지옥
+## Problem 2: Telegram Bot MarkdownV2 Parsing Hell
 
-### 현상
+### Symptom
 
 ```
 Telegram API error: Bad Request: can't parse entities:
 Can't find end of the entity starting at byte offset 395
 ```
 
+Every time a notification job ran, Telegram message delivery failed. The `byte offset` number in the error changed with each occurrence because it depends on the content of the message — specifically, whatever the user had typed into a task title or note.
+
 ### Cause
 
-Telegram의 `parse_mode: 'Markdown'` (legacy)을 사용하면서 메시지 본문에 `_`, `.`, `(`, `)` 같은 특수문자가 포함되면 파싱이 깨진다. MarkdownV2로 바꾸면 이스케이프할 문자가 더 많아져서 오히려 복잡해진다.
+The code was using `parse_mode: 'Markdown'` (Telegram's legacy Markdown mode), and any message containing characters like `_`, `.`, `(`, or `)` would cause a parse failure. Since these characters appear naturally in user-generated content, the failure was essentially unavoidable.
 
-### Solution: HTML parse_mode로 전환
+Switching to MarkdownV2 makes things worse, not better. MarkdownV2 requires escaping 18 characters: `_`, `*`, `[`, `]`, `(`, `)`, `~`, `` ` ``, `>`, `#`, `+`, `-`, `=`, `|`, `{`, `}`, `.`, and `!`. Reliably escaping all of these in dynamically assembled messages is nearly impossible in practice.
 
-근본적으로 **HTML parse_mode를 쓰는 게 정답**이다. 이스케이프할 문자가 `&`, `<`, `>` 세 개뿐이다:
+### Fix: Switch to HTML parse_mode
+
+The correct solution is to **use HTML parse_mode**. Only three characters need escaping: `&`, `<`, and `>`.
 
 ```ruby
 def self.escape(text)
@@ -111,13 +116,13 @@ end
 def self.markdown_to_html(text)
   text.to_s
       .gsub('&', '&amp;').gsub('<', '&lt;').gsub('>', '&gt;')
-      .gsub(/\\([_*\[\]()~`>#+=|{}.!\-])/, '\1')  # MD 이스케이프 제거
+      .gsub(/\\([_*\[\]()~`>#+=|{}.!\-])/, '\1')  # strip MD escape chars
       .gsub(/\*([^*]+?)\*/, '<b>\1</b>')
       .gsub(/`([^`]+?)`/, '<code>\1</code>')
 end
 ```
 
-그리고 모든 `send_message` 호출에서:
+And update every `send_message` call:
 
 ```ruby
 bot.api.send_message(
@@ -127,50 +132,54 @@ bot.api.send_message(
 )
 ```
 
-**교훈**: Telegram Bot에서 Markdown/MarkdownV2 파싱은 삽질의 원천이다. 처음부터 HTML을 쓰자. 이스케이프 규칙이 훨씬 단순하다.
+In HTML mode, Telegram only interprets `<b>`, `<i>`, `<code>`, `<pre>`, and `<a>` tags. Everything else is treated as plain text. No matter how complex the user's input is, three substitutions are all it takes to make it safe.
+
+**Takeaway**: Markdown and MarkdownV2 in Telegram bots are a maintenance trap when dealing with dynamic content. Start with HTML parse mode. The escaping rules are far simpler, and it handles user-generated text safely.
 
 ---
 
-## Problem 3: Solid Stack 테이블 누락 — 여러 프로젝트 공통
+## Problem 3: Solid Stack Missing Tables — Multiple Projects
 
-### 현상
+### Symptom
 
 ```
 PG::UndefinedTable: ERROR: relation "solid_cache_entries" does not exist
 ```
 
-이게 3개 프로젝트에서 동시에 발생했다.
+This hit three projects simultaneously. Services C, D, and E were all recently set up with Rails 8.
 
 ### Cause
 
-Rails 8의 `solid_cache` (1.0.x)는 **마이그레이션 파일이 아니라 스키마 파일** (`db/cache_schema.rb`)로 테이블을 관리한다. `rails solid_cache:install`을 실행하면 `config/cache.yml`과 `db/cache_schema.rb`만 생성하고, `db/cache_migrate/` 디렉토리는 만들지 않는다.
+Rails 8's `solid_cache` (1.0.x) manages its tables through a **schema file** (`db/cache_schema.rb`) rather than standard migration files. When you run `rails solid_cache:install`, it generates `config/cache.yml` and `db/cache_schema.rb`, but it does **not** create a `db/cache_migrate/` directory.
 
 ```
-# solid_cache:install이 생성하는 것
+# What solid_cache:install creates
 config/cache.yml
-db/cache_schema.rb       ← 스키마 정의
+db/cache_schema.rb       ← schema definition
 
-# 생성하지 않는 것
-db/cache_migrate/        ← 이게 없다!
+# What it does NOT create
+db/cache_migrate/        ← does not exist
 ```
 
-그래서 `bin/render-build.sh`에서 `bundle exec rails db:migrate:cache`를 실행해봐야 마이그레이션 파일이 없으니 아무것도 안 된다.
+So running `bundle exec rails db:migrate:cache` in `bin/render-build.sh` does nothing — there are no migration files to run. The build succeeds without errors, but the table is never created. Every request then hits a 500 at runtime.
 
-### Solution (방법 2가지)
+This design reflects Solid Stack's assumption of a multi-database configuration, where each component (cache, queue, cable) connects to a dedicated database. With a dedicated DB, loading the schema file is safe because it targets only that database. On Render's free/starter plan with a single shared PostgreSQL instance, this separation breaks down.
 
-**방법 1**: `render-build.sh`에서 스키마 로드 사용
+### Fix (two options)
+
+**Option 1**: Use schema load in `render-build.sh`
 
 ```bash
-# 수정 전 (작동 안 함)
+# Before (does nothing)
 bundle exec rails db:migrate:cache || true
 bundle exec rails db:migrate:queue || true
 
-# 수정 후 (작동함)
+# After (actually creates the tables)
 SCHEMA=db/cache_schema.rb bundle exec rails db:schema:load || true
 SCHEMA=db/queue_schema.rb bundle exec rails db:schema:load || true
 ```
 
-**방법 2**: `db/cache_migrate/`에 직접 마이그레이션 생성
+**Option 2**: Manually create a migration in `db/cache_migrate/`
 
 ```ruby
 # db/cache_migrate/20260306_create_solid_cache_entries.rb
@@ -189,98 +198,112 @@ class CreateSolidCacheEntries < ActiveRecord::Migration[8.0]
 end
 ```
 
-**production에서 cache/queue/cable DB가 primary DB와 같은 경우** (Render 무료/스타터 플랜), 방법 2가 더 안전하다. `db:schema:load`는 기존 테이블을 날릴 위험이 있다.
+**When cache/queue/cable share the same DB as primary** (Render free/starter plan), Option 2 is safer. `db:schema:load` drops and recreates tables, which could wipe existing data. Option 2 uses `if_not_exists: true`, making it safe to run even when the table already exists.
 
-**교훈**: Solid Stack은 멀티 DB 구성을 전제로 설계됐다. 단일 DB에서 쓸 때는 마이그레이션 파일을 직접 만들어야 한다.
+**Takeaway**: Solid Stack is designed for multi-database setups. When using a single database, you need to create migration files manually. The official documentation only covers the multi-DB case, so this trip-up is common on budget hosting plans.
 
 ---
 
-## Problem 4: TaskCleanupJob FK 제약 위반
+## Problem 4: TaskCleanupJob FK Constraint Violation
 
-### 현상
+### Symptom
 
 ```
 PG::ForeignKeyViolation: ERROR: update or delete on table "tasks"
 violates foreign key constraint "fk_rails_d8a07e5092" on table "notifications"
 ```
 
-30일 지난 soft-delete 태스크를 영구 삭제하는 Job에서 발생.
+This occurred in a job that permanently deletes soft-deleted tasks older than 30 days. Every run failed, and SolidQueue kept retrying, filling the error logs.
 
 ### Cause
 
-`Notification` 모델에 `belongs_to :task` (직접 FK)가 있는데, `Task` 모델에는 `has_many :notifications`가 **없었다**. CleanupJob에서 notifications를 먼저 삭제하려고 시도하지만, `destroy_all`이 콜백을 거치면서 타이밍 이슈가 생길 수 있다.
+The `Notification` model had `belongs_to :task` with a direct foreign key, but the `Task` model had no corresponding `has_many :notifications`. When the cleanup job tried to delete a task, PostgreSQL rejected it because `notifications` records still referenced that task via the FK.
+
+Rails cascades dependent deletions based on declared associations. Without the `has_many` on `Task`, Rails had no instruction to clean up notifications first, so PostgreSQL's FK constraint enforcement stepped in and blocked the delete.
 
 ```ruby
-# Task 모델 (수정 전) - notifications 연관관계 없음
+# Task model (before) — missing notifications association
 has_many :notification_schedules, as: :notifiable, dependent: :destroy
-# has_many :notifications 가 없다!
+# has_many :notifications is absent
 ```
 
-### Solution
+### Fix
 
 ```ruby
-# Task 모델 (수정 후)
-has_many :notifications, dependent: :destroy  # 추가
+# Task model (after)
+has_many :notifications, dependent: :destroy  # added
 has_many :notification_schedules, as: :notifiable, dependent: :destroy
 ```
 
-그리고 CleanupJob에서 `destroy_all` → `delete_all`로 변경:
+And change `destroy_all` to `delete_all` in the cleanup job:
 
 ```ruby
-# 수정 전: 콜백까지 실행 (불필요 + 느림)
+# Before: triggers callbacks, loads each record into memory
 Notification.where(task_id: task.id).destroy_all
 
-# 수정 후: SQL DELETE 직접 실행 (빠르고 확실)
+# After: single SQL DELETE, fast and reliable
 Notification.where(notifiable_type: 'Task', notifiable_id: task.id)
             .or(Notification.where(task_id: task.id))
             .delete_all
 ```
 
-**교훈**: `belongs_to :task`이 있으면 반드시 반대쪽에 `has_many :notifications`를 선언하고 `dependent` 옵션을 지정할 것. 안 그러면 레코드 삭제 시 FK 제약에 걸린다.
+For bulk deletion in a cleanup job, `destroy_all` is a bad choice even when it works. It instantiates each record as a Ruby object, runs all callbacks, and issues N individual `DELETE` queries. `delete_all` issues a single SQL statement — much faster and immune to FK timing issues.
+
+**Takeaway**: If a model has `belongs_to :something`, always declare the inverse `has_many` on the other side with an appropriate `dependent:` option. Without it, FK violations will surface during deletion. For mass-delete jobs, prefer `delete_all` over `destroy_all` unless you specifically need callbacks to run.
 
 ---
 
-## Problem 5: `find_each`와 default_scope `order` 충돌
+## Problem 5: `find_each` Conflicts with `default_scope` Order
 
-### 현상
+### Symptom
 
 ```
 WARN: Scoped order is ignored, use :cursor with :order to configure custom order.
 ```
 
-5분마다 리마인더 Job이 실행될 때마다 경고 발생.
+Logged every 5 minutes whenever the reminder job ran. Functionally it still worked, but the logs were noisy and the processing order was not what the code intended.
 
 ### Cause
 
-`Task` 모델에 `default_scope { order(created_at: :desc) }`가 있는데, `find_each`는 내부적으로 `order(:id)`를 강제한다. 두 order가 충돌하면 Rails가 default_scope의 order를 무시하고 경고를 낸다.
+The `Task` model had `default_scope { order(created_at: :desc) }`, but `find_each` internally forces `ORDER BY id ASC`. When the two conflict, Rails silently ignores the `default_scope` ordering and emits this warning.
 
-### Solution
+`find_each` requires `id ASC` ordering because it uses cursor-based batching: each batch is fetched with `WHERE id > last_seen_id`. Any other ordering would break the pagination boundary logic. Rails cannot honor `default_scope`'s `ORDER BY` here, so it overrides it.
+
+### Fix
 
 ```ruby
-# 수정 전
+# Before
 tasks_with_reminders.find_each do |task|
 
-# 수정 후 — 명시적으로 order를 재지정
+# After — explicitly reset the order
 tasks_with_reminders.reorder(:id).find_each do |task|
 ```
 
-**교훈**: `default_scope`에 `order`가 있으면 `find_each`/`find_in_batches` 사용 시 반드시 `.reorder(:id)`를 붙여줄 것.
+`.reorder(:id)` discards all existing order clauses from the relation and applies `id ASC`. Calling it before `find_each` eliminates the warning and ensures correct batch iteration.
+
+**Takeaway**: If a model has an `order` in `default_scope`, always add `.reorder(:id)` before `find_each` or `find_in_batches`. Better yet, avoid putting `order` in `default_scope` at all — it creates unpredictable behavior across many query contexts.
 
 ---
 
-## Problem 6: Puma 7 deprecated 콜백
+## Problem 6: Puma 7 Deprecated Callbacks
 
-### 현상
+### Symptom
 
 ```
 Use 'before_worker_boot', 'on_worker_boot' is deprecated and will be removed in v8
 Use 'before_worker_shutdown', 'on_worker_shutdown' is deprecated and will be removed in v8
 ```
 
-### Solution
+Logged on every server startup. Functionally fine now, but a ticking time bomb for when Puma 8 is adopted — the hooks would simply stop firing, breaking database connection pool management across workers.
+
+### Background
+
+Puma in clustered mode uses fork-based workers. Each worker needs to re-establish its own database connection after forking, and cleanly disconnect before shutting down. The lifecycle hooks that handle this were renamed in Puma 7.
+
+### Fix
 
 ```ruby
-# 수정 전 (Puma 6 이하)
+# Before (Puma 6 and earlier)
 on_worker_boot do
   ActiveRecord::Base.establish_connection
 end
@@ -288,7 +311,7 @@ on_worker_shutdown do
   ActiveRecord::Base.connection_pool.disconnect!
 end
 
-# 수정 후 (Puma 7+)
+# After (Puma 7+)
 before_worker_boot do
   ActiveRecord::Base.establish_connection
 end
@@ -297,11 +320,13 @@ before_worker_shutdown do
 end
 ```
 
+The behavior is identical — only the names changed. Fixing this before Puma 8 lands avoids a silent failure mode where workers share or lose database connections.
+
 ---
 
-## Problem 7: HTML에서 `<button>` 중첩 금지
+## Problem 7: Nested `<button>` Elements Are Invalid HTML
 
-### 현상 (Vite 빌드 경고)
+### Symptom (Vite build warning)
 
 ```
 `<button>` cannot be a child of `<button>`.
@@ -309,21 +334,25 @@ When rendering this component on the server, the resulting HTML
 will be modified by the browser, likely resulting in a hydration_mismatch warning
 ```
 
+With Inertia.js SSR enabled, this warning can escalate into a hydration mismatch that breaks interactivity.
+
 ### Cause
 
-알림 목록에서 각 항목이 `<button>`이고, 그 안에 삭제 버튼도 `<button>`이었다. HTML 스펙상 `<button>` 안에 `<button>`을 넣을 수 없다.
+In the notification list component, each list item was a `<button>` (clicking it navigated to the detail view), and inside each item there was a delete `<button>`. The HTML specification forbids nesting interactive elements this way.
 
-### Solution
+When the browser encounters a `<button>` inside a `<button>`, it corrects the DOM by moving the inner button outside the outer one. This restructured DOM differs from the server-rendered HTML, causing Inertia's SSR hydration to detect a mismatch and potentially re-render the component from scratch on the client.
 
-내부 버튼을 `<div role="button">`으로 변경하고 키보드 접근성을 유지:
+### Fix
+
+Replace the inner button with a `<div role="button">` while preserving keyboard accessibility:
 
 ```svelte
-<!-- 수정 전 -->
+<!-- Before -->
 <button onclick={(e) => { e.stopPropagation(); onDelete(id); }}>
-  삭제
+  Delete
 </button>
 
-<!-- 수정 후 -->
+<!-- After -->
 <div
   role="button"
   tabindex="0"
@@ -336,15 +365,17 @@ will be modified by the browser, likely resulting in a hydration_mismatch warnin
     }
   }}
 >
-  삭제
+  Delete
 </div>
 ```
 
+Adding `role="button"` makes the element semantically equivalent to a button for screen readers. `tabindex="0"` ensures it receives keyboard focus. Handling `Enter` and `Space` in `onkeydown` matches standard button behavior.
+
 ---
 
-## Render API로 일괄 배포
+## Triggering Deployments via Render API
 
-모든 수정을 커밋 & 푸시한 뒤, Render API로 수동 배포를 트리거했다:
+After committing and pushing all fixes, deployments were triggered through the Render API rather than clicking through the dashboard one service at a time:
 
 ```bash
 curl -X POST "https://api.render.com/v1/services/${SERVICE_ID}/deploys" \
@@ -353,25 +384,53 @@ curl -X POST "https://api.render.com/v1/services/${SERVICE_ID}/deploys" \
   -d '{"clearCache":"do_not_clear"}'
 ```
 
-`autoDeploy: no`로 설정된 서비스들은 이렇게 API 호출로 배포해야 한다. 6개 서비스를 순서대로 트리거하고, 배포 상태를 확인:
+Services configured with `autoDeploy: no` do not deploy on push — they require an explicit API trigger. The `clearCache: "do_not_clear"` option reuses Docker layer cache, significantly reducing build time when only application code changed and dependencies are unchanged.
+
+To verify each deployment succeeded:
 
 ```bash
 curl -s "https://api.render.com/v1/services/${SERVICE_ID}/deploys?limit=1" \
   -H "Authorization: Bearer $RENDER_API_KEY"
 ```
 
+The response includes a `status` field. When it reads `live`, the deploy is complete. The `build_started_at` and `finished_at` timestamps tell you the exact build duration.
+
 ---
 
 ## Summary
 
-| 문제 | 핵심 원인 | 해결 |
-|------|-----------|------|
-| Stoplight `Light#run` | 5.x에서 블록 전달 위치 변경 | `Stoplight().run { }` 패턴 사용 |
-| Telegram 파싱 에러 | MarkdownV2 이스케이프 복잡도 | HTML parse_mode로 전환 |
-| solid_cache 테이블 누락 | 스키마 기반이라 migrate가 안 됨 | 마이그레이션 직접 생성 or 스키마 로드 |
-| FK 제약 위반 | `has_many :notifications` 누락 | 연관관계 추가 + `delete_all` |
-| Scoped order 경고 | default_scope order vs find_each | `.reorder(:id)` 명시 |
-| Puma deprecated | 7.x에서 콜백명 변경 | `before_worker_boot/shutdown` |
-| button 중첩 | HTML 스펙 위반 | `div[role=button]` |
+| Problem | Root Cause | Fix |
+|---------|------------|-----|
+| Stoplight `Light#run` | Block passing position changed in 5.x | Use `Stoplight().run { }` pattern |
+| Telegram parse error | MarkdownV2 escaping too complex for dynamic content | Switch to HTML parse_mode |
+| solid_cache table missing | Schema-file based install, no migrations generated | Create migration manually or load schema |
+| FK constraint violation | `has_many :notifications` not declared on Task | Add association + use `delete_all` |
+| Scoped order warning | `default_scope` order conflicts with `find_each` | Add `.reorder(:id)` before `find_each` |
+| Puma deprecated callbacks | Callback names changed in Puma 7 | Rename to `before_worker_boot/shutdown` |
+| Nested buttons | HTML spec violation | Replace inner button with `div[role=button]` |
 
-한 세션에서 6개 서비스의 에러를 전부 수정하고 배포까지 마쳤다. 핵심은 **Render API로 로그를 일괄 조회**해서 전체 상황을 먼저 파악한 것이다. 하나씩 SSH 접속해서 보는 것보다 훨씬 빠르다.
+All seven errors across six services were fixed and deployed in a single session. The key enabler was **using the Render API to fetch logs in bulk** before touching any code. Getting a complete picture of every service's error state at once makes it possible to batch related fixes and avoid context-switching one service at a time.
+
+---
+
+## Key Takeaways
+
+Several patterns emerged from this session that are worth applying across any Rails deployment on managed hosting.
+
+**1. Read the CHANGELOG before upgrading gems**
+Stoplight 5.x's block-passing change is a textbook breaking change — syntactically valid code silently stops working. One `bundle update stoplight` without reading the changelog can take down every external API call in production. Make CHANGELOG review a required step in any gem upgrade.
+
+**2. Avoid Markdown in Telegram messages with dynamic content**
+Whether Telegram, Slack, or any other messaging platform, if messages contain user-generated text, avoid parse modes with complex escaping rules. HTML mode in Telegram requires escaping only three characters and handles any content safely. Markdown-based failures tend to be invisible in test environments and only surface in production with specific user inputs.
+
+**3. Solid Stack on a single database requires manual migration files**
+Rails 8's Solid Stack defaults assume a multi-database configuration. On budget hosting plans like Render's free tier where all components share one database, the install generator's output is incomplete. After running `solid_cache:install` or `solid_queue:install`, verify that the tables actually get created during the build step — not just that the build command exits without error.
+
+**4. Always declare both sides of an association**
+If `Notification` has `belongs_to :task`, then `Task` must have `has_many :notifications` with a `dependent:` option. Missing the inverse declaration leaves Rails unable to manage child records during deletion, and the database's FK constraint enforcement becomes your runtime error reporter. This is a standard Rails convention that is easy to skip and painful to debug.
+
+**5. For bulk deletion jobs, default to `delete_all` over `destroy_all`**
+`destroy_all` loads every record, runs callbacks, and issues N SQL statements. For cleanup jobs that delete potentially hundreds or thousands of old records, this is both slow and fragile. `delete_all` issues a single SQL statement, skips callbacks, and sidesteps FK timing issues that can occur when callbacks trigger additional queries mid-transaction.
+
+**6. Use the Render API to manage multiple services at scale**
+Once you have more than two or three services on Render, the dashboard becomes a bottleneck. Log fetching, deploy triggering, and environment variable updates are all available through the Render REST API. Scripting these operations pays off quickly, especially when operating services with `autoDeploy: no` that require explicit deploy triggers for each release.

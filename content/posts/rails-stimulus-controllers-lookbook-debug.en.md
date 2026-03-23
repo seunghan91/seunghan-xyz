@@ -11,41 +11,46 @@ cover:
 categories: ["Rails", "Hotwire"]
 ---
 
+When building a component library with Rails + ViewComponent + Lookbook, I ran into a situation where all my Stimulus controllers were stubs — empty shells. Out of 13 controllers, only 3 were actually working; the remaining 10 were single-line `connect() {}` placeholders. This post documents the debugging process and implementation decisions for all 11 controllers I built out.
 
-Rails + ViewComponent + Lookbook 조합으로 컴포넌트 라이브러리를 만들 때, Stimulus 컨트롤러가 전부 스텁(빈 껍데기) 상태로 남아있는 상황을 맞닥뜨렸다. 13개 컨트롤러 중 3개만 동작하고 나머지 10개는 `connect() {}` 한 줄짜리였다. 이걸 전부 구현하면서 겪은 삽질을 정리한다.
-
----
-
-## 구현 대상
-
-총 11개 컨트롤러를 4단계로 나눠서 구현했다.
-
-| Wave | 컨트롤러 | 핵심 기술 |
-|------|---------|---------|
-| 1 | TagInput, FileDropzone, CategoryTab | DOM 조작, 드래그 이벤트 |
-| 2 | ScrollReveal, ScrollScale, VideoScrubbing, HorizontalScroll | RAF 쓰로틀, IntersectionObserver, ResizeObserver |
-| 3 | ScrambleText, RandomReveal | RAF 애니메이션 루프, Fisher-Yates 셔플 |
-| 4 | ImageCarousel, CarouselContainer | 드래그/터치, translateX 트랜지션 |
+The focus here is not just on the code itself, but on **why** I chose each approach, **what problems came up**, and **how I solved them**.
 
 ---
 
-## 삽질 1: Lookbook 프리뷰에서 Stimulus가 아예 안 됨
+## What Was Being Implemented
 
-가장 크게 막혔던 부분이다. 컨트롤러를 다 구현하고 Lookbook을 열었는데 아무 동작도 하지 않는다. 크롬 DevTools를 열어보니 `data-controller` 속성은 붙어있는데 Stimulus가 연결이 안 된 상태였다.
+I implemented 11 controllers across 4 waves, ordered by complexity and dependency. Going from direct DOM manipulation to scroll integration to RAF animation to interactive carousels means the patterns learned in each wave carry forward naturally to the next.
+
+| Wave | Controllers | Key Techniques |
+|------|------------|----------------|
+| 1 | TagInput, FileDropzone, CategoryTab | DOM manipulation, drag events |
+| 2 | ScrollReveal, ScrollScale, VideoScrubbing, HorizontalScroll | RAF throttle, IntersectionObserver, ResizeObserver |
+| 3 | ScrambleText, RandomReveal | RAF animation loop, Fisher-Yates shuffle |
+| 4 | ImageCarousel, CarouselContainer | drag/touch, translateX transitions |
+
+---
+
+## Bug #1: Stimulus Does Not Work at All Inside Lookbook Previews
+
+This was the biggest blocker. I finished implementing the controllers, opened Lookbook, and nothing was interactive. Chrome DevTools showed the `data-controller` attributes were present, but Stimulus was never connecting to them.
+
+Everything worked fine when I opened the components directly in the dev server — the bug only appeared inside Lookbook previews. At first I couldn't figure out whether this was a Stimulus bug, a ViewComponent issue, or something wrong with my own code.
 
 ### Cause
 
-Lookbook은 프리뷰를 `<iframe>`으로 렌더링한다. 이 iframe의 레이아웃 파일이 따로 있는데:
+Lookbook renders its previews inside an `<iframe>`. This iframe has its own separate layout file:
 
 ```erb
 <%# app/views/layouts/previews/preview.html.erb %>
 <head>
   <%= stylesheet_link_tag "application" %>
-  <%# javascript_importmap_tags 가 없었음! %>
+  <%# javascript_importmap_tags was missing! %>
 </head>
 ```
 
-`stylesheet_link_tag`만 있고 `javascript_importmap_tags`가 없었다. CSS는 불러오는데 JS는 로드 자체가 안 된 것.
+Only `stylesheet_link_tag` was present — `javascript_importmap_tags` was missing entirely. CSS was loading, but JavaScript was not being loaded at all inside the iframe.
+
+An iframe is a completely independent browsing context. Even if JavaScript is loaded in the parent page, Stimulus will not connect to elements inside the iframe unless JavaScript is explicitly loaded there too. Once you understand this, the problem is obvious — but it is easy to assume Lookbook handles this automatically.
 
 ### Fix
 
@@ -56,18 +61,20 @@ Lookbook은 프리뷰를 `<iframe>`으로 렌더링한다. 이 iframe의 레이�
 </head>
 ```
 
-한 줄 추가로 해결됐다. Rails 8 Importmap 환경에서 Lookbook을 쓴다면 반드시 확인해야 할 부분이다. 프리뷰 레이아웃 파일이 2곳에 있었는데 둘 다 수정해야 했다:
+One line added, problem solved. If you are using Lookbook with Rails 8 Importmap, this is the first thing to check. There were two preview layout files, and both needed to be updated:
 
 - `app/views/layouts/previews/preview.html.erb`
 - `app/views/previews/preview.html.erb`
 
+If you are using Webpacker or esbuild instead of Importmap, replace `javascript_importmap_tags` with the appropriate tag helper for your build tool.
+
 ---
 
-## Wave 1: DOM 조작 컨트롤러
+## Wave 1: DOM Manipulation Controllers
 
 ### TagInput
 
-Enter나 콤마로 태그를 추가하고, × 버튼으로 삭제, Backspace로 마지막 태그를 지우는 컨트롤러.
+A controller that adds tags on Enter or comma, removes them via an x button, and deletes the last tag on Backspace. Tag input UIs are common, but getting them right requires careful attention to duplicate prevention, XSS defense, focus management, and keyboard accessibility.
 
 ```javascript
 // app/javascript/controllers/tag_input_controller.js
@@ -129,7 +136,9 @@ export default class extends Controller {
 }
 ```
 
-ERB에서의 연결 패턴:
+The `_escapeHtml` helper exists specifically to prevent XSS when injecting user input via `innerHTML`. Without it, a user could type `<img src=x onerror=alert(1)>` as a tag value and have it execute as HTML.
+
+The ERB connection pattern:
 
 ```erb
 <div data-controller="tag-input" class="tag-input-wrapper">
@@ -142,11 +151,13 @@ ERB에서의 연결 패턴:
 </div>
 ```
 
-### CategoryTab — underline indicator 애니메이션
+Multiple actions for the same event can be listed space-separated in `data-action`. This wires two action methods to the same `keydown` event on the input.
 
-기존 구현은 배경색만 바꾸는 방식이었다. 하단 인디케이터가 슬라이딩하는 방식으로 교체했다.
+### CategoryTab — Sliding Underline Indicator Animation
 
-핵심은 선택된 탭의 `offsetLeft`와 `offsetWidth`를 읽어서 인디케이터 `<span>`에 적용하는 것이다:
+The original implementation simply toggled a background color on the active tab. I replaced it with a sliding underline indicator. A background color toggle is simple to implement but visually stiff; an indicator that smoothly travels between tabs produces a much more polished UX.
+
+The core of the implementation is reading the selected tab's `offsetLeft` and `offsetWidth` and applying those values to an indicator `<span>`:
 
 ```javascript
 _moveIndicator(index) {
@@ -157,13 +168,49 @@ _moveIndicator(index) {
 }
 ```
 
-인디케이터에 `transition: width 0.3s ease, left 0.3s ease`를 주면 탭 이동 시 자연스럽게 슬라이딩된다.
+Adding `transition: width 0.3s ease, left 0.3s ease` to the indicator element makes it glide smoothly when switching tabs. Since `offsetLeft` is relative to the parent element, the indicator's container needs `position: relative` for the positioning to be accurate.
+
+On initial render, `connect()` should find the currently active tab and call `_moveIndicator` with its index. Without this, the indicator will be in the wrong position on page load and snap into place only after the first tab click.
+
+### FileDropzone
+
+A file drag-and-drop controller must handle all four events: `dragenter`, `dragover`, `dragleave`, and `drop`. The most common mistake is forgetting to call `event.preventDefault()` inside `dragover` — without it, the browser will not fire the `drop` event.
+
+A subtler issue is that `dragleave` fires when the cursor moves over a child element, which triggers unexpected "drag exited" state changes. The counter technique solves this cleanly:
+
+```javascript
+connect() {
+  this._dragCounter = 0
+}
+
+onDragEnter() {
+  this._dragCounter++
+  this.element.classList.add("drag-over")
+}
+
+onDragLeave() {
+  this._dragCounter--
+  if (this._dragCounter === 0) {
+    this.element.classList.remove("drag-over")
+  }
+}
+
+onDrop(event) {
+  event.preventDefault()
+  this._dragCounter = 0
+  this.element.classList.remove("drag-over")
+  const files = Array.from(event.dataTransfer.files)
+  // handle files
+}
+```
 
 ---
 
-## Wave 2: 스크롤 기반 컨트롤러
+## Wave 2: Scroll-Based Controllers
 
-스크롤 이벤트는 무조건 RAF(requestAnimationFrame) 쓰로틀을 걸어야 한다. 매 스크롤 이벤트마다 DOM을 건드리면 렉이 생긴다.
+Scroll events must be throttled with RAF (requestAnimationFrame) without exception. Touching the DOM on every scroll event causes jank. Scroll events fire dozens of times per second, and calling `getBoundingClientRect()` in each handler triggers continuous forced reflows.
+
+The RAF throttle pattern works like this: when a scroll event fires, schedule a RAF callback and set a flag to indicate a frame is already pending. The actual DOM update happens once in that next animation frame. If a frame is already scheduled, subsequent scroll events during that frame are no-ops.
 
 ```javascript
 connect() {
@@ -185,9 +232,13 @@ disconnect() {
 }
 ```
 
-### ScrollReveal — 글자별 순차 등장
+The `{ passive: true }` option tells the browser that this handler will never call `preventDefault()`, allowing the browser to optimize scroll performance. Without it, the browser must wait for each handler to finish before deciding whether to proceed with the scroll.
 
-텍스트를 한 글자씩 `<span>`으로 쪼개고, 스크롤 진행도에 따라 `settledCount`개만큼 색상을 바꾼다.
+Failing to call `removeEventListener` in `disconnect()` leaves a dangling scroll listener after the controller is removed from the DOM. In a Turbo Drive app, controllers are disconnected on navigation, so cleanup is essential.
+
+### ScrollReveal — Character-by-Character Color Reveal
+
+This controller splits text into individual `<span>` elements, one per character, and changes their color progressively as the user scrolls. Characters start in a muted inactive color and transition to the active color as scroll progress advances.
 
 ```javascript
 connect() {
@@ -199,7 +250,7 @@ connect() {
       : `<span style="color:${this.inactiveColorValue}">${c}</span>`)
     .join("")
   this.spans = this.element.querySelectorAll("span")
-  // ... scroll listener
+  // ... attach scroll listener
 }
 
 _update() {
@@ -212,9 +263,13 @@ _update() {
 }
 ```
 
+`window.innerHeight * 0.8` defines the trigger point at 80% of the viewport height. When the top of the element reaches this point during scroll, the reveal begins. Adjusting this multiplier changes when the effect starts relative to the viewport.
+
+Space characters are passed through as plain HTML rather than being wrapped in `<span>`. Wrapping spaces would cause them to get colored too, but more importantly it maintains word spacing without requiring `&nbsp;` hacks.
+
 ### VideoScrubbing
 
-스크롤 위치를 `video.currentTime`에 매핑한다. IntersectionObserver로 화면에 들어왔을 때만 스크롤 리스너를 붙여서 성능을 아낀다.
+This controller maps scroll position to `video.currentTime`, letting users scrub through a video by scrolling. An IntersectionObserver is used to attach the scroll listener only when the video is in the viewport, avoiding unnecessary scroll processing when the element is off-screen.
 
 ```javascript
 _update() {
@@ -227,11 +282,15 @@ _update() {
 }
 ```
 
-비디오는 `muted playsinline preload="auto"` 속성이 필수다. `preload="auto"` 없으면 `duration`이 NaN이라 아무것도 안 된다.
+The video element requires `muted playsinline preload="auto"` attributes. Without `preload="auto"`, the browser does not load video metadata before the user interacts with it, meaning `duration` is `NaN` and nothing works. The browser needs to know the total duration to compute `currentTime` from a progress value.
 
-### HorizontalScroll — 수직 스크롤 → 수평 이동
+The video file must also be in a format that supports frame-accurate seeking — typically MP4/H.264. Setting `currentTime` on a video triggers a decode operation in the browser, so performance depends on file format and encoding.
 
-sticky container 안에서 수직 스크롤을 수평 translateX로 변환한다. 컨테이너 높이를 `100vh + scrollDistance`로 설정해서 스크롤 여유 공간을 확보하는 게 핵심이다.
+### HorizontalScroll — Vertical Scroll Mapped to Horizontal Translation
+
+This controller converts vertical scroll progress into a horizontal `translateX` transform inside a sticky container. The outer container is given a height of `100vh + scrollDistance` to create the scroll room, while the inner track stays fixed on screen via `position: sticky`.
+
+This is the same technique used on many Apple product pages: content appears fixed while the user scrolls, and the progression of scrolling drives a horizontal pan.
 
 ```javascript
 _setup() {
@@ -248,13 +307,17 @@ _update() {
 }
 ```
 
+`scrollWidth` is the total scrollable width of the track element. Subtracting the viewport width gives the actual distance the track needs to travel. This distance also becomes the extra height added to the container to provide enough scroll room.
+
+A ResizeObserver should call `_setup()` again whenever the viewport size changes, since `scrollDistance` depends on both the track content width and the viewport width.
+
 ---
 
-## Wave 3: 텍스트 애니메이션
+## Wave 3: Text Animation Controllers
 
 ### ScrambleText
 
-텍스트가 랜덤 문자로 뒤섞인 후 좌→우 순서로 정착되는 효과. RAF 루프로 구현한다.
+Text starts as a jumble of random characters and resolves left-to-right into the actual content. This is the effect commonly seen in hacker films and cyberpunk UIs. The implementation is a RAF loop that calculates which characters have "settled" based on elapsed time.
 
 ```javascript
 _animate(timestamp) {
@@ -277,30 +340,55 @@ _animate(timestamp) {
 }
 ```
 
-IntersectionObserver로 화면에 들어올 때 애니메이션을 트리거한다. `threshold: 0.3`으로 설정하면 30% 보일 때 시작된다.
+If `cancelAnimationFrame(this._rafId)` is not called in `disconnect()`, the RAF loop continues running after the controller is removed from the DOM. An orphaned RAF loop has no visible effect but still executes on every frame, wasting CPU cycles and holding a reference to the element in memory.
+
+An IntersectionObserver triggers the animation when the element enters the viewport. Using `threshold: 0.3` starts the animation when 30% of the element is visible:
+
+```javascript
+connect() {
+  this._observer = new IntersectionObserver(
+    ([entry]) => {
+      if (entry.isIntersecting) {
+        this._startTime = null
+        this._rafId = requestAnimationFrame(this._animate.bind(this))
+        this._observer.unobserve(this.element)
+      }
+    },
+    { threshold: 0.3 }
+  )
+  this._observer.observe(this.element)
+}
+
+disconnect() {
+  if (this._rafId) cancelAnimationFrame(this._rafId)
+  if (this._observer) this._observer.disconnect()
+}
+```
+
+`unobserve` stops monitoring after the first trigger, preventing the animation from restarting every time the user scrolls past the element. If repeating the animation is desired, omit `unobserve` and reset `_startTime` to `null` instead.
 
 ### RandomReveal
 
-Fisher-Yates 셔플로 글자 등장 순서를 랜덤하게 만들고, `delay + index * stagger` ms 간격으로 staggered setTimeout을 건다.
+Characters appear one by one in a random order, each transitioning from `opacity: 0; filter: blur(8px)` to fully visible. Where ScrambleText settles characters left-to-right, RandomReveal reveals them in a shuffled sequence using staggered `setTimeout` calls.
 
 ```javascript
 connect() {
   const text = this.element.textContent.trim()
   const chars = text.split("")
 
-  // 글자별 span 생성, 초기엔 blur + opacity 0
+  // Wrap each character in a span, initially hidden with blur
   this.element.innerHTML = chars.map((c, i) =>
     `<span data-index="${i}" style="opacity:0;filter:blur(8px);transition:opacity 0.4s,filter 0.4s">${c}</span>`
   ).join("")
 
-  // Fisher-Yates 셔플
+  // Fisher-Yates shuffle
   const indices = chars.map((_, i) => i)
   for (let i = indices.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [indices[i], indices[j]] = [indices[j], indices[i]]
   }
 
-  // 랜덤 순서로 순차 등장
+  // Reveal characters in shuffled order with stagger
   const spans = this.element.querySelectorAll("span")
   indices.forEach((charIndex, order) => {
     setTimeout(() => {
@@ -311,13 +399,29 @@ connect() {
 }
 ```
 
+Fisher-Yates guarantees a truly uniform random distribution of permutations. The commonly seen `arr.sort(() => Math.random() - 0.5)` approach has a statistical bias toward certain orderings and should be avoided.
+
+Since many `setTimeout` calls are queued, all of them must be cancelled in `disconnect()`. Store the IDs in an array:
+
+```javascript
+this._timers = []
+indices.forEach((charIndex, order) => {
+  const id = setTimeout(() => { ... }, delay)
+  this._timers.push(id)
+})
+
+disconnect() {
+  this._timers?.forEach(clearTimeout)
+}
+```
+
 ---
 
-## Wave 4: 캐러셀
+## Wave 4: Carousel Controllers
 
-### ImageCarousel — 드래그/터치/키보드/버튼
+### ImageCarousel — Drag, Touch, Keyboard, and Button Navigation
 
-캐러셀에서 가장 신경 써야 할 건 드래그 판정 임계값이다. 50px 미만으로 드래그하면 클릭으로 처리하고, 50px 이상이면 슬라이드를 넘긴다.
+The most important detail in a carousel is the drag threshold. Without a minimum drag distance, clicking on a slide image will accidentally trigger a slide change. A 50px threshold means: drag less than 50px and treat it as a click; drag 50px or more and advance the slide.
 
 ```javascript
 onDragStart(event) {
@@ -337,7 +441,11 @@ onDragEnd(event) {
 }
 ```
 
-오토플레이는 `setInterval`로 구현하되, 사용자가 수동으로 조작하면 인터벌을 초기화해야 자연스럽다:
+The `event.clientX ?? event.touches?.[0].clientX` pattern handles both mouse and touch events in a single method. Mouse events expose `clientX` directly; touch events store the contact point in the `touches` array.
+
+One important detail: in `touchend` events, the `touches` array is empty because the touch has ended. The coordinates of the completed touch are in `event.changedTouches`, not `event.touches`.
+
+Autoplay is implemented with `setInterval`, but the interval should be reset whenever the user interacts manually. This prevents the awkward situation where the carousel auto-advances immediately after the user has just changed the slide:
 
 ```javascript
 _resetAutoPlay() {
@@ -348,9 +456,13 @@ _resetAutoPlay() {
 }
 ```
 
-### CarouselContainer — 반응형 visible count
+Calling `_resetAutoPlay()` at the end of every `next()` and `prev()` call restarts the autoplay countdown from zero after each manual interaction.
 
-ResizeObserver로 컨테이너 너비가 바뀔 때마다 아이템 너비를 재계산한다.
+Keyboard accessibility is also worth including. Add `keydown->image-carousel#onKeydown` to `data-action` and handle `ArrowLeft` and `ArrowRight`. The carousel container needs `tabindex="0"` to be focusable.
+
+### CarouselContainer — Responsive Visible Item Count
+
+A ResizeObserver recalculates item widths whenever the container dimensions change. In a responsive layout, the number of visible items changes with viewport size. The `visible` value can be updated via media queries, and the ResizeObserver picks up the change and recalculates the layout.
 
 ```javascript
 _updateLayout() {
@@ -368,17 +480,21 @@ _updateLayout() {
 }
 ```
 
+Both `minWidth` and `maxWidth` are set because in a flex container, items can grow or shrink from their specified `width`. Setting only `width` may not override flex behavior; constraining both min and max ensures the item is exactly the calculated size.
+
+The final `_goTo(this._currentIndex)` call recalculates the `translateX` value for the current slide after the layout has changed. Without this, the active slide's position would be stale after a resize.
+
 ---
 
-## 검증: Playwright로 iframe 내부 확인
+## Verification: Accessing the Iframe with Playwright
 
-Lookbook 프리뷰가 iframe이라 일반적인 Playwright locator로는 접근이 안 된다. `frameLocator`를 써야 한다.
+Because Lookbook previews are rendered inside an iframe, standard Playwright locators cannot reach the preview DOM. The `frameLocator` API is required. An iframe's DOM is entirely separate from the parent page's DOM.
 
 ```javascript
-// iframe 내부 접근
+// Access the iframe's document
 const iframe = page.frameLocator('iframe[title="viewport"]')
 
-// Stimulus 연결 확인 + 값 읽기
+// Verify Stimulus connection and read computed values
 const result = await iframe.locator('body').evaluate((el) => {
   const ctrl = el.querySelector('[data-controller="category-tab"]')
   return {
@@ -388,22 +504,35 @@ const result = await iframe.locator('body').evaluate((el) => {
 })
 ```
 
-각 컨트롤러별 검증 포인트:
+The `evaluate()` callback runs inside the browser context. To verify that a Stimulus controller is working, check DOM attributes and computed styles rather than trying to access the controller instance directly — Stimulus does not expose instances in a standard way on DOM elements.
 
-- **CategoryTab**: 탭 클릭 후 indicator의 `left` 값 변경 여부
-- **TagInput**: Enter 입력 후 `data-tag` 속성 chip 생성 여부
-- **ScrambleText**: 애니메이션 완료 후 원본 텍스트와 일치 여부
-- **ImageCarousel**: next 클릭 후 track의 `translateX` 값 변경 여부
-- **CarouselContainer**: next 클릭 후 `translate3d` 값 변경 여부
+Verification points for each controller:
+
+- **CategoryTab**: Confirm the indicator's `left` value changes after clicking a tab
+- **TagInput**: Confirm a `data-tag` chip appears after pressing Enter
+- **ScrambleText**: Confirm the element's text matches the original after the animation completes
+- **ImageCarousel**: Confirm the track's `translateX` value changes after clicking next
+- **CarouselContainer**: Confirm `translate3d` updates after clicking next
 
 ---
 
 ## Summary
 
-Rails + Lookbook 환경에서 Stimulus를 쓸 때 놓치기 쉬운 포인트:
+Key things to watch for when using Stimulus with Rails and Lookbook:
 
-1. **프리뷰 레이아웃에 `javascript_importmap_tags` 추가** — 이게 없으면 Stimulus 자체가 로드 안 됨
-2. **스크롤 이벤트는 RAF 쓰로틀** — `passive: true`도 함께 설정
-3. **disconnect()에서 리스너 정리** — 메모리 누수 방지
-4. **video scrubbing은 `preload="auto"`** — 없으면 `duration`이 NaN
-5. **Lookbook iframe 내부는 `frameLocator`** — 일반 locator로 접근 불가
+1. **Add `javascript_importmap_tags` to the preview layout** — without it, Stimulus does not load inside the iframe at all
+2. **Always RAF-throttle scroll event handlers** — also set `{ passive: true }` on the listener
+3. **Clean up everything in `disconnect()`** — scroll listeners, RAF callbacks, `setTimeout` timers, IntersectionObservers, and ResizeObservers all need explicit cleanup
+4. **Use `preload="auto"` on scrubbing videos** — without it, `duration` is `NaN` and scrubbing does nothing
+5. **Use `frameLocator` to reach Lookbook previews in Playwright** — standard locators cannot access iframe content
+
+---
+
+## Key Takeaways
+
+- **The Lookbook iframe bug** is the first thing to check when setting up a Rails 8 Importmap project with Lookbook. Adding `javascript_importmap_tags` to the preview layout file is a one-line fix, but without it nothing in Stimulus will work inside any preview.
+- **RAF throttling is not optional** for scroll handlers that touch the DOM. The pattern is always the same — copy it once and reuse it across every scroll-based controller.
+- **Thorough `disconnect()` cleanup** is critical in Turbo Drive applications. Scroll listeners, RAF loops, setTimeout callbacks, IntersectionObservers, and ResizeObservers all outlive the controller if not explicitly torn down, causing memory leaks and subtle bugs on subsequent navigations.
+- **The drag threshold** in carousel controllers is a UX detail that users will notice even if they cannot articulate what is wrong. A 50px minimum drag distance cleanly separates intent-to-click from intent-to-swipe.
+- **Fisher-Yates shuffle** produces a statistically uniform distribution. The `array.sort(() => Math.random() - 0.5)` shortcut is tempting but introduces bias — use Fisher-Yates for any shuffle that needs to appear truly random.
+- **IntersectionObserver for animation triggers** is more performant than checking `getBoundingClientRect()` on every scroll event. For one-shot animations like ScrambleText, calling `unobserve` after the first trigger eliminates ongoing observation overhead.

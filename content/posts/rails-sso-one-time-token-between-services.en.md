@@ -11,39 +11,58 @@ cover:
 categories: ["Rails"]
 ---
 
+There are two Rails apps. One is an **internal staff app** — OTP login only, restricted to a specific domain. The other is a **review and management system** built on Devise + JWT. Internal employees need access to both, but creating and managing separate accounts for each was not a path worth taking.
 
-두 개의 Rails 앱이 있다. 하나는 **내부 직원용** 앱(OTP 로그인, 특정 도메인 전용), 다른 하나는 **심사/관리 시스템**으로 Devise + JWT 기반이다. 내부 직원이 심사 시스템에도 접근해야 하는데, 계정을 따로 만들어 관리하기 싫었다.
+> "If a user is already logged into the internal app, can't they just click a button and get into the review system automatically?"
 
-> "이미 내부 앱에 로그인돼 있으면, 심사 시스템에서 버튼 하나로 자동 로그인되면 안 되나?"
-
-OAuth2를 붙이면 정석이지만, Doorkeeper 설정하고 scope 관리하고... 내부 서비스 두 개 사이에 그게 과할 수 있다. 더 단순한 방법을 택했다.
-
----
-
-## Structure 선택: One-Time Token + HMAC
-
-이미 두 서비스 사이에 webhook 연동이 있었다. ITSM 이벤트를 다른 서비스에 전달할 때 HMAC-SHA256으로 서명하는 패턴이 있었고, 이걸 SSO에도 그대로 쓰기로 했다.
-
-```
-[Service A - 로그인 버튼 클릭]
-  → Service B /sso/authorize (로그인 여부 확인 + 토큰 발급)
-  → Redirect → Service A /sso/callback?token=xxx&state=yyy
-  → Service A가 Service B에 POST /sso/verify (HMAC 서명)
-  → Service B가 유저 정보 반환
-  → Service A Devise 세션 생성
-```
-
-핵심 보안 장치:
-- **Token**: 일회용, 5분 만료, DB 저장 (`used_at` 체크)
-- **HMAC-SHA256**: Verify 요청이 신뢰된 서비스에서 온 것인지 검증
-- **state**: CSRF 방지 (세션에 저장, callback에서 비교)
-- **redirect_uri 화이트리스트**: 허용된 주소로만 리다이렉트
+Wiring up OAuth2 would be the textbook solution, but setting up Doorkeeper, managing scopes, configuring clients — for just two internal services that already trust each other, that felt like significant overhead. A simpler approach made more sense here.
 
 ---
 
-## IdP 쪽 구현 (토큰 발급 서비스)
+## Why Not OAuth2?
 
-### SsoToken 모델
+OAuth2 is the right choice when you need to support third-party clients, granular permission scopes, token refresh flows, or public-facing integrations. For two internal Rails services that already share infrastructure and an operations team, OAuth2 introduces:
+
+- An authorization server that needs its own maintenance
+- A Doorkeeper setup with client registration and scope management
+- Token refresh logic on the SP side
+- More attack surface than the problem actually requires
+
+The One-Time Token + HMAC pattern solves the core need — "trust this user because Service A already authenticated them" — with no new dependencies, no new servers, and code that mirrors an existing HMAC webhook pattern already in the codebase.
+
+---
+
+## Architecture: One-Time Token + HMAC
+
+There was already a webhook integration between the two services. ITSM events were being forwarded between them using HMAC-SHA256 signatures, so the same pattern was reused for SSO.
+
+```
+[Service A - user clicks "Login with internal account"]
+  → Redirect to Service B /sso/authorize (check auth status + issue token)
+  → Redirect back → Service A /sso/callback?token=xxx&state=yyy
+  → Service A POSTs to Service B /sso/verify (with HMAC signature)
+  → Service B validates and returns user info
+  → Service A creates Devise session
+```
+
+**Core security mechanisms:**
+
+- **Token**: Single-use, 5-minute expiry, persisted in DB with `used_at` tracking
+- **HMAC-SHA256**: Proves the verify request came from the trusted SP, not an attacker
+- **state parameter**: CSRF protection — stored in session, compared on callback
+- **redirect_uri allowlist**: Prevents open redirect attacks by whitelisting valid destinations
+
+The flow is deliberately short. The token lives for at most 5 minutes and can only be used once. Even if an attacker intercepted the callback URL, they would need the shared HMAC secret to get the verify endpoint to return anything.
+
+---
+
+## IdP Side (Token-Issuing Service)
+
+The Identity Provider (IdP) is the internal staff app. It owns the authoritative user records and is responsible for issuing and validating tokens.
+
+### SsoToken Model
+
+The model is intentionally minimal. The `valid` scope combines two conditions: the token must not have been consumed yet (`used_at` is nil), and it must not have expired.
 
 ```ruby
 class SsoToken < ApplicationRecord
@@ -57,7 +76,7 @@ class SsoToken < ApplicationRecord
 end
 ```
 
-마이그레이션:
+Migration:
 
 ```ruby
 create_table :sso_tokens do |t|
@@ -72,7 +91,9 @@ create_table :sso_tokens do |t|
 end
 ```
 
-### SSO 컨트롤러
+The `client_id` column records which SP requested the token. If you later need to support multiple SPs, this is the field you filter or audit on. The `state` column stores the value passed in by the SP for round-trip CSRF validation.
+
+### SSO Controller
 
 ```ruby
 class Auth::SsoController < ApplicationController
@@ -88,7 +109,6 @@ class Auth::SsoController < ApplicationController
   def authorize
     redirect_uri = params[:redirect_uri]
 
-    # redirect_uri 화이트리스트 검증
     unless ALLOWED_REDIRECT_URIS.call.any? { |uri| redirect_uri.start_with?(uri) }
       return render plain: "Invalid redirect_uri", status: :bad_request
     end
@@ -134,11 +154,15 @@ class Auth::SsoController < ApplicationController
 end
 ```
 
-**포인트**: `require_authentication`이 미로그인 유저를 로그인 페이지로 보낼 때, SSO authorize URL 전체(쿼리 파라미터 포함)를 `session[:return_to]`에 저장해야 한다. OTP 인증 후 `redirect_back_or(dashboard_path)`로 돌아오면 SSO 흐름이 이어진다.
+**Important detail about `require_authentication`:** When an unauthenticated user hits `/auth/sso/authorize`, the `before_action` will redirect them to the login page. The entire SSO authorize URL — including all query parameters — must be saved to `session[:return_to]` at that point. After OTP authentication, `redirect_back_or(dashboard_path)` should restore this saved URL, and the SSO flow will resume from where it left off. Without this, the user completes login but loses the SSO context and has to start over.
+
+**Why `skip_before_action :verify_authenticity_token` on `/verify`?** The verify endpoint is called server-to-server by the SP's Rails backend, not by a browser form. Rails CSRF protection is browser-session-based and not applicable here. The HMAC signature in `X-Signature-SHA256` is the equivalent protection mechanism for this server-to-server call.
 
 ---
 
-## SP 쪽 구현 (로그인 위임 서비스)
+## SP Side (Delegating Service)
+
+The Service Provider (SP) is the review/management system. It delegates authentication to the IdP and receives a verified user identity back.
 
 ### SSO Service
 
@@ -172,7 +196,9 @@ class SsoService
 end
 ```
 
-### 콜백 컨트롤러
+The `verify_token` method returns `nil` on any error — network failure, non-2xx response, or JSON parse error — rather than raising. The calling code treats `nil` as an authentication failure and redirects to the login page. This keeps the error surface simple and predictable.
+
+### Callback Controller
 
 ```ruby
 class SsoController < ApplicationController
@@ -187,23 +213,23 @@ class SsoController < ApplicationController
   end
 
   def callback
-    # CSRF 방지: state 검증
+    # CSRF protection: validate state parameter
     unless ActiveSupport::SecurityUtils.secure_compare(
       params[:state], session.delete(:sso_state).to_s
     )
-      redirect_to login_path, alert: "인증 실패 (state mismatch)"
+      redirect_to login_path, alert: "Authentication failed (state mismatch)"
       return
     end
 
     user_data = SsoService.verify_token(params[:token])
-    return redirect_to login_path, alert: "인증 실패" unless user_data
+    return redirect_to login_path, alert: "Authentication failed" unless user_data
 
-    # 유저 생성 또는 조회
+    # Find or provision the user
     user = User.find_or_initialize_by(email: user_data["email"])
     if user.new_record?
       user.assign_attributes(
         name: user_data["name"],
-        role: :reviewer,         # SSO 유저 기본 역할
+        role: :reviewer,         # Default role for SSO users
         password: SecureRandom.hex(16),
         sso_provider: "internal"
       )
@@ -211,22 +237,31 @@ class SsoController < ApplicationController
     end
 
     sign_in(user)
-    redirect_to root_path, notice: "로그인되었습니다."
+    redirect_to root_path, notice: "Logged in successfully."
   end
 end
 ```
 
+**User provisioning on first login:** New SSO users are created automatically with a random password (since they will never use it — they always authenticate via SSO) and a default `reviewer` role. The `sso_provider: "internal"` attribute lets you distinguish SSO accounts from regular Devise accounts in queries and admin views.
+
+**`session.delete(:sso_state)` vs `session[:sso_state]`:** Using `delete` rather than just reading the value is deliberate. It clears the state from the session in a single atomic operation, so a replayed callback URL cannot reuse an old state value.
+
 ---
 
-## Render 배포 시 삽질한 부분
+## Render Deployment Pitfall
 
-### autoDeploy: no 서비스에서 env var 업데이트가 구 커밋으로 배포됨
+### env var updates on `autoDeploy: no` services deploy from old commits
 
-환경변수를 Render API/MCP로 업데이트하면 자동으로 재배포가 트리거된다. 그런데 `autoDeploy: no`인 서비스는 **env var 업데이트 시점의 최신 커밋이 아니라 마지막으로 배포됐던 커밋**으로 빌드한다.
+When you update environment variables via the Render API or Render MCP, Render automatically triggers a redeploy. However, for services configured with `autoDeploy: no`, this redeployment does **not** use the latest commit in your repository — it rebuilds from the **last manually deployed commit**.
 
-새 코드를 push한 뒤 env var을 업데이트했는데, 막상 배포된 건 push 전 코드였다. 버튼이 안 보이는 이유가 여기 있었다.
+The sequence that caused the problem:
 
-**해결**: Render REST API로 수동 배포 트리거.
+1. Added new SSO code and pushed to the repository
+2. Updated `SSO_SHARED_SECRET` and `IDP_URL` via Render API
+3. Render triggered a redeploy — but from the old commit, before the SSO code existed
+4. The SSO login button was missing because the view code had not been deployed yet
+
+The fix is to trigger a manual deploy via the Render REST API after updating environment variables, pointing explicitly at the latest commit:
 
 ```bash
 curl -X POST "https://api.render.com/v1/services/{SERVICE_ID}/deploys" \
@@ -235,13 +270,13 @@ curl -X POST "https://api.render.com/v1/services/{SERVICE_ID}/deploys" \
   -d '{"clearCache": "do_not_clear"}'
 ```
 
-응답에서 최신 커밋 메시지를 확인해 제대로 된 버전이 배포됐는지 검증할 수 있다.
+The deploy response includes the commit message and SHA. Verify these match your latest push before assuming the deployment succeeded.
 
 ---
 
-## 프론트엔드: 로그인 버튼
+## Frontend: The Login Button
 
-Svelte + Inertia.js 환경에서 SSO 버튼은 **Inertia router가 아닌 일반 `<a>` 태그**를 써야 한다. Inertia는 내부 XHR 요청을 보내는데, SSO 흐름은 외부 서비스로 실제 페이지 이동(redirect)이 필요하기 때문이다.
+In a Svelte + Inertia.js application, the SSO button must use a plain `<a>` tag rather than Inertia's `<Link>` component or `router.visit()`. Inertia intercepts navigation and sends XHR requests, which prevents the full-page redirect that SSO requires. The browser needs to actually navigate to the IdP's `/sso/authorize` endpoint, which then redirects back to the SP's callback URL. XHR cannot participate in this redirect chain.
 
 ```svelte
 <a
@@ -250,23 +285,62 @@ Svelte + Inertia.js 환경에서 SSO 버튼은 **Inertia router가 아닌 일반
          bg-[#1e3a5f] hover:bg-[#162d4a] text-white rounded-xl transition-all"
 >
   <svg><!-- shield icon --></svg>
-  내부 계정으로 로그인
-  <span class="text-xs text-white/70">직원 전용</span>
+  Login with internal account
+  <span class="text-xs text-white/70">Staff only</span>
 </a>
 ```
 
-기존 이메일/비밀번호 폼 위에 `또는` 구분선과 함께 배치했다.
+This button was placed above the existing email/password form with an "or" divider between them.
 
 ---
 
-## 마무리
+## Routes
 
-OAuth2가 표준이지만, 내부 서비스 두 개 사이라면 One-Time Token + HMAC 조합이 훨씬 가볍고 직관적이다. 이미 서비스 간 HMAC webhook이 있다면 동일 패턴을 SSO에 재사용할 수 있어서 코드 일관성도 좋다.
+Add these routes to both applications.
 
-핵심 체크리스트:
-- [ ] Token은 반드시 일회용 (`used_at`)
-- [ ] 만료 시간 짧게 (5분 이하)
-- [ ] HMAC 검증에 `ActiveSupport::SecurityUtils.secure_compare` 사용 (타이밍 공격 방지)
-- [ ] `state` 파라미터로 CSRF 방지
-- [ ] redirect_uri 화이트리스트 필수
-- [ ] Render `autoDeploy: no` 서비스는 env var 업데이트 후 수동 배포 확인
+**IdP (`config/routes.rb`):**
+
+```ruby
+namespace :auth do
+  get  "sso/authorize", to: "sso#authorize"
+  post "sso/verify",    to: "sso#verify"
+end
+```
+
+**SP (`config/routes.rb`):**
+
+```ruby
+get  "sso/initiate",  to: "sso#initiate",  as: :sso_initiate
+get  "sso/callback",  to: "sso#callback",  as: :sso_callback
+```
+
+---
+
+## Environment Variables
+
+Both services share the same `SSO_SHARED_SECRET` value. Treat it as a high-value secret: rotate it the same way you would rotate a database password.
+
+**IdP:**
+```
+SSO_SHARED_SECRET=<long-random-value>
+SSO_ALLOWED_REDIRECT_URIS=https://review-system.example.com/sso/callback
+```
+
+**SP:**
+```
+SSO_SHARED_SECRET=<same-long-random-value>
+IDP_URL=https://internal-app.example.com
+```
+
+---
+
+## Key Takeaways
+
+- **OAuth2 is not always the right tool.** For two trusted internal services, One-Time Token + HMAC achieves the same security goals with far less infrastructure.
+- **Reuse existing patterns.** If HMAC webhook signing already exists between your services, extending it to SSO means developers already understand the security model.
+- **One-time tokens are non-negotiable.** The `used_at` column and the `valid` scope together ensure each token can only be exchanged once, eliminating replay attacks.
+- **`ActiveSupport::SecurityUtils.secure_compare` is not optional.** Regular string comparison is vulnerable to timing attacks. Always use constant-time comparison for HMAC validation.
+- **The `state` parameter prevents CSRF.** Generate it fresh on each SSO initiation, store it in the session, and delete it (not just read it) when validating the callback.
+- **Whitelist `redirect_uri`.** An open redirect combined with a valid token is a credential-theft vulnerability. Validate against an explicit allowlist, not a prefix guess.
+- **Render `autoDeploy: no` + env var update = old-code deploy.** Always trigger a manual deploy after updating env vars, and verify the commit SHA in the deploy response.
+- **Use a plain `<a>` tag for SSO in Inertia.js apps.** Inertia's XHR-based navigation breaks redirect-dependent auth flows.

@@ -11,38 +11,39 @@ cover:
 categories: ["Rails"]
 ---
 
+To give an electronic contract storage system **legal evidentiary weight**, I needed to implement two things simultaneously:
 
-전자계약 보관 시스템에 **법적 증거력**을 부여하기 위해 두 가지를 동시에 구현해야 했다:
+1. **Blockchain Merkle Tree anchoring** — collect contract hashes, compute a Merkle Root, and record it on an L2 chain
+2. **RFC 3161 TSA timestamps** — cryptographic proof of existence at a specific point in time, certified by a trusted third party
 
-1. **블록체인 Merkle Tree 앵커링** — 계약 해시들을 모아 Merkle Root를 L2 체인에 기록
-2. **RFC 3161 TSA 타임스탬프** — 신뢰할 수 있는 제3자 시간 증명
-
-간단해 보였는데, 삽질의 연속이었다.
-
----
-
-## 1. RFC 3161 TSA란?
-
-RFC 3161은 **Time-Stamp Authority(TSA)** 프로토콜로, 특정 데이터가 특정 시점에 존재했음을 제3자가 증명해주는 표준이다.
-
-흐름은 간단하다:
-
-```
-클라이언트 → SHA-256 해시 생성 → TSA 서버에 요청 → 서명된 타임스탬프 토큰 수신
-```
-
-무료 TSA 서버들:
-- **DigiCert**: `http://timestamp.digicert.com` (가장 안정적)
-- **Sectigo**: `http://timestamp.sectigo.com` (15초 rate limit)
-- **Entrust**: `http://timestamp.entrust.net/TSS/RFC3161sha2TS`
-
-Ruby에는 `OpenSSL::Timestamp` 모듈이 내장되어 있어서, 외부 gem 없이 구현 가능하다.
+It looked straightforward. It was not. Each problem took far longer than expected to resolve, and the issues compounded in unexpected ways — especially where Ruby 4.0 API changes intersected with Rails 8's multi-database behavior.
 
 ---
 
-## 2. 구현 구조
+## 1. What is RFC 3161 TSA?
 
-### TSA 서비스
+RFC 3161 is the **Time-Stamp Authority (TSA)** protocol, an international standard (updated by RFC 5816) for having a trusted third party certify that a specific piece of data existed at a specific point in time. In a legal context, this means a recognized authority signs off on "this document existed on this date."
+
+The flow is straightforward:
+
+```
+Client → generate SHA-256 hash → send request to TSA server → receive signed timestamp token
+```
+
+The TSA server takes the request, signs it with its private key, and returns a **TimeStampToken (TST)** in DER encoding. The token contains the hash value, the timestamp, and the TSA's certificate chain, so anyone can independently verify it.
+
+Free TSA servers:
+- **DigiCert**: `http://timestamp.digicert.com` (most reliable, recommended)
+- **Sectigo**: `http://timestamp.sectigo.com` (has a 15-second rate limit)
+- **Entrust**: `http://timestamp.entrust.net/TSS/RFC3161sha2TS` (occasionally slow)
+
+Ruby includes the `OpenSSL::Timestamp` module in its standard library, so no external gem is required. However, the API differs across Ruby versions, and this turned out to be the first major source of pain.
+
+---
+
+## 2. Implementation Structure
+
+### TSA Service
 
 ```ruby
 class TsaTimestampService
@@ -58,29 +59,100 @@ class TsaTimestampService
     response_der = send_tsa_request(req.to_der)
     parse_tsa_response(response_der, digest)
   end
+
+  private
+
+  def build_timestamp_request(digest)
+    req = OpenSSL::Timestamp::Request.new
+    req.algorithm = "SHA256"
+    req.message_imprint = digest
+    req.cert_requested = true
+    req.nonce = OpenSSL::BN.rand(64)
+    req
+  end
+
+  def send_tsa_request(request_der)
+    TSA_SERVERS.each do |provider, url|
+      response = try_tsa_server(url, request_der)
+      return response if response
+    rescue => e
+      Rails.logger.warn "TSA #{provider} failed: #{e.message}"
+    end
+    nil
+  end
+
+  def try_tsa_server(url, request_der)
+    uri = URI.parse(url)
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.open_timeout = 10
+    http.read_timeout = 30
+    req = Net::HTTP::Post.new(uri.path.presence || "/")
+    req["Content-Type"] = "application/timestamp-query"
+    req.body = request_der
+    response = http.request(req)
+    response.body if response.is_a?(Net::HTTPSuccess)
+  end
 end
 ```
 
-### Merkle + TSA 앵커링 흐름
+### Merkle Tree Implementation
+
+A Merkle Tree pairs up leaf node hashes and combines them upward until a single Root hash remains. This is the same structure used in Bitcoin to verify transactions in a block:
+
+```ruby
+class MerkleTree
+  def self.build(leaves)
+    return nil if leaves.empty?
+    return leaves.first if leaves.size == 1
+
+    # Duplicate the last node if the count is odd
+    leaves = leaves + [leaves.last] if leaves.size.odd?
+
+    parent_layer = leaves.each_slice(2).map do |left, right|
+      Digest::SHA256.hexdigest(left + right)
+    end
+
+    build(parent_layer)
+  end
+
+  def self.proof(leaves, target_index)
+    proof_nodes = []
+    layer = leaves.dup
+    idx = target_index
+
+    while layer.size > 1
+      layer = layer + [layer.last] if layer.size.odd?
+      sibling_idx = idx.even? ? idx + 1 : idx - 1
+      proof_nodes << { hash: layer[sibling_idx], position: idx.even? ? :right : :left }
+      layer = layer.each_slice(2).map { |l, r| Digest::SHA256.hexdigest(l + r) }
+      idx /= 2
+    end
+
+    proof_nodes
+  end
+end
+```
+
+### Merkle + TSA Anchoring Flow
 
 ```
-1. 미앵커링 Merkle leaf들 수집
-2. Merkle Tree 구성 → root 해시 계산
-3. 블록체인에 root 해시 기록 (tx_hash 수신)
-4. TSA 서버에 root 해시로 타임스탬프 요청
-5. batch에 tx_hash + TSA 토큰 모두 저장
+1. Collect unanchored Merkle leaves
+2. Build Merkle Tree → compute root hash
+3. Record root hash on blockchain (receive tx_hash)
+4. Send root hash to TSA server for timestamp
+5. Save tx_hash + TSA token together in the batch record
 ```
 
-TSA 실패는 **non-fatal** — 블록체인 기록이 주 증거이고, TSA는 보조 증거다.
+TSA failure is **non-fatal** — the blockchain record is the primary evidence, and TSA is supplementary. A TSA failure must not abort the entire anchoring process.
 
 ---
 
-## 3. 삽질 1: Ruby 4.0의 OpenSSL::Timestamp API 변경
+## 3. Bug 1: Ruby 4.0 OpenSSL::Timestamp API Changes
 
 ### Problem
 
 ```ruby
-# 이렇게 작성했다
+# Written based on older examples
 def verify(token_der, data_hash)
   token = OpenSSL::Timestamp::Token.new(token_der)
   token.message_imprint == digest
@@ -93,15 +165,15 @@ NameError: uninitialized constant OpenSSL::Timestamp::Token
 
 ### Cause
 
-Ruby 4.0 (OpenSSL 3.x 기반)에서는 `OpenSSL::Timestamp::Token` 클래스가 **존재하지 않는다**.
+In Ruby 4.0 (based on OpenSSL 3.x), the `OpenSSL::Timestamp::Token` class **does not exist**. A large number of older blog posts and Stack Overflow answers demonstrate examples using this class — those were written against older Ruby versions.
 
-사용 가능한 클래스:
-- `OpenSSL::Timestamp::Request` — 요청 생성
-- `OpenSSL::Timestamp::Response` — 응답 파싱
-- `OpenSSL::Timestamp::TokenInfo` — 토큰 정보 (Response에서 추출)
-- `OpenSSL::Timestamp::Factory` — 테스트용 자체 서명 응답 생성
+The classes actually available in the current API:
+- `OpenSSL::Timestamp::Request` — build a timestamp request
+- `OpenSSL::Timestamp::Response` — parse the server's response
+- `OpenSSL::Timestamp::TokenInfo` — access token metadata (extracted from Response)
+- `OpenSSL::Timestamp::Factory` — generate self-signed responses for testing
 
-`Token`은 없다. `Response`에서 `token_info`를 꺼내야 한다.
+`Token` is gone. You must extract `token_info` from the `Response` object. `token_info` returns a `TokenInfo` instance, which exposes `message_imprint`, `serial_number`, `gen_time`, and so on.
 
 ### Fix
 
@@ -109,21 +181,26 @@ Ruby 4.0 (OpenSSL 3.x 기반)에서는 `OpenSSL::Timestamp::Token` 클래스가 
 def verify(token_der, data_hash)
   digest = [data_hash].pack("H*")
   resp = OpenSSL::Timestamp::Response.new(token_der)
+
+  # Check response status first
+  return false unless resp.status == OpenSSL::Timestamp::Response::GRANTED
+
   token_info = resp.token_info
   token_info.message_imprint == digest
 rescue OpenSSL::Timestamp::TimestampError, StandardError => e
+  Rails.logger.error "TSA verification failed: #{e.message}"
   false
 end
 ```
 
 ---
 
-## 4. 삽질 2: `cert_requested` vs `cert_requested?`
+## 4. Bug 2: `cert_requested` vs `cert_requested?`
 
 ### Problem
 
 ```ruby
-# 테스트에서
+# In a test assertion
 assert req.cert_requested
 ```
 
@@ -133,25 +210,27 @@ NoMethodError: undefined method 'cert_requested' for OpenSSL::Timestamp::Request
 
 ### Cause
 
-Ruby 4.0의 `OpenSSL::Timestamp::Request`에서:
-- **쓰기**: `req.cert_requested = true` (setter, `=` 사용)
-- **읽기**: `req.cert_requested?` (predicate, `?` 사용)
+In Ruby 4.0's `OpenSSL::Timestamp::Request`:
+- **Write**: `req.cert_requested = true` (setter, uses `=`)
+- **Read**: `req.cert_requested?` (predicate, uses `?`)
 
-`cert_requested` (물음표 없이)는 존재하지 않는다. Ruby의 Boolean accessor 네이밍 컨벤션을 엄격하게 따른 결과.
+`cert_requested` without a question mark does not exist. This is Ruby's strict boolean accessor naming convention at work. Because this is a custom accessor rather than a standard `attr_accessor`, the getter and setter are defined with different names. In Ruby, reading a boolean value conventionally uses a `?`-suffixed predicate method, and the OpenSSL bindings enforce this convention.
 
 ### Fix
 
 ```ruby
-assert req.cert_requested?  # ? 추가
+assert req.cert_requested?  # add the ?
 ```
+
+Similar issues can arise with other boolean attributes on OpenSSL Timestamp objects. When in doubt, consult the Ruby 4.0 docs directly rather than relying on older examples.
 
 ---
 
-## 5. 삽질 3: Rails 8 Multi-Database 마이그레이션 충돌
+## 5. Bug 3: Rails 8 Multi-Database Migration Conflict
 
-### 상황
+### Situation
 
-TSA 컬럼 4개를 추가하는 마이그레이션을 만들었다:
+I created a migration to add four TSA-related columns:
 
 ```ruby
 class AddTsaToBlockchainBatches < ActiveRecord::Migration[8.0]
@@ -174,35 +253,44 @@ $ bin/rails db:migrate
 PG::DuplicateObject: ERROR: constraint "fk_rails_xxxxx" already exists
 ```
 
-마이그레이션이 엉뚱한 에러를 뱉었다. TSA 컬럼과는 무관한 foreign key 충돌.
+The migration threw an error completely unrelated to the TSA columns I was adding — a foreign key constraint conflict on a table I had never touched.
 
 ### Cause
 
-Rails 8의 **Solid Stack** (Cache, Queue, Cable) 때문이다. `db:migrate`는 4개 DB를 모두 마이그레이트하려고 시도하는데, Solid Queue/Cable/Cache의 마이그레이션이 이미 적용된 foreign key를 다시 만들려고 해서 충돌.
+This is caused by Rails 8's **Solid Stack** (Solid Cache, Solid Queue, Solid Cable). Rails 8 uses four separate databases by default:
 
 ```
-primary:  메인 데이터          ← 여기만 건드리면 됨
-cache:    Solid Cache          ← 건드리면 안 됨
-queue:    Solid Queue          ← 건드리면 안 됨
-cable:    Solid Cable          ← 건드리면 안 됨
+primary:  main application data   ← the only one I need to touch
+cache:    Solid Cache              ← leave alone
+queue:    Solid Queue              ← leave alone
+cable:    Solid Cable              ← leave alone
 ```
+
+`bin/rails db:migrate` attempts to migrate **all** databases listed in `database.yml`. The migrations for Solid Queue/Cable/Cache had already been applied, but running `db:migrate` again tried to recreate foreign keys that already existed, causing the conflict.
+
+What made this especially confusing is that the error message pointed at tables from the Solid Stack schemas — tables I had never written a migration for. My first instinct was that something was wrong with my migration file, leading to a long debugging session before I realized the real cause.
 
 ### Fix
 
 ```bash
-# primary DB만 특정 마이그레이션 적용
+# Apply migration only to the primary database
 bin/rails db:migrate:up:primary VERSION=20260306100000
 ```
 
-핵심: Multi-database 앱에서는 `db:migrate` 대신 **`db:migrate:up:primary`**로 특정 DB를 지정해야 한다.
+The key insight: in a Rails 8 multi-database application, use `db:migrate:up:primary` instead of `db:migrate` to target a specific database. The generic `db:migrate` command looks convenient but carries unexpected side effects in multi-database environments.
+
+Rollback works the same way:
+```bash
+bin/rails db:migrate:down:primary VERSION=20260306100000
+```
 
 ---
 
-## 6. 삽질 4: 테스트 DB 환경 꼬임
+## 6. Bug 4: Test Database Environment Mismatch
 
 ### Problem
 
-마이그레이션 후 테스트를 돌렸더니:
+After applying the migration, running the test suite produced:
 
 ```
 ActiveRecord::EnvironmentMismatchError:
@@ -212,37 +300,39 @@ environment. You are running in `test` environment.
 
 ### Cause
 
-테스트 DB의 environment 태그가 `development`로 되어 있었다. 개발 환경에서 마이그레이션을 돌리다가 테스트 DB까지 건드린 결과.
+The test database's environment tag was set to `development`. Rails stores environment information in an `ar_internal_metadata` table in each database. During the migration process, running commands in the development environment had accidentally overwritten the test database's environment tag.
 
-### Fix 과정
+This error is a Rails safety mechanism to prevent accidental modifications to the wrong environment's database. However, in a multi-database setup, misusing `db:migrate` can silently overwrite environment tags across multiple databases at once.
+
+### Resolution Steps
 
 ```bash
-# 1. 테스트 환경 설정
+# 1. Reset the environment tag for the test environment
 RAILS_ENV=test bin/rails db:environment:set
 
-# 2. primary 스키마 로드
+# 2. Reload the primary schema
 RAILS_ENV=test bin/rails db:schema:load:primary
 
-# 3. TSA 마이그레이션 적용
+# 3. Apply the TSA migration
 RAILS_ENV=test bin/rails db:migrate:up:primary VERSION=20260306100000
 ```
 
-여기서 끝이 아니었다. Solid Queue/Cable/Cache의 테스트 DB도 foreign key 충돌:
+That was not the end of it. The Solid Queue/Cable/Cache test databases also had foreign key conflicts:
 
 ```bash
-# Solid 3개 DB를 drop & recreate
+# Drop and recreate the three Solid Stack test databases
 RAILS_ENV=test bin/rails db:drop:queue db:drop:cable db:drop:cache
 RAILS_ENV=test bin/rails db:create:queue db:create:cable db:create:cache
 RAILS_ENV=test bin/rails db:migrate
 ```
 
-이렇게 해서 테스트 환경이 정상화됐다.
+After this, all four test databases were back in a clean state. The order matters: `db:environment:set` first, then `db:schema:load`, then `db:migrate`.
 
 ---
 
-## 7. 삽질 5: 테스트에서 self-signed TSA 만들기
+## 7. Bug 5: Building a Self-Signed TSA Response for Tests
 
-실제 TSA 서버에 요청하면 테스트가 느려지고 불안정해진다. `OpenSSL::Timestamp::Factory`로 자체 서명 TSA 응답을 만들 수 있다:
+Making real HTTP requests to an external TSA server during tests makes the suite slow and flaky — especially problematic in CI environments. `OpenSSL::Timestamp::Factory` allows you to generate a complete, cryptographically valid TSA response locally, with no external dependencies:
 
 ```ruby
 def build_self_signed_tsa_response(data_hash)
@@ -251,68 +341,108 @@ def build_self_signed_tsa_response(data_hash)
   factory.serial_number = 1
   factory.allowed_digests = ["sha256"]
 
+  # 2048-bit RSA is sufficient for test purposes
   key = OpenSSL::PKey::RSA.new(2048)
+
   cert = OpenSSL::X509::Certificate.new
-  # ... 인증서 설정 ...
+  cert.version = 2
+  cert.serial = 1
+  cert.subject = OpenSSL::X509::Name.parse("/CN=Test TSA")
+  cert.issuer = cert.subject
+  cert.public_key = key.public_key
+  cert.not_before = Time.now - 60
+  cert.not_after = Time.now + 3600
+
+  ef = OpenSSL::X509::ExtensionFactory.new
+  ef.subject_certificate = cert
+  ef.issuer_certificate = cert
+
+  # This extension is REQUIRED — Factory will reject the certificate without it
   cert.add_extension(
     ef.create_extension("extendedKeyUsage", "timeStamping", true)
   )
+  cert.add_extension(
+    ef.create_extension("basicConstraints", "CA:FALSE")
+  )
+
   cert.sign(key, "SHA256")
 
   req = OpenSSL::Timestamp::Request.new
   req.algorithm = "SHA256"
   req.message_imprint = [data_hash].pack("H*")
+  req.cert_requested = true
 
   resp = factory.create_timestamp(key, cert, req)
   resp.to_der
 end
 ```
 
-`extendedKeyUsage`에 `timeStamping`을 넣지 않으면 Factory가 거부한다. 이것도 알아내는 데 시간이 걸렸다.
+If you omit the `extendedKeyUsage` extension with `timeStamping`, the Factory raises `OpenSSL::Timestamp::TimestampError` and refuses to generate the response. This extension designates the certificate as valid for signing timestamps, and RFC 3161 requires it. Tracking down this requirement took longer than it should have.
+
+In tests, the DER data produced by this method can be used exactly like a real TSA server response:
+
+```ruby
+# Test helper module
+module TsaTestHelper
+  def stub_tsa_response(data_hash)
+    tsa_der = build_self_signed_tsa_response(data_hash)
+    allow_any_instance_of(TsaTimestampService)
+      .to receive(:send_tsa_request)
+      .and_return(tsa_der)
+  end
+end
+```
 
 ---
 
-## 8. 전체 아키텍처 정리
+## 8. Full Architecture Overview
+
+The complete flow of the finished system:
 
 ```
-계약 서명
+Contract signed
   ↓
-SHA-256 해시 생성
+SHA-256 hash generated
   ↓
-MerkleLeaf 생성 (unanchored)
+MerkleLeaf created (unanchored)
   ↓
 Daily Cron Job (AnchorService.call)
   ↓
-┌─────────────────────────────────┐
-│ 1. Merkle Tree 구성             │
-│ 2. Root → 블록체인 기록 (tx_hash) │
-│ 3. Root → TSA 타임스탬프 (선택적)  │
-│ 4. Batch + Leaves 업데이트       │
-└─────────────────────────────────┘
+┌─────────────────────────────────────┐
+│ 1. Build Merkle Tree                │
+│ 2. Root → record on blockchain      │
+│    (receive tx_hash)                │
+│ 3. Root → TSA timestamp (optional)  │
+│ 4. Update Batch + Leaves            │
+└─────────────────────────────────────┘
   ↓
 Evidence Package (ASiC-E)
 ├── document.pdf
 ├── META-INF/manifest.xml
 ├── META-INF/blockchain-proof.json
-└── META-INF/timestamp.tst        ← TSA 토큰
+└── META-INF/timestamp.tst   ← TSA token
 ```
 
-- **블록체인**: 데이터 무결성 + 존재 증명 (주 증거)
-- **TSA**: 제3자 시간 증명 (보조 증거)
-- **ASiC-E**: EU eIDAS 호환 증거 패키지
+What each component contributes:
+- **Blockchain**: data integrity + proof of existence (primary evidence) — written to an immutable public ledger
+- **TSA**: third-party time certification (supplementary evidence) — signed by a recognized timestamp authority
+- **ASiC-E**: EU eIDAS-compatible evidence package — a standardized format acceptable for court submission
+- **Merkle Proof**: a cryptographic path proving that an individual contract was included in a specific batch
+
+The reason for combining blockchain anchoring and TSA is that they are complementary. Blockchain prevents data tampering but provides relatively weak proof of *when* something occurred. TSA provides a precise, third-party-certified timestamp but depends on a centralized server. Using both means that even if confidence in one approach erodes over time, the other maintains the evidentiary value.
 
 ---
 
-## Lessons Learned
+## Key Takeaways
 
-1. **Ruby 4.0 OpenSSL API를 반드시 확인하라** — 구버전 문서나 예제가 동작하지 않는다. `Token` 클래스는 없고, predicate 메서드에 `?`가 필요하다.
+1. **Always verify Ruby 4.0 OpenSSL APIs against current documentation.** Older examples and Stack Overflow answers will not work. `OpenSSL::Timestamp::Token` does not exist. Predicate methods require `?`. Check the official Ruby docs for the exact version you are running.
 
-2. **Rails 8 multi-database는 마이그레이션이 까다롭다** — `db:migrate` 대신 `db:migrate:up:primary VERSION=xxx`로 특정 DB만 건드려라. Solid Stack DB를 건드리면 foreign key 충돌이 발생한다.
+2. **Rails 8 multi-database migration requires explicit targeting.** Use `db:migrate:up:primary VERSION=xxx` instead of the generic `db:migrate`. Running `db:migrate` in a Solid Stack setup will attempt to re-migrate the cache/queue/cable databases and trigger foreign key conflicts. The error messages will point at tables you never touched — do not let that mislead you.
 
-3. **테스트 환경은 별도로 관리하라** — `RAILS_ENV=test`를 빼먹으면 environment 태그가 꼬인다. multi-database 앱에서는 4개 DB 모두 상태를 확인해야 한다.
+3. **Manage test environment state explicitly.** Forgetting `RAILS_ENV=test` can corrupt environment tags across databases. In a multi-database Rails 8 app, all four databases need their environment state verified independently. Recovery order: `db:environment:set` → `db:schema:load` → `db:migrate`.
 
-4. **TSA 실패는 non-fatal로 처리하라** — TSA 서버가 다운되어도 블록체인 앵커링은 성공해야 한다. `rescue`로 감싸고 로그만 남겨라.
+4. **Treat TSA failures as non-fatal.** A TSA server outage must not abort the blockchain anchoring process. Wrap TSA calls in `rescue`, log the failure, and continue. TSA is supplementary evidence — the system must remain functional without it.
 
-5. **무료 TSA 서버는 DigiCert가 가장 안정적이다** — Sectigo는 15초 rate limit이 있고, Entrust는 가끔 느리다. fallback 체인을 구성하는 게 좋다.
+5. **DigiCert is the most reliable free TSA server.** Sectigo has a 15-second rate limit that makes it unsuitable for batch processing. Entrust is occasionally slow. Use DigiCert as primary and configure the others as fallbacks in an ordered chain.
 
-6. **self-signed TSA로 테스트하라** — `OpenSSL::Timestamp::Factory`를 쓰면 외부 의존성 없이 round-trip 테스트가 가능하다. `extendedKeyUsage: timeStamping` 잊지 마라.
+6. **Use `OpenSSL::Timestamp::Factory` for test isolation.** It enables complete round-trip testing with no network dependency. The `extendedKeyUsage: timeStamping` extension on the test certificate is mandatory — without it, the Factory will refuse to generate the response entirely.

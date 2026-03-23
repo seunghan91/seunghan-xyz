@@ -11,28 +11,33 @@ cover:
 categories: ["Rails", "Hotwire"]
 ---
 
+When running a Rails 8 + Hotwire (Turbo) application in production, `broadcast_append_to` callbacks can silently throw 500 errors. When that's compounded by a SolidCable setup issue and Telegram Bot message parsing errors, interpreting the logs becomes genuinely confusing. All three hit at the same time in a recent project — here's how each one was diagnosed and resolved.
 
-Rails 8 + Hotwire(Turbo) 기반 앱을 운영하다 보면 `broadcast_append_to` 계열 콜백이 조용히 500을 내뱉는 경우가 있다. 거기에 SolidCable 초기 설정 문제와 Telegram Bot 메시지 파싱 오류가 겹치면 로그 해석도 헷갈린다. 이번에 세 가지가 한꺼번에 터져서 순서대로 해결한 과정을 정리한다.
+These three problems are independent of each other, but in practice they tend to surface together in a freshly deployed Rails 8 app. The key is to isolate each problem and fix them one at a time.
 
 ---
 
-## Problem 1: `No unique index found for id` — broadcast 콜백 500
+## Problem 1: `No unique index found for id` — broadcast callback 500
 
-### 현상
+### Symptoms
 
-메시지나 알림을 생성할 때 컨트롤러에서 500이 발생한다. 로그를 보면:
+A 500 error fires from the controller when creating a message or notification. The log shows:
 
 ```
 MessagesController#create error: No unique index found for id
 ```
 
+The error message reads like an index problem, but that's misleading. What's actually happening is that an exception thrown inside an ActionCable broadcast is propagating all the way up to the controller. The record itself has already been saved to the database successfully.
+
 ### Cause
 
-Rails `after_create_commit` 콜백 안에서 `broadcast_append_to` 를 호출할 때, 내부적으로 ActionCable 채널을 통해 메시지를 전달하는 과정에서 예외가 발생한다. SolidCable을 쓰는 경우 특히 초기 설정이 완전하지 않으면 이 에러가 자주 나온다.
+When `broadcast_append_to` is called inside an `after_create_commit` callback, it internally delivers a message through an ActionCable channel. If anything goes wrong during that delivery — especially when SolidCable is not fully configured — an exception is raised.
 
-문제는 콜백 내부의 예외가 **컨트롤러 레벨로 그대로 전파**된다는 점이다. `create!` 는 이미 성공했고 DB에 레코드도 저장됐지만, 브로드캐스트 콜백 실패 때문에 500을 반환하게 된다.
+The critical issue is that **exceptions inside callbacks propagate up to the controller level**. The `create!` has already succeeded and the record is in the database, but the broadcast callback failure causes the controller to return a 500.
 
-### 모델 코드 (수정 전)
+Rails' `after_create_commit` runs after the transaction commits. At that point, an exception cannot roll back the database record. However, Rails does not catch exceptions in the callback chain — it lets them propagate to the caller. The result is a user-visible 500 error even though the data was saved correctly. This is a confusing and misleading failure mode.
+
+### Model code (before fix)
 
 ```ruby
 class Message < ApplicationRecord
@@ -51,7 +56,7 @@ end
 
 ### Fix
 
-`broadcast_message` 메서드 안에 `rescue` 를 추가한다. 브로드캐스트 실패는 치명적이지 않다 — 레코드는 이미 저장됐고, 클라이언트는 다음 폴링이나 페이지 이동 시 최신 상태를 받게 된다.
+Add a `rescue` block inside `broadcast_message`. A broadcast failure is not fatal — the record is already saved, and the client will receive the latest state on the next poll or page navigation.
 
 ```ruby
 def broadcast_message
@@ -66,7 +71,7 @@ rescue => e
 end
 ```
 
-`Notification` 모델의 `broadcast_to_user` 콜백도 동일한 패턴으로 수정했다:
+The `Notification` model's `broadcast_to_user` callback was fixed with the same pattern:
 
 ```ruby
 def broadcast_to_user
@@ -77,23 +82,54 @@ rescue => e
 end
 ```
 
-> **핵심 원칙**: `after_create_commit` 안의 브로드캐스트 콜백은 부수 효과(side effect)다. 실패해도 트랜잭션 자체가 롤백되어선 안 된다. 반드시 rescue로 감싸자.
+> **Core principle**: Broadcast callbacks inside `after_create_commit` are side effects. A failure must not roll back the transaction or return a 500. Always wrap them in a rescue.
+
+### Going further: retries and monitoring
+
+Simply swallowing the error with rescue is a start, but for production applications consider the following:
+
+**Retry logic**: If failures are due to transient network issues or SolidCable queue delays, queuing a background job to retry the broadcast is a valid pattern.
+
+```ruby
+def broadcast_message
+  broadcast_append_to(
+    "conversation_#{conversation_id}",
+    target: "messages",
+    partial: "messages/message",
+    locals: { message: self }
+  )
+rescue => e
+  Rails.logger.error "[Message] broadcast_message failed: #{e.message}"
+  # Queue a retry job if needed
+  # BroadcastRetryJob.perform_later(self.class.name, id)
+end
+```
+
+**Error monitoring**: If you use Sentry or a similar error tracking service, reporting broadcast failures at warning level lets you track trends. Frequent broadcast failures are an early signal of SolidCable configuration issues or database load problems.
 
 ---
 
-## Problem 2: `PG::UndefinedTable — solid_cable_messages` 테이블 누락
+## Problem 2: `PG::UndefinedTable — solid_cable_messages` table missing
 
-### 현상
+### Symptoms
 
-로그에 아래 에러가 섞여 나온다:
+The following error appears repeatedly in the logs:
 
 ```
 PG::UndefinedTable: ERROR: relation "solid_cable_messages" does not exist
 ```
 
+ActionCable connections establish successfully, but message delivery fails and this error floods the logs.
+
+### What is SolidCable?
+
+SolidCable is a new library introduced in Rails 8 that allows PostgreSQL (or another relational database) to serve as the ActionCable adapter — eliminating the need for Redis. The goal is to simplify infrastructure by reducing the number of external services required.
+
+SolidCable stores messages in a dedicated `solid_cable_messages` table and delivers them to subscribers via polling. If this table does not exist, ActionCable broadcasts fail entirely.
+
 ### Cause
 
-Rails 8에서 SolidCable은 별도 migration path(`db/cable_migrate/`)를 사용한다. `database.yml` 설정을 보면:
+In Rails 8, SolidCable uses a separate migration path (`db/cable_migrate/`). The `database.yml` configuration looks like this:
 
 ```yaml
 production:
@@ -104,15 +140,21 @@ production:
     migrations_paths: db/cable_migrate
 ```
 
-`cable` 데이터베이스가 primary와 같은 URL을 가리키더라도, `db/cable_migrate/` 안의 마이그레이션은 일반 `rails db:migrate` 로는 실행이 안 될 수 있다. Render 같은 PaaS에서 deploy hook이 `rails db:migrate` 만 실행하도록 설정되어 있다면 cable migrate는 빠진다.
+Even if the `cable` database points to the same URL as `primary`, migrations inside `db/cable_migrate/` may not run when you execute the standard `rails db:migrate`. On PaaS platforms like Render, if the deploy hook only runs `rails db:migrate`, the cable migrations are skipped.
 
-### 확인 방법
+This happens because of how Rails handles multi-database migrations. By default, `db:migrate` looks at `db/migrate/` only. Databases with a custom `migrations_paths` require a separate migration command to pick up their migrations.
+
+### How to check
 
 ```bash
 rails db:migrate:status
 ```
 
-출력에서 `solid_cable_messages` 관련 마이그레이션이 `down` 상태인지 확인.
+Look for the `solid_cable_messages` migration showing as `down`:
+
+```
+down    20241001000000  CreateSolidCableMessages
+```
 
 ### Solution
 
@@ -120,60 +162,112 @@ rails db:migrate:status
 rails db:migrate RAILS_ENV=production
 ```
 
-Rails 7+ 에서는 `db:migrate` 가 multi-database 환경의 모든 데이터베이스를 마이그레이션해야 하는데, 실제로는 `db/cable_migrate` 안의 파일이 `up` 처리되는지 확인이 필요하다. 안 되면:
+In Rails 7+, `db:migrate` should migrate all databases in a multi-database setup, but in practice you need to verify that the files in `db/cable_migrate` are actually processed. If they are not, run:
 
 ```bash
 rails db:migrate:cable RAILS_ENV=production
-# 또는
+# or
 rails db:migrate DATABASE=cable RAILS_ENV=production
 ```
 
-`db/cable_migrate/` 에 마이그레이션 파일이 있는지, deploy 스크립트에서 실행되는지 체크하는 게 중요하다.
+### Updating the deploy script
+
+On PaaS platforms such as Render, Fly.io, or Heroku, the deploy command needs to be updated explicitly.
+
+**For Render** (`render.yaml`):
+
+```yaml
+services:
+  - type: web
+    name: myapp
+    buildCommand: bundle install && bundle exec rails assets:precompile
+    startCommand: bundle exec rails db:migrate && bundle exec rails db:migrate DATABASE=cable && bundle exec rails server
+```
+
+Or create a `bin/render-build.sh` script:
+
+```bash
+#!/usr/bin/env bash
+set -o errexit
+
+bundle install
+bundle exec rails assets:precompile
+bundle exec rails assets:clean
+bundle exec rails db:migrate
+bundle exec rails db:migrate DATABASE=cable
+```
+
+Always verify that the migration files exist in `db/cable_migrate/` and that the deploy script actually executes them.
+
+### Watch out for confusion with SolidQueue
+
+Rails 8 ships with three Solid libraries, each with its own migration path:
+
+- SolidCable: `db/cable_migrate/`
+- SolidQueue: `db/queue_migrate/`
+- SolidCache: `db/cache_migrate/`
+
+If you use all three, the deploy script must include all three migration commands.
 
 ---
 
-## Problem 3: Telegram 메시지에 `\(`, `\.`, `\-` 이스케이프 문자가 그대로 출력
+## Problem 3: Raw escape characters `\(`, `\.`, `\-` appearing in Telegram messages
 
-### 현상
+### Symptoms
 
-Telegram Bot으로 받은 메시지에 이런 식으로 raw 이스케이프 문자가 노출된다:
+Messages received via the Telegram Bot show raw escape characters like this:
 
 ```
-신청자: seunghan \(seunghan@example\.co\.kr\)
-요청 금액: 20000
+Applicant: seunghan \(seunghan@example\.co\.kr\)
+Requested amount: 20000
 ```
 
-기대했던 출력:
+Expected output:
 ```
-신청자: seunghan (seunghan@example.co.kr)
-요청 금액: 20,000원
+Applicant: seunghan (seunghan@example.co.kr)
+Requested amount: 20,000 KRW
 ```
 
-두 가지 문제가 있었다:
-1. `\(`, `\.`, `\-` 등 MarkdownV2 이스케이프 문자가 Telegram에 그대로 노출됨
-2. `desired_amount: 20000` 같이 raw 키 이름이 숫자 그대로 출력됨
+There were two separate issues:
+1. MarkdownV2 escape sequences like `\(`, `\.`, `\-` were being rendered literally in Telegram
+2. Raw metadata keys like `desired_amount: 20000` were appearing instead of human-readable labels with formatted numbers
+
+### Understanding Telegram Markdown versions
+
+The Telegram Bot API supports two Markdown parsing modes:
+
+**Markdown (v1)**: The older format. Supports `*bold*`, `_italic_`, `` `code` ``, but has no escape syntax. The backslash in `\(` is not treated as an escape character — it is printed as-is.
+
+**MarkdownV2**: The currently recommended format. All special characters (`. ( ) [ ] { } ~ > # + - = | ! \`) must be escaped with a backslash. Any unescaped special character causes a 400 error from the API.
 
 ### Cause
 
-앱 내부적으로 description을 **MarkdownV2 형식**으로 빌드하고 있었는데 (`\(`, `\.` 등으로 이스케이프), 이걸 Telegram 메시지에 그대로 넣을 때 `parse_mode: 'Markdown'`(v1)을 사용했다.
+The application was internally building descriptions in **MarkdownV2 format** (with `\(`, `\.`, etc. as escapes), then sending those descriptions to Telegram using `parse_mode: 'Markdown'` (v1).
 
-Markdown v1은 `\(` 같은 문자를 이스케이프 시퀀스로 인식하지 않는다. 그러므로 백슬래시가 그대로 보이게 된다. `parse_mode: 'MarkdownV2'` 로 바꾸면 되지만, description 내용이 완전히 MarkdownV2 스펙에 맞지 않으면 또 파싱 오류(400)가 발생한다.
+Since Markdown v1 does not recognize backslash escapes, the backslashes are printed literally. Switching to `parse_mode: 'MarkdownV2'` would fix the backslash issue, but only if the entire message content strictly conforms to MarkdownV2 spec — any non-escaped special character in the content will cause a 400 error.
 
-### Solution: plain_text 헬퍼로 마크다운 완전 제거
+Three options are available:
+1. Send without `parse_mode` (plain text) — no Markdown rendering at all
+2. Switch to `parse_mode: 'MarkdownV2'` and ensure the entire message content is properly escaped
+3. Strip all Markdown before sending and use plain text
 
-Telegram 알림 메시지에는 굳이 마크다운 포매팅이 필요 없으므로, 전송 전에 모든 마크다운을 벗겨내는 `plain_text` 헬퍼를 만들었다:
+For notification messages that do not need bold text or links, option 3 is the simplest and most robust.
+
+### Solution: strip Markdown with a plain_text helper
+
+Since Telegram notification messages do not require Markdown formatting, a `plain_text` helper strips all Markdown before sending:
 
 ```ruby
 def self.plain_text(text)
   text.to_s
-      .gsub(/\*\*(.*?)\*\*/m, '\1')   # **bold** 제거
-      .gsub(/\*(.*?)\*/m, '\1')        # *italic* 제거
-      .gsub(/\\([_*\[\]()~`>#+=|{}.!\-])/, '\1')  # MarkdownV2 이스케이프 제거
+      .gsub(/\*\*(.*?)\*\*/m, '\1')   # remove **bold**
+      .gsub(/\*(.*?)\*/m, '\1')        # remove *italic*
+      .gsub(/\\([_*\[\]()~`>#+=|{}.!\-])/, '\1')  # remove MarkdownV2 escapes
       .strip
 end
 ```
 
-그리고 알림 전송 시:
+Update the notification send call accordingly:
 
 ```ruby
 # Before
@@ -183,20 +277,22 @@ desc = escape(ticket.description.to_s.truncate(200))
 desc = plain_text(ticket.description.to_s.truncate(300))
 ```
 
-### Solution: 메타데이터 키 한글 레이블 + 금액 포매팅
+Remove the `parse_mode` option as well, or omit it entirely. Without `parse_mode`, Telegram treats the message as plain text.
 
-`desired_amount: 20000` 같이 raw key가 출력되는 문제는 description 빌드 단계에서 키 매핑을 추가해 해결했다:
+### Solution: human-readable metadata labels and amount formatting
+
+The problem of raw keys like `desired_amount: 20000` was fixed by adding a label mapping at the description-building stage:
 
 ```ruby
 METADATA_LABELS = {
-  "desired_amount" => "요청 금액",
-  "current_amount" => "현재 금액",
-  "target_amount"  => "목표 금액",
-  "quota"          => "할당량",
-  "target_date"    => "목표 일자",
-  "department"     => "부서",
-  "system"         => "대상 시스템",
-  "priority"       => "우선순위"
+  "desired_amount" => "Requested amount",
+  "current_amount" => "Current amount",
+  "target_amount"  => "Target amount",
+  "quota"          => "Quota",
+  "target_date"    => "Target date",
+  "department"     => "Department",
+  "system"         => "Target system",
+  "priority"       => "Priority"
 }.freeze
 
 def build_description
@@ -212,21 +308,39 @@ end
 
 def format_amount(v)
   num = v.to_s.gsub(/[^0-9]/, "").to_i
-  "#{num.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\1,').reverse}원"
+  "#{num.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\1,').reverse} KRW"
 end
 ```
 
-`20000` → `20,000원` 으로 출력된다.
+`20000` becomes `20,000 KRW`.
+
+### Mind the Telegram message length limit
+
+The Telegram Bot API enforces a 4096-character limit per message. `truncate(300)` is well within range, but if metadata is extensive or descriptions are long, verify the total assembled message does not exceed 4096 characters. Exceeding it results in a `400 Bad Request: message is too long` error from the API.
 
 ---
 
-## 총정리
+## Summary
 
-| 문제 | 원인 | 해결 |
-|------|------|------|
-| `No unique index found for id` 500 | `after_create_commit` 브로드캐스트 예외가 컨트롤러로 전파 | 콜백 안에 `rescue` 추가 |
-| `solid_cable_messages` 테이블 없음 | deploy 시 `db/cable_migrate` 실행 안 됨 | `rails db:migrate` 또는 cable 전용 migrate 명령 실행 |
-| Telegram 이스케이프 문자 노출 | MarkdownV2 이스케이프가 Markdown v1 parse_mode에서 그대로 출력 | `plain_text` 헬퍼로 마크다운 전체 제거 후 전송 |
-| 메타데이터 raw key 노출 | key name이 그대로 출력 | `METADATA_LABELS` 매핑 + `format_amount` 포매팅 |
+| Problem | Cause | Fix |
+|---------|-------|-----|
+| `No unique index found for id` 500 | Broadcast exception inside `after_create_commit` propagates to the controller | Add `rescue` inside the callback |
+| `solid_cable_messages` table missing | `db/cable_migrate` not run during deploy | Run `rails db:migrate DATABASE=cable` explicitly |
+| Telegram escape characters shown literally | MarkdownV2 escapes sent with `parse_mode: 'Markdown'` (v1) | Strip all Markdown with a `plain_text` helper before sending |
+| Raw metadata keys in messages | Key names rendered without labels or formatting | Add `METADATA_LABELS` mapping and `format_amount` formatter |
 
-Rails + Turbo 조합에서 브로드캐스트 콜백 에러는 예상보다 자주 발생한다. 특히 ActionCable/SolidCable 초기 설정이 완전하지 않거나 다중 DB 마이그레이션이 누락된 경우가 많다. `after_create_commit` 안의 부수 효과는 항상 rescue로 격리하는 습관을 들이자.
+Broadcast callback errors are more common than expected in Rails + Turbo setups. Incomplete ActionCable/SolidCable configuration and missing multi-database migrations are the most frequent culprits. Get into the habit of isolating side effects inside `after_create_commit` with a rescue block.
+
+---
+
+## Key Takeaways
+
+1. **Always wrap broadcasts inside `after_create_commit` with `rescue`.** Broadcasts are side effects. A failure must not roll back the main transaction or cause a 500 response to the user.
+
+2. **SolidCable (and SolidQueue, SolidCache) uses a separate migration path.** Migrations in `db/cable_migrate/` may not run with a plain `rails db:migrate`. Add `rails db:migrate DATABASE=cable` explicitly to your PaaS deploy script.
+
+3. **Telegram MarkdownV2 and Markdown v1 follow completely different parsing rules.** Mixing internally-formatted MarkdownV2 content with a v1 `parse_mode` causes escape characters to appear literally. For notification messages, stripping all Markdown and sending plain text is the safest approach.
+
+4. **Do not read error messages at face value.** `No unique index found for id` was not an index problem — it was an ActionCable internal exception propagating upward. You need the full stack trace to find the real cause.
+
+5. **If you use all three Rails 8 Solid libraries (SolidCable, SolidQueue, SolidCache), include all three migration commands in your deploy script.** Each watches a different path: `db/cable_migrate/`, `db/queue_migrate/`, and `db/cache_migrate/`.

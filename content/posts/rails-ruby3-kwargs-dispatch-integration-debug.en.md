@@ -11,26 +11,25 @@ cover:
 categories: ["Rails"]
 ---
 
-
-AI 에이전트가 Rails API 서버를 호출해서 티켓을 자동 배정하는 디스패처를 만들었다. 로직 자체는 간단한데 붙이는 과정에서 예상치 못한 곳에서 계속 막혔다. 겪은 것들을 기록해 둔다.
+I was building a dispatcher that lets an AI agent call a Rails API server to automatically assign tickets. The logic itself was straightforward, but the integration kept hitting unexpected walls. Over the course of one day, I ran into seven distinct bugs — each small on its own, but exhausting in rapid succession. I'm writing them down in hopes they save someone else the same frustration.
 
 ---
 
-## 1. Ruby 3.0 kwargs 분리 — `render_success(key: val)` 가 왜 터지나
+## 1. Ruby 3.0 kwargs Separation — Why Does `render_success(key: val)` Blow Up?
 
-가장 오래 고생한 것. Rails 컨트롤러에서 응답 헬퍼를 이렇게 호출했다:
+This one cost the most time. In a Rails controller, I was calling a response helper like this:
 
 ```ruby
 render_success(tickets: tickets_list, pagination: pagination_data)
 ```
 
-서버 로그에 찍힌 에러:
+The error in the server log:
 
 ```
 ArgumentError - unknown keywords: :tickets, :pagination
 ```
 
-헬퍼 정의는 이렇다:
+The helper is defined as:
 
 ```ruby
 def render_success(data, status: :ok)
@@ -38,28 +37,32 @@ def render_success(data, status: :ok)
 end
 ```
 
-**Ruby 2.x**에서는 `render_success(tickets: ..., pagination: ...)` 호출 시 `{tickets: ..., pagination: ...}` 해시가 `data`에 들어갔다.
+### Why Did Ruby 3.0 Change This?
 
-**Ruby 3.0**부터 키워드 인수와 일반 인수가 완전히 분리됐다. `tickets:`, `pagination:` 이 키워드처럼 생겼으니 Ruby 3.0은 이것들을 키워드 인수로 인식한다. 그런데 `render_success`는 `data` 하나만 positional 인수로 받으니 `ArgumentError`.
+In **Ruby 2.x**, calling `render_success(tickets: ..., pagination: ...)` would implicitly coerce `{tickets: ..., pagination: ...}` into the `data` positional argument. This was called the "last hash argument as keyword parameters" implicit conversion. Ruby would helpfully say: "these look like keyword syntax, but there's a positional slot waiting — I'll pack them into a hash."
 
-단일 키워드처럼 생긴 것도 마찬가지다:
+**Ruby 3.0 removed this behavior entirely** (Ruby 2.7 first introduced a deprecation warning to give developers time to migrate). Keyword arguments and positional arguments are now completely separate. When `tickets:` and `pagination:` are passed, Ruby 3.0 treats them as keyword arguments. But `render_success` only declares `status:` as a keyword parameter — so `tickets:` and `pagination:` are unknown keywords, resulting in `ArgumentError`.
+
+The same applies to a single key:
 
 ```ruby
 render_success(ticket: ticket_json(@ticket))
 # → ArgumentError: wrong number of arguments (given 0, expected 1)
 ```
 
-`ticket:` 하나도 키워드 인수로 해석되어 `data`에 아무것도 안 들어간다.
+`ticket:` is parsed as a keyword argument, so the `data` positional parameter receives nothing (0 arguments), triggering the error.
 
-**해결:** 명시적으로 해시 `{}`로 감싸면 Ruby가 "이건 해시 리터럴이다"라고 확실히 인식한다.
+### Fix
+
+Wrap the hash explicitly with `{}`. This makes Ruby unambiguously treat it as a hash literal rather than keyword arguments.
 
 ```ruby
-# 전부 이렇게 바꿔야 한다
+# All calls need to be updated to this form
 render_success({ ticket: ticket_json(@ticket) })
 render_success({ tickets: tickets_list, pagination: pagination_data })
 ```
 
-프로젝트 전체 컨트롤러를 훑어서 `render_success(` 뒤에 `{`가 없는 것을 전부 수정했다. 한 줄짜리는 sed로 일괄 처리:
+I swept the entire project's controllers looking for any `render_success(` call not immediately followed by `{` and fixed them all. For single-line patterns, `sed` handled the bulk:
 
 ```bash
 sed -i '' \
@@ -68,32 +71,42 @@ sed -i '' \
   app/controllers/api/v1/tickets_controller.rb
 ```
 
+### Prevention
+
+If you're still on Ruby 2.7, search your logs for `warning: Using the last argument as keyword parameters is deprecated`. Fixing those warnings now means the Ruby 3.0 upgrade won't break anything.
+
 ---
 
-## 2. Docker `restart` 는 env_file을 재로드하지 않는다
+## 2. Docker `restart` Does Not Reload env_file
 
-`.env` 파일에 환경 변수를 추가하고 컨테이너를 재시작했다:
+I added a new environment variable to the `.env` file and restarted the container:
 
 ```bash
 docker compose restart
 ```
 
-그런데 컨테이너 안에서 확인하면 새 변수가 없다.
+But checking inside the container showed the new variable was absent:
 
 ```bash
 docker exec mycontainer python3 -c "import os; print(os.environ.get('NEW_VAR', 'MISSING'))"
 # → MISSING
 ```
 
-**원인:** `docker compose restart`는 프로세스만 재시작한다. 컨테이너 자체를 재생성하지 않기 때문에 `env_file`을 다시 읽지 않는다.
+### Why
 
-**해결:** 컨테이너를 재생성해야 한다.
+`docker compose restart` sends SIGTERM to the running process and starts it again — but inside the **same container**. It does not recreate the container. The `env_file` configuration is read only at container creation time. Once a container exists, its environment variables are fixed regardless of how many times you restart it.
+
+You can verify this with `docker inspect <container>` — the `Env` section shows the environment as it was when the container was created, and it does not change after a restart.
+
+### Fix
+
+Recreate the container:
 
 ```bash
 docker compose up -d
 ```
 
-`up -d`는 설정이 바뀐 서비스를 재생성(Recreate)한다. 이렇게 해야 `env_file`의 새 값이 컨테이너에 반영된다.
+`up -d` compares the current `docker-compose.yml` configuration with the running containers and recreates any service whose configuration has changed. This is what actually re-reads `env_file`.
 
 ```
 Container mycontainer  Recreate
@@ -102,61 +115,100 @@ Container mycontainer  Starting
 Container mycontainer  Started
 ```
 
+### Force Recreate When Config Hasn't Changed
+
+If the compose file itself hasn't changed but you still want to force a recreate:
+
+```bash
+docker compose up -d --force-recreate
+```
+
+Verify the variable is now present:
+
+```bash
+docker exec mycontainer env | grep NEW_VAR
+```
+
 ---
 
-## 3. Synology NAS에는 `crontab` 명령이 없다
+## 3. Synology NAS Has No `crontab` Command
 
-파이썬 스크립트를 5분마다 실행하는 크론잡을 걸려고 했다.
+I wanted to run a Python script every 5 minutes on the NAS:
 
 ```bash
 ssh user@nas "crontab -e"
 # → crontab: command not found
 ```
 
-Synology DSM은 일반 Linux와 다르게 `crontab` 명령을 기본으로 제공하지 않는다. `/etc/crontab`을 직접 편집해야 한다.
+### Why
+
+Synology DSM is not a standard Linux distribution. The `crond` daemon is present and running, but the `crontab` user-space utility is not included. There is no per-user crontab management interface.
+
+### Fix: Edit /etc/crontab Directly
+
+You need to edit `/etc/crontab` directly. This is a system-level crontab file. Unlike per-user crontab files, it includes a "run-as user" column in each entry:
 
 ```bash
-# /etc/crontab 형식: 분 시 일 월 요일 실행유저 명령
+# /etc/crontab format: minute hour day month weekday user command
 */5    *    *    *    *    root    /usr/local/bin/docker exec mycontainer python3 /home/node/script.py >> /path/to/logs/script.log 2>&1
 ```
 
-주의할 점:
-- 필드 구분은 **탭**이 원칙이지만 공백도 동작한다
-- 실행 유저 컬럼(`root`)이 일반 사용자용 crontab과 달리 있다
-- `sudo` 권한으로 편집해야 한다
+Points to watch:
+- Field separator is technically a **tab**, but spaces work too
+- The **user column** (`root`) is required — standard per-user crontabs omit this
+- Editing requires **sudo** access
+- `/etc/crontab` **may be overwritten by DSM updates**. For anything mission-critical, back it up separately or use DSM's built-in Task Scheduler (Control Panel > Task Scheduler), which survives updates.
+
+### Reload After Editing
+
+In many cases `crond` auto-detects changes to `/etc/crontab`, but to be sure:
+
+```bash
+sudo synoservicectl --restart crond
+```
 
 ---
 
-## 4. SSH heredoc에서 `!` 문자가 문제가 된다
+## 4. `!` Characters Break SSH Heredocs
 
-Rails runner로 서버에서 짧은 Ruby 코드를 실행하고 싶었다:
+I wanted to run a short Ruby snippet on the server via Rails runner:
 
 ```bash
 ssh user@server 'bundle exec rails runner "record.update!(key: value)"'
 ```
 
-이게 자꾸 실패했다. `update!`의 `!`가 bash에서 히스토리 확장 문자로 해석되는 것이 문제다.
+This kept failing. The `!` in `update!` is the culprit — in interactive bash, `!` triggers history expansion.
 
-단순 따옴표 안에서도 SSH를 타면 해석 방식이 달라져서 heredoc을 쓰면 더 심각해진다:
+### Why It Happens Even Inside Single Quotes
+
+In normal interactive bash, single quotes prevent most special character interpretation. But when passing commands through SSH, you're effectively dealing with two layers of shell parsing: the local shell that builds the command string, and the remote shell that receives and executes it. In interactive shells with history expansion enabled (`set -H`, which is the default), `!` can be misinterpreted even inside quoted strings depending on context.
+
+With heredocs it gets worse:
 
 ```bash
-# heredoc에서 update! → update\! 로 변환되어 Ruby 문법 에러
+# heredoc turns update! into update\! which is a Ruby syntax error
 ssh user@server << 'EOF'
   record.update!(key: value)
 EOF
 ```
 
-**해결 1:** `!`를 쓰지 않는 메서드로 교체한다. Rails에는 bang 메서드 대신 쓸 수 있는 것들이 있다:
+### Fix 1: Avoid Bang Methods
+
+Replace bang methods with their non-bang equivalents. Rails provides alternatives for all common bang operations:
 
 ```ruby
-record.update_columns(key: value)   # update! 대신
-record.save(validate: false)        # save! 대신
+record.update_columns(key: value)   # instead of update!
+record.save(validate: false)        # instead of save!
 ```
 
-**해결 2:** 코드를 서버 파일로 먼저 쓴 다음 실행한다.
+`update_columns` bypasses callbacks and validations and issues a direct `UPDATE` SQL statement. For one-off data fix scripts, this is often exactly what you want.
+
+### Fix 2: Write the Script to a File First
+
+For complex snippets, use Python to write the Ruby code to a temp file on the server, then execute it:
 
 ```bash
-# Python으로 파일 작성 (! 문자 포함 가능)
+# Write the file via Python (handles ! without issue)
 ssh user@server "python3 -c \"
 with open('/tmp/fix.rb', 'w') as f:
     f.write('''
@@ -166,71 +218,121 @@ puts k.reload.permissions.inspect
 ''')
 \""
 
-# 그 다음 실행
+# Then run it
 ssh user@server 'bundle exec rails runner /tmp/fix.rb'
+```
+
+### Fix 3: bash -s Pattern
+
+Another option is piping the script via stdin:
+
+```bash
+ssh user@server bash -s << 'SCRIPT'
+cd /app && bundle exec rails runner - << 'RUBY'
+puts "Hello from Rails"
+RUBY
+SCRIPT
 ```
 
 ---
 
-## 5. SCP/SFTP가 안 되는 디렉토리 — base64 우회
+## 5. SCP/SFTP Blocked by Permissions — base64 Workaround
 
-NAS 서버에 파일을 올리려고 했는데:
+Trying to upload a file to the NAS:
 
 ```bash
 scp script.py user@nas:/path/to/dir/
 # → scp: /path/to/dir/script.py: Permission denied
 ```
 
-디렉토리가 root로 생성되어 있어서 일반 SSH 계정으로는 SCP/SFTP 쓰기가 안 됐다. `chmod`로 권한을 줘도 SSH 세션에서는 바로 적용이 안 되는 상황.
+The directory was owned by root, so the regular SSH account had no write access via SCP. Running `chmod` in a separate SSH session didn't take effect immediately.
 
-**우회 방법:** SSH + base64 인코딩으로 전송한다.
+### Why SCP Can't Use sudo
 
-로컬에서:
+SCP and SFTP operate through a separate subsystem (`sftp-server`). Unlike a regular SSH shell session, this subsystem does not support privilege escalation via `sudo`. If the destination directory is not writable by your user, there is no way to use SCP or SFTP to write there — regardless of what `sudo` permissions your account has.
+
+### Workaround: SSH + base64
+
+Send the file using only SSH shell commands, which do support `sudo`:
+
 ```bash
 base64 script.py | ssh user@nas "base64 -d | sudo tee /path/to/dir/script.py > /dev/null"
 ```
 
-또는 Python으로 내용을 직접 echo:
+Or capture the base64 content first and echo it:
 
 ```bash
 CONTENT=$(base64 < script.py)
 ssh user@nas "echo '$CONTENT' | base64 -d | sudo tee /path/to/dir/script.py"
 ```
 
-SCP는 SFTP 서브시스템을 타지만, 이 방식은 순수 SSH 셸 명령만 사용해서 `sudo`로 권한 우회가 가능하다.
+### Caveats
+
+base64 encoding inflates file size by roughly 33%. This approach is fine for scripts and config files, but not for large binaries or media files. For large files, the right fix is to correct the directory permissions (`chmod`/`chown`) rather than working around them.
 
 ---
 
-## 6. `update_column` vs `update_columns` — PostgreSQL 배열 컬럼
+## 6. `update_column` vs `update_columns` — PostgreSQL Array Columns
 
-마이그레이션에서 PostgreSQL 배열 타입 컬럼을 업데이트하려고 했다:
+During a data migration, I was trying to update a PostgreSQL array-type column:
 
 ```ruby
 record.update_column(:permissions, record.permissions + ['new_perm'])
 ```
 
-이게 말썽이었다. `update_column`은 단수형으로, 단일 컬럼만 바꾸고 콜백도 건너뛴다. 배열 연산 결과(`Array`)를 그대로 넘기면 pg 드라이버가 직렬화를 제대로 못 하는 경우가 있다.
+This caused problems.
 
-**`update_columns` (복수형)**을 쓰면 더 안정적으로 동작했다:
+### The Difference Between update_column and update_columns
+
+`update_column` (singular) updates a single column directly in the database, skipping callbacks and validations. When you pass a Ruby `Array` to it, the `pg` driver has to serialize it to PostgreSQL's `text[]` format. In some versions and configurations, this serialization is unreliable for array values.
+
+`update_columns` (plural) is more robust and the preferred approach:
 
 ```ruby
 new_perms = (record.permissions || []) | ['new_perm']
 record.update_columns(permissions: new_perms)
 ```
 
-`|` 연산자는 중복 없이 배열을 합쳐준다. `+`는 중복을 허용하므로 권한 목록에는 `|`가 더 적합하다.
+### Using `|` Instead of `+`
+
+The `|` operator performs a set union — it merges two arrays without duplicates:
+
+```ruby
+['admin', 'read'] | ['read', 'write']  # → ['admin', 'read', 'write']
+['admin', 'read'] + ['read', 'write']  # → ['admin', 'read', 'read', 'write']
+```
+
+For a permissions list, duplicates are meaningless or harmful, so `|` is the right operator.
+
+### Guard Against nil
+
+If the column might be `nil` for older records (e.g., `default: []` wasn't set in the migration):
+
+```ruby
+new_perms = (record.permissions || []) | ['new_perm']
+```
+
+Always guard with `|| []` to avoid `NoMethodError: undefined method '|' for nil`.
 
 ---
 
-## 7. `wip_count` 가 DB 컬럼인 줄 알았는데 computed field였다
+## 7. `wip_count` Was a Computed Field, Not a DB Column
 
-유저 모델에 `wip_count` 속성이 있길래 `update_columns(wip_count: 0)`으로 리셋하려 했다:
+The user model had a `wip_count` attribute, so I tried to reset it with `update_columns`:
+
+```ruby
+user.update_columns(wip_count: 0)
+```
+
+Error:
 
 ```
 can't write unknown attribute 'wip_count'
 ```
 
-확인해 보니 DB 컬럼이 아니라 Ruby 메서드였다:
+### Why
+
+It was not a database column at all — it was a Ruby method:
 
 ```ruby
 def wip_count
@@ -238,25 +340,49 @@ def wip_count
 end
 ```
 
-실시간으로 활성 티켓 수를 세는 computed field. 값을 바꾸려면 관련 티켓의 상태를 바꾸거나, `max_wip`을 조정해야 한다.
+This is a computed (derived) field that counts the user's currently active tickets in real time. It only exists as a method on the model class, not as a column in the database. You cannot write to it with `update_columns` because there is no corresponding column in the `UPDATE` SQL statement.
+
+### Fix
+
+To change the effective value of `wip_count`, you need to change the underlying tickets' states, or adjust the related `max_wip` column that controls how many tickets the user is allowed to hold:
 
 ```ruby
-# wip_count는 못 바꾸고, max_wip을 늘리면 수용 가능 티켓 수가 늘어난다
+# wip_count itself is read-only; increase max_wip to allow more tickets
 user.update_columns(max_wip: 20)
 ```
+
+### Quick Way to Check
+
+When unsure whether an attribute is a DB column or a computed method:
+
+```ruby
+# In Rails console
+User.column_names.include?('wip_count')  # false → it's a method, not a column
+User.columns_hash['wip_count']            # nil → not in the database
+```
+
+Or just search `db/schema.rb` — if it's not there, it's not a column.
 
 ---
 
 ## Summary
 
-| 문제 | 핵심 원인 | 해결 |
-|------|-----------|------|
-| `render_success(key: val)` 500 에러 | Ruby 3.0 kwargs/positional 분리 | `{}` 명시적 해시 래핑 |
-| Docker 환경 변수 미반영 | `restart`는 컨테이너 재생성 안 함 | `up -d` 사용 |
-| NAS `crontab` 없음 | Synology DSM 특성 | `/etc/crontab` 직접 편집 |
-| SSH heredoc `!` 오류 | bash 히스토리 확장 | `update_columns` 등 `!` 없는 메서드 사용 |
-| SCP Permission denied | root 소유 디렉토리 | base64 + SSH tee 우회 |
-| PostgreSQL 배열 업데이트 | `update_column` 직렬화 이슈 | `update_columns` + `|` 연산자 |
-| `update_columns` 오류 | computed field를 DB 컬럼으로 착각 | 모델 정의 확인 후 `max_wip` 조정 |
+| Problem | Root Cause | Fix |
+|---------|------------|-----|
+| `render_success(key: val)` raises ArgumentError | Ruby 3.0 kwargs/positional separation | Wrap explicitly with `{}` |
+| Docker env vars not updated after restart | `restart` does not recreate the container | Use `up -d` to recreate |
+| NAS `crontab` command not found | Synology DSM doesn't ship `crontab` | Edit `/etc/crontab` directly |
+| SSH heredoc `!` causes Ruby syntax error | bash history expansion | Use `update_columns` and other non-bang methods |
+| SCP Permission denied | Root-owned directory, no sudo via SFTP | base64 encode and pipe through SSH + tee |
+| PostgreSQL array column update fails | `update_column` serialization inconsistency | Use `update_columns` with `|` operator |
+| `update_columns` fails on `wip_count` | Mistook a computed field for a DB column | Check schema.rb; adjust `max_wip` instead |
 
-하루 동안 겪은 것들인데 각각은 사소하지만 연속으로 터지니 꽤 피로했다. 특히 Ruby 3.0 kwargs 변경은 마이그레이션 안 한 프로젝트에서 자주 만날 것 같아서 기록해 둔다.
+---
+
+## Key Takeaways
+
+- **Ruby 3.0 kwargs separation is a silent time bomb.** Any codebase upgraded from Ruby 2.x that uses `render_success(key: val)` or similar helper patterns will break without warning at runtime. Run a project-wide grep for `render_success(` not immediately followed by `{` before upgrading.
+- **Docker environment variables are locked at container creation time.** `restart` keeps the old environment. `up -d` recreates and picks up the new values. This distinction also matters in CI/CD pipelines.
+- **Synology NAS is not standard Linux.** Familiar tools like `crontab`, `apt`, and `systemctl` are absent or work differently. Always check DSM-specific documentation first.
+- **SSH + `!` is always dangerous.** When executing Rails bang methods (`update!`, `save!`) via SSH, either switch to non-bang alternatives (`update_columns`, `save(validate: false)`) or write the code to a file first.
+- **Always verify whether an attribute is a DB column or a computed field** before trying to write it. A quick check of `schema.rb` or `column_names` saves a confusing `can't write unknown attribute` error.

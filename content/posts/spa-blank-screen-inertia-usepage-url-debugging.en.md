@@ -10,31 +10,35 @@ cover:
   hidden: true
 ---
 
-
-Rails + Inertia.js + Svelte 앱을 배포한 뒤 접속하면 **완전히 빈 화면**만 보였다. 서버는 정상이고 에셋도 다 로드되는데 화면이 안 그려지는 상황. 원인 추적부터 해결까지 정리한다.
+After deploying a Rails + Inertia.js + Svelte app, visiting the URL showed a **completely blank screen**. The server was responding normally and all assets were loading fine — but nothing was rendering. This post covers the full investigation, root cause, fix, and patterns to prevent this from happening again.
 
 ---
 
 ## Symptoms
 
-- 배포된 URL 접속 시 **빈 화면** (흰색 배경만 표시)
-- 로컬 개발 서버에서는 정상 동작
-- 아무런 에러 페이지 없이 그냥 빈 화면
+- **Blank screen** (white background only) when accessing the deployed URL
+- Works fine on the local development server
+- No error page displayed — just silence
+- No anomalies in the server logs (200 responses, normal request handling)
+
+What makes this situation particularly frustrating is that from the server's perspective, everything is working perfectly. HTTP status code 200, no error logs, normal response times. The problem exists only inside the browser.
 
 ---
 
-## 진단 과정
+## Diagnosis
 
-### Step 1: HTTP 응답 확인
+The key to debugging SPAs is a **layered, sequential approach**. Trying to see everything at once wastes time.
+
+### Step 1: Check HTTP Response
 
 ```bash
 curl -s -o /dev/null -w "%{http_code}" https://example.com/
 # 200
 ```
 
-HTTP 200 OK. 서버 자체는 정상 응답 중이다.
+HTTP 200 OK. The server itself is responding normally. This rules out DNS, infrastructure, and SSL issues.
 
-### Step 2: HTML 구조 확인
+### Step 2: Check HTML Structure
 
 ```bash
 curl -s https://example.com/ | head -30
@@ -53,9 +57,9 @@ curl -s https://example.com/ | head -30
 </html>
 ```
 
-HTML은 정상이고, Inertia.js의 `data-page` 속성도 정상적으로 들어가 있다.
+The HTML looks correct, and Inertia.js's `data-page` attribute is populated as expected. The Rails server-side rendering is not the problem. Inspecting the `data-page` JSON also confirmed that the component name, props, and other fields were properly serialized.
 
-### Step 3: 에셋 로딩 확인
+### Step 3: Check Asset Loading
 
 ```bash
 curl -s -o /dev/null -w "%{http_code}" https://example.com/vite/assets/application-xxx.js
@@ -65,11 +69,11 @@ curl -s -o /dev/null -w "%{http_code}" https://example.com/vite/assets/applicati
 # 200
 ```
 
-JS, CSS 모두 200 OK. 에셋 로딩 문제는 아니다.
+Both JS and CSS return 200 OK. Asset loading is not the issue. The Vite build artifacts are being served correctly.
 
-### Step 4: 브라우저 콘솔 에러 확인 (결정적 단서)
+### Step 4: Check Browser Console Errors (The Critical Clue)
 
-여기서 **Playwright MCP**를 사용해 실제 브라우저로 접속하고 콘솔 에러를 수집했다.
+This is where **Playwright MCP** came in — navigating to the page with a real browser and collecting console errors. This is information you simply cannot get from `curl`.
 
 ```
 TypeError: Cannot read properties of undefined (reading 'pathname')
@@ -79,13 +83,13 @@ TypeError: Cannot read properties of undefined (reading 'pathname')
     at vendor-svelte-xxx.js:1:37413
 ```
 
-**JS 런타임 에러**가 있었다. `pathname`이라는 프로퍼티를 `undefined`에서 읽으려 했다.
+There was a **JS runtime error**. Something was trying to read the `pathname` property off `undefined`. The stack trace points into minified bundles so the exact source location isn't obvious, but the word `pathname` is the key clue.
 
 ---
 
-## 근본 원인
+## Root Cause
 
-문제는 레이아웃 컴포넌트에서 현재 URL 경로를 체크하는 코드였다:
+The problem was in a layout component that checked the current URL path:
 
 ```svelte
 <script lang="ts">
@@ -93,58 +97,100 @@ TypeError: Cannot read properties of undefined (reading 'pathname')
 
   const page = usePage()
 
-  // 문제의 코드
+  // The problematic code
   const isMyPage = $derived($page.url.pathname.startsWith('/mypage'))
 </script>
 ```
 
-### 핵심: `usePage().url`은 **string**이다
+### The Core Issue: `usePage().url` is a **string**
 
-브라우저의 `window.location`이나 `URL` 객체와 달리, Inertia.js의 `usePage()`가 반환하는 `url` 프로퍼티는 **URL 객체가 아닌 순수 문자열**이다.
+Unlike the browser's `window.location` or a `URL` object, the `url` property returned by Inertia.js's `usePage()` is a **plain string — not a URL object**.
 
 ```typescript
-// Inertia.js 내부에서 url은 이런 형태
+// Inside Inertia.js, url looks like this
 $page.url // "/mypage"     ← string
 $page.url // "/products/1" ← string
 
-// URL 객체처럼 쓸 수 없다
-$page.url.pathname  // undefined! string에는 pathname이 없다
-$page.url.startsWith('/mypage')  // 이것이 올바른 사용법
+// You cannot use it like a URL object
+$page.url.pathname  // undefined! strings have no pathname property
+$page.url.startsWith('/mypage')  // this is the correct approach
 ```
 
-| 접근 방식 | 타입 | `.pathname` | `.startsWith()` |
-|-----------|------|-------------|-----------------|
-| `window.location` | Location 객체 | `/mypage` | `/mypage` |
-| `new URL(...)` | URL 객체 | `/mypage` | 에러 |
+This confusion is easy to fall into because there are multiple ways to work with URLs in web development:
+
+| Approach | Type | `.pathname` | `.startsWith()` |
+|----------|------|-------------|-----------------|
+| `window.location` | Location object | `/mypage` | not a method |
+| `new URL(...)` | URL object | `/mypage` | not a method |
 | `$page.url` (Inertia.js) | **string** | **undefined** | `/mypage` |
 
-### 왜 로컬에서는 됐나?
+If you frequently use `window.location.pathname` or `new URL(href).pathname`, it's natural to assume `$page.url` is also an object. Especially if you've cast `$page` to `any` in TypeScript — the type checker won't catch this mistake at compile time.
 
-로컬 개발 환경에서는 이 코드가 이미 수정된 상태였고, 배포된 버전은 수정 전 코드가 빌드되어 올라가 있었다. 즉 **로컬과 배포 코드 불일치** 상태.
+### How Inertia.js Works Internally
+
+When Inertia.js initializes the page, the Rails server responds with a `data-page` JSON payload that includes the `url` field as a string:
+
+```json
+{
+  "component": "Home/Index",
+  "props": { ... },
+  "url": "/",
+  "version": "abc123"
+}
+```
+
+Inertia parses this JSON directly and uses it as the page state. The `url` field starts out as a string and stays that way. Even during SPA navigation, Inertia sets the new URL string directly into `page.url` — it never creates a parsed URL object.
+
+### Why Did It Work Locally?
+
+The local development environment already had the fixed version of this code. The deployed version had been built from the code before the fix was applied. In other words, **the local and deployed code were out of sync**.
+
+This is one of the most common traps: you fix something locally but forget to commit, or you commit but forget to deploy, or you deploy the wrong branch. It's a fundamental reason to always verify behavior on the production URL after deploying, not just assume local == production.
 
 ---
 
-## Solution
+## Fix
 
 ```svelte
 <script lang="ts">
   const page = usePage()
 
-  // 수정: string으로 직접 비교 + optional chaining
+  // Fixed: compare directly as string + optional chaining
   const isMyPage = $derived(($page as any)?.url?.startsWith('/mypage') ?? false)
 </script>
 ```
 
-변경 포인트:
-1. `.pathname` 제거 - `url`이 string이므로 직접 `.startsWith()` 사용
-2. **optional chaining** (`?.`) - `$page`나 `url`이 아직 초기화되지 않은 경우 대비
-3. **nullish coalescing** (`?? false`) - undefined일 때 기본값 false
+What changed:
+1. Removed `.pathname` — since `url` is a string, call `.startsWith()` directly on it
+2. Added **optional chaining** (`?.`) — guards against `$page` or `url` not yet being initialized
+3. Added **nullish coalescing** (`?? false`) — returns `false` as a safe default when the value is `undefined`
+
+### A More Type-Safe Approach
+
+To avoid `any` casts and leverage TypeScript properly, use Inertia.js's type generics:
+
+```typescript
+import { usePage } from '@inertiajs/svelte'
+import type { Page } from '@inertiajs/core'
+
+interface AppPageProps {
+  flash: { notice?: string; alert?: string }
+  unread_message_count: number
+}
+
+const page = usePage<AppPageProps>()
+
+// page.url is correctly inferred as string type
+const isMyPage = $derived($page.url?.startsWith('/mypage') ?? false)
+```
+
+With this approach, `$page.url` is typed as `string`, so any attempt to access `.pathname` will produce a compile-time error rather than a silent runtime crash.
 
 ---
 
-## 추가 안전 장치
+## Additional Safety: Defensive `inertia_share`
 
-글로벌 데이터를 `inertia_share`로 공유할 때, DB 마이그레이션이 아직 실행되지 않은 환경에서도 에러가 나지 않도록 rescue 처리:
+When sharing global data via `inertia_share`, it is good practice to add rescue handling so that errors from a not-yet-migrated database do not cause blank screens. This is especially relevant on the initial deploy to a new server, where the app might start before migrations have run.
 
 ```ruby
 # ApplicationController
@@ -161,47 +207,100 @@ def safe_unread_count
   return 0 unless current_user
   current_user.conversations.sum(:unread_count_for_user)
 rescue ActiveRecord::StatementInvalid
-  0  # 테이블이 아직 없는 경우 (마이그레이션 전)
+  0  # Table does not exist yet (before migration runs)
 end
 ```
 
+Why this pattern matters: on PaaS platforms like Render.com, the deployment process runs `bundle exec rails db:migrate` and then restarts the app. During the brief window between the app booting and the migration completing, the old app version may try to query a table that doesn't exist yet, triggering `ActiveRecord::StatementInvalid`. Since `inertia_share` runs on every request, an error here means a blank screen on every page.
+
 ---
 
-## Lessons Learned
+## Automating Post-Deploy Diagnostics with Playwright
 
-### 1. SPA 빈 화면 = JS 런타임 에러를 의심하라
+The most decisive tool in this investigation was Playwright. You can programmatically collect JS runtime errors from a deployed site without opening a browser manually.
 
-SPA에서 빈 화면이 나올 때 가장 흔한 원인:
-- HTTP 200이지만 JS에서 에러가 터져 렌더링이 안 됨
-- `curl`로는 정상인데 브라우저에서만 문제 → **콘솔 에러 확인 필수**
+```javascript
+// playwright-console-check.js
+const { chromium } = require('playwright')
 
-### 2. 프레임워크 API의 타입을 정확히 알아야 한다
+async function checkConsoleErrors(url) {
+  const browser = await chromium.launch()
+  const page = await browser.newPage()
 
-`$page.url`이 string인지 URL 객체인지는 Inertia.js 문서에 나와 있지만, 빠르게 코딩할 때 `window.location`과 혼동하기 쉽다. TypeScript를 쓰더라도 `any` 캐스팅하면 타입 체크가 무력화된다.
+  const errors = []
+  page.on('console', msg => {
+    if (msg.type() === 'error') {
+      errors.push(msg.text())
+    }
+  })
+  page.on('pageerror', err => {
+    errors.push(`Page error: ${err.message}`)
+  })
 
-### 3. 배포 디버깅 도구 계층
+  await page.goto(url, { waitUntil: 'networkidle' })
+
+  await browser.close()
+
+  if (errors.length > 0) {
+    console.log('Console errors found:')
+    errors.forEach(e => console.log(' -', e))
+    process.exit(1)
+  } else {
+    console.log('No console errors found.')
+  }
+}
+
+checkConsoleErrors('https://example.com')
+```
+
+This script can be integrated into your CI/CD pipeline to automatically verify that no runtime errors appear after each deployment. On GitHub Actions, you can run this with the official `playwright/action` to get a headless browser in the CI environment.
+
+---
+
+## Key Takeaways
+
+### 1. Blank Screen in SPA = Suspect a JS Runtime Error First
+
+The most common cause of a blank screen in an SPA:
+- The server returns HTTP 200, but JavaScript throws an error before rendering completes
+- `curl` shows everything is fine, but the browser fails silently — **always check the console**
+- In Svelte or React, an unhandled error in a top-level component will leave the entire page blank
+
+### 2. Know the Exact Type of Every Framework API
+
+Whether `$page.url` is a string or a URL object is documented in Inertia.js, but it is easy to confuse with `window.location` when coding quickly. Even with TypeScript, casting to `any` disables type checking entirely and turns runtime errors invisible at compile time.
+
+Common Inertia.js type pitfalls:
+- `$page.url` → string (no `.pathname`, no `.host`, etc.)
+- `$page.props.user` → requires TypeScript generic to be typed correctly
+- `router.visit()` → asynchronous, but does not return a Promise
+
+### 3. The Layered Debugging Stack for Deployed SPAs
 
 ```
-1단계: curl -s -w "%{http_code}" (HTTP 상태)
-2단계: curl + HTML 분석 (서버 렌더링 확인)
-3단계: 에셋 URL curl (JS/CSS 로딩 확인)
-4단계: Playwright/브라우저 DevTools (JS 런타임 에러)
+Layer 1: curl -s -w "%{http_code}"  — HTTP status
+Layer 2: curl + HTML inspection     — Server rendering check
+Layer 3: curl asset URLs            — JS/CSS loading check
+Layer 4: Playwright / Browser DevTools  — JS runtime errors
 ```
 
-특히 4단계에서 **Playwright를 사용한 자동 콘솔 에러 수집**이 결정적이었다. 수동으로 브라우저 열지 않고도 배포 사이트의 런타임 에러를 프로그래밍으로 감지할 수 있다.
+Each layer eliminates a class of problems. Most blank-screen SPA issues surface at Layer 4, which requires a real browser to reproduce. Playwright makes this automatable and scriptable.
 
-### 4. 로컬 ≠ 배포 환경
+### 4. Local Success Does Not Mean Production Success
 
-코드를 수정해도 **커밋 + 배포**하지 않으면 프로덕션에는 반영되지 않는다. 당연한 이야기지만, 로컬에서 잘 되는 것만 확인하고 "됐다"고 넘어가면 배포 환경에서 구버전 코드가 동작하고 있을 수 있다.
+Fixing code locally means nothing until it is committed, pushed, and deployed. This sounds obvious, but it is surprisingly easy to confirm the fix locally and move on, leaving the production environment still running the broken version.
+
+After every deploy, verify behavior on the actual production URL. Automating this as a smoke test removes the human error factor entirely.
 
 ---
 
 ## TL;DR
 
-| 항목 | 내용 |
-|------|------|
-| **증상** | SPA 배포 후 빈 화면 |
-| **오해** | 서버 문제? 에셋 로딩 실패? |
-| **실제 원인** | Inertia.js `usePage().url`이 string인데 `.pathname` 접근 |
-| **해결** | `.startsWith()` 직접 사용 + optional chaining |
-| **핵심 도구** | Playwright 콘솔 에러 자동 수집 |
+| Item | Detail |
+|------|--------|
+| **Symptom** | Blank screen after SPA deployment |
+| **Initial suspicion** | Server error? Asset loading failure? |
+| **Actual cause** | Accessing `.pathname` on `usePage().url`, which is a string in Inertia.js |
+| **Fix** | Use `.startsWith()` directly + optional chaining |
+| **Key tool** | Playwright automated console error collection |
+| **Prevention** | Use Inertia type generics; add post-deploy smoke tests |

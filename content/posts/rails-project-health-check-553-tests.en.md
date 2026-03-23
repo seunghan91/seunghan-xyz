@@ -11,42 +11,49 @@ cover:
 categories: ["Rails"]
 ---
 
+I decided to do a thorough inspection of a production Rails 8 API server. Most features appeared to be working, but test coverage sat at a mere 3%. This was an exercise in finding out just how dangerous the assumption "it works, so it's fine" really is.
 
-운영 중인 Rails 8 API 서버를 점검하기로 했다. 기능은 대부분 동작하고 있었지만, 테스트 커버리지가 3%밖에 안 되는 상태. "동작하니까 괜찮겠지"라는 생각이 얼마나 위험한지 확인하는 과정이었다.
-
----
-
-## 점검 전 상태
-
-- Rails 8 + PostgreSQL (UUID PK) + JWT 인증 + Pundit 권한
-- RSpec 테스트: **16개** (기본 scaffold 수준)
-- 모델 20개+, 컨트롤러 15개+, 서비스 5개+
-- Dockerfile은 배포용으로 작성되어 있었고, CI는 없음
+When a project reaches a certain level of maturity, stability becomes more important than shipping new features. In a codebase without tests, every refactor, every dependency upgrade, and every new team member onboarding becomes a gamble. This inspection was not just about raising a coverage number — it was about taking an honest look at the actual state of the codebase.
 
 ---
 
-## 발견된 문제들
+## State Before the Inspection
 
-### 1. Dockerfile Ruby 버전 불일치
+- Rails 8 + PostgreSQL (UUID PK) + JWT authentication + Pundit authorization
+- RSpec tests: **16** (basic scaffold level)
+- 20+ models, 15+ controllers, 5+ services
+- A Dockerfile written for deployment, but no CI pipeline
+
+Those 16 tests were essentially auto-generated routing tests from scaffold. Core business logic, authorization checks, and the service layer had zero coverage. Running a production service for months while continuously adding features on top of that foundation was genuinely unsettling in hindsight.
+
+The inspection approach was straightforward: start with models, work through controllers, services, and Policies, and treat every failing test as a signal pointing to a real problem in the production code.
+
+---
+
+## Problems Found
+
+### 1. Dockerfile Ruby Version Mismatch
 
 ```dockerfile
 # Dockerfile
-FROM ruby:3.2-slim AS builder  # ← 여기가 3.2
+FROM ruby:3.2-slim AS builder  # ← version is 3.2
 
 # Gemfile.lock
 RUBY VERSION
-   ruby 3.4.4p34                # ← 실제는 3.4
+   ruby 3.4.4p34                # ← actual version is 3.4
 ```
 
-로컬에서는 `rbenv`로 3.4를 쓰고 있어서 문제 없었지만, Docker 빌드 시 gem 호환성 에러가 날 수 있는 시한폭탄이었다.
+Locally everything was fine because `rbenv` was pinned to 3.4, but this was a ticking time bomb. Ruby 3.2 and 3.4 have gem C extension compatibility differences, and native gem builds can fail unexpectedly. Without a CI pipeline, this would have gone unnoticed until it caused an actual deployment failure.
 
-**수정**: `ruby:3.2-slim` → `ruby:3.4-slim`
+**Fix**: `ruby:3.2-slim` → `ruby:3.4-slim`
+
+This kind of drift is easy to accumulate when there is no single source of truth for the Ruby version. A good practice is to define the version once — in a GitHub Actions workflow matrix or a shared environment variable — and have `.ruby-version`, the `Gemfile`, and the `Dockerfile` all reference it.
 
 ---
 
-### 2. 누락된 Serializer — 엔드포인트 500 에러
+### 2. Missing Serializer — 500 Error on an Endpoint
 
-커뮤니티 공개 여행 목록 API가 있었는데, 해당 Serializer 클래스가 아예 없었다.
+There was a public community travel listing API, but the corresponding Serializer class simply did not exist.
 
 ```ruby
 # controller
@@ -57,86 +64,118 @@ def community
 end
 ```
 
-인증 없이 접근하는 공개 API라 QA에서도 빠지기 쉬운 부분이었다. 기존 Serializer 패턴에 맞춰 생성.
+Because this was a public API requiring no authentication, it was easy to skip in QA. Authentication-gated endpoints naturally get exercised during development, but public endpoints exist outside the auth flow and can slip through unnoticed. The missing class was created following the existing Serializer pattern, and the endpoint was covered with a Request spec.
 
 ---
 
-### 3. Policy 메서드 누락
+### 3. Missing Policy Methods
 
-컨트롤러에서 `authorize @trip, :update_exchange_rates?`를 호출하는데, Policy에 해당 메서드가 없었다.
+The controller called `authorize @trip, :update_exchange_rates?`, but the corresponding method was not defined in the Policy.
 
 ```
 Pundit::NotDefinedError: unable to find policy method :update_exchange_rates?
 ```
 
-비슷한 케이스로 `generate_invite?`도 누락. 둘 다 owner 또는 member 권한으로 추가.
+A similar case: `generate_invite?` was also missing. Both were added with owner or member access.
+
+This type of bug appears frequently when controllers and Policies are written at different times. If you write the controller first and add the Policy later, the methods the controller references and the methods the Policy actually defines tend to drift apart. Writing Policy specs makes these mismatches surface at test time rather than in production.
 
 ---
 
-### 4. Pundit class-level authorize 문제
+### 4. Pundit Class-Level Authorize Bug
 
-숙소(Accommodation) 목록 조회에서 흥미로운 버그가 있었다.
+There was an interesting bug in the Accommodation listing endpoint.
 
 ```ruby
 # controller
 def index
-  authorize Accommodation  # ← 클래스를 넘김
+  authorize Accommodation  # ← passing the class itself
   # ...
 end
 
 # policy
 def trip
   record.is_a?(Class) ? Trip.find_by(id: @trip_id) : record.trip
-  # ↑ @trip_id가 Policy에는 전달되지 않음 → nil → 권한 체크 실패
+  # ↑ @trip_id is not passed to the Policy → nil → authorization fails
 end
 ```
 
-컨트롤러의 `@trip_id`는 Policy 객체에 전달되지 않는다. Pundit의 `authorize`는 Policy 인스턴스를 새로 만들기 때문.
+The controller's `@trip_id` instance variable is not available inside the Policy object. Pundit constructs a new Policy instance with only `initialize(user, record)`, so there is no way to access controller-level instance variables from inside a Policy.
 
-**수정**: `authorize Accommodation` 대신 `authorize @trip.accommodations.build`로 인스턴스를 넘겨서 Policy가 항상 `record.trip`을 통해 여행 정보에 접근하도록 변경.
+The code attempted to handle this with an `is_a?(Class)` branch, but `@trip_id` inside the Policy is nil, so `Trip.find_by(id: nil)` returns nil, causing authorization to always fail or raise an exception.
+
+**Fix**: Replace `authorize Accommodation` with `authorize @trip.accommodations.build`, so the Policy can always reach the parent resource through `record.trip`.
+
+```ruby
+# controller (after fix)
+def index
+  authorize @trip.accommodations.build
+  accommodations = @trip.accommodations
+  # ...
+end
+
+# policy (simplified)
+def index?
+  trip_member?
+end
+
+private
+
+def trip
+  record.trip  # always accessible from the record
+end
+```
+
+Using `build` creates an unsaved in-memory instance. The Policy receives that instance as `record` and can traverse the `trip` association on it without ever needing access to controller instance variables.
 
 ---
 
-### 5. render_error 호출 방식 불일치
+### 5. Positional vs Keyword Argument Mismatch in render_error
 
 ```ruby
-# 컨트롤러에서 호출
+# called in controller
 render_error(message, :unprocessable_entity)  # positional argument
 
-# BaseController 정의
+# defined in BaseController
 def render_error(errors, status: :unprocessable_entity)  # keyword argument
 ```
 
-Ruby에서 `render_error("msg", :unprocessable_entity)`로 호출하면 두 번째 인자가 `status` 키워드가 아닌 positional로 들어가서 `ArgumentError`가 난다.
+In Ruby, calling `render_error("msg", :unprocessable_entity)` passes the second argument as a positional parameter, not as the `status` keyword — resulting in an `ArgumentError`. Since Ruby 3.0 drew a hard line between positional and keyword arguments, any code that carried over the old calling convention is at risk.
 
-**수정**: `render_error(message, status: :unprocessable_entity)`
+There is also a subtler variant: if the status keyword has a default value, Ruby may silently ignore the extra positional argument and use the default instead. The wrong HTTP status gets returned without any error, which is far harder to track down than an explicit `ArgumentError`.
+
+**Fix**: `render_error(message, status: :unprocessable_entity)`
 
 ---
 
-### 6. Serializer에서 없는 메서드 참조
+### 6. Serializer Referencing a Non-Existent Method
 
 ```ruby
 class UserSerializer < ApplicationSerializer
   def serializable_hash
     {
-      image: object.image,  # ← User 모델에 image 메서드 없음
-      # avatar_url은 있음
+      image: object.image,  # ← User model has no `image` method
+      # avatar_url exists instead
     }
   end
 end
 ```
 
-User 모델에는 `avatar_url` 메서드가 있고, `image`는 없었다. OAuth 인증 시 provider가 주는 필드명(`image`)을 그대로 쓴 것으로 보인다.
+The User model had an `avatar_url` method, not `image`. OAuth providers such as Google and GitHub include an `image` field in their user info payloads. The model column was named `avatar_url` when it was saved, but the Serializer was written using the OAuth provider's original field name.
+
+This bug would raise `NoMethodError` on every API response that serializes a User — a critical failure that was never caught because there were no tests for those endpoints.
 
 ---
 
-### 7. 모델 파일 누락 (테이블은 존재)
+### 7. Missing Model File (Table Exists)
 
-`chat_messages` 테이블은 마이그레이션으로 만들어져 있었지만, `app/models/chat_message.rb` 파일이 없었다. User 모델에서 `has_many :chat_messages`를 선언하고 있어서 association 호출 시 에러.
+The `chat_messages` table had been created via migration, but `app/models/chat_message.rb` did not exist. The User model declared `has_many :chat_messages`, meaning any call to that association would raise an error.
+
+This situation typically arises when a migration and its model file are written separately, or when a file gets deleted without rolling back the migration. Rails loads associations lazily, so the error only surfaces when `user.chat_messages` is actually called — not at boot time.
 
 ---
 
-### 8. private 메서드를 컨트롤러에서 호출
+### 8. Calling a Private Method from a Controller
 
 ```ruby
 class Trip < ApplicationRecord
@@ -148,25 +187,29 @@ class Trip < ApplicationRecord
 end
 ```
 
-컨트롤러에서 `@trip.generate_invite_code!`를 호출하는데, private 블록 안에 있어서 `NoMethodError`. 같은 파일에 다른 메서드들은 `public :method_name`으로 명시적으로 공개하고 있었는데, 이것만 빠져 있었다.
+The controller called `@trip.generate_invite_code!`, but the method was inside a `private` block, causing a `NoMethodError`. Other methods in the same file were explicitly re-opened with `public :method_name`, but this one was missed.
+
+What makes this bug interesting is that the `public :method_name` pattern was already in use in the same file. The developer clearly intended to selectively expose private methods, but `generate_invite_code!` was simply overlooked. Without code review, this kind of omission accumulates quietly.
 
 ---
 
-## UUID PK에서의 테스트 함정
+## The UUID PK Test Trap
 
-PostgreSQL UUID를 PK로 쓰는 프로젝트에서 재미있는 문제를 만났다.
+Working with PostgreSQL UUID primary keys surfaced a subtle but important testing problem.
 
 ```ruby
-# 이 테스트가 간헐적으로 실패
+# This test failed intermittently
 expense.recalculate_shares!
-expect(ep1.reload.share_amount_cents).to eq(3334)  # 나머지 1원
+expect(ep1.reload.share_amount_cents).to eq(3334)  # gets the remainder penny
 expect(ep2.reload.share_amount_cents).to eq(3333)
 expect(ep3.reload.share_amount_cents).to eq(3333)
 ```
 
-`recalculate_shares!`는 `order(:id)`로 참가자를 정렬한 뒤 첫 번째에게 나머지를 준다. 그런데 UUID는 순차적이지 않다. `ep1`이 항상 첫 번째가 아닌 것이다.
+`recalculate_shares!` sorts participants by `order(:id)` and assigns the remainder to the first one. But UUIDs are not sequential. There is no guarantee that `ep1` is ever the first record in that ordering.
 
-**수정**: 특정 참가자의 값을 검증하는 대신, 전체 분배 결과를 정렬해서 검증.
+Because UUIDs are randomly generated, `order(:id)` can produce a different result on every test run. "Intermittently failing tests" are among the hardest bugs to track down — they rarely reproduce on demand, and teams often dismiss them as flaky CI. In most cases they stem from ordering assumptions or timing dependencies.
+
+**Fix**: Instead of asserting a specific participant's value, sort all results and assert the distribution.
 
 ```ruby
 shares = [ep1, ep2, ep3].map { |ep| ep.reload.share_amount_cents }.sort
@@ -174,49 +217,57 @@ expect(shares).to eq([3333, 3333, 3334])
 expect(shares.sum).to eq(10_000)
 ```
 
+This approach tests "is the total split correct?" rather than "who gets the remainder?" — which is also the more accurate expression of the actual business requirement.
+
 ---
 
-## Shoulda Matchers + UUID 호환 문제
+## Shoulda Matchers + UUID Compatibility
 
 ```ruby
 it { should validate_uniqueness_of(:email).case_insensitive }
 ```
 
-이 매처가 UUID PK 환경에서 실패했다. Shoulda가 내부적으로 레코드를 저장할 때 UUID 포맷 관련 비교에서 문제가 생긴다.
+This matcher failed in a UUID PK environment. Shoulda Matchers internally assumes integer primary keys in parts of its uniqueness validation logic, leading to unexpected behavior when UUIDs are used.
 
-**수정**: 수동 테스트로 교체.
+**Fix**: Replace with a manual test.
 
 ```ruby
-it "이메일 중복을 허용하지 않는다" do
+it "does not allow duplicate emails" do
   create(:user, email: "test@example.com")
   duplicate = build(:user, email: "TEST@example.com")
   expect(duplicate).not_to be_valid
 end
 ```
 
+The manual test is longer, but it makes the intent explicit in the code. The `case_insensitive` behavior is also verified directly by using a different casing in the email, rather than relying on a matcher option.
+
 ---
 
-## 최종 결과
+## Final Results
 
-| 항목 | Before | After |
-|------|--------|-------|
-| 테스트 수 | 16 | **553** |
-| 실패 | 0 (테스트가 없으니까) | **0** |
+| Metric | Before | After |
+|--------|--------|-------|
+| Test count | 16 | **553** |
+| Failures | 0 (no tests to fail) | **0** |
 | Pending | 0 | **0** |
-| 발견된 앱 버그 | 0 (몰랐음) | **8개 수정** |
+| App bugs found | 0 (unknown) | **8 fixed** |
 
-테스트를 작성하는 과정에서 실제 버그 8개를 발견했다. "기능이 동작한다"와 "코드가 올바르다"는 다른 이야기다.
+Writing tests surfaced 8 real bugs. "The feature works" and "the code is correct" are not the same statement.
+
+The number 553 was never the goal. It accumulated by working through model specs, controller specs, policy specs, request specs, and service specs one layer at a time. Every time a test failed, the production code was fixed. Every fix reinforced why having the test there in the first place mattered.
 
 ---
 
-## Lessons Learned
+## Key Takeaways
 
-1. **Dockerfile과 로컬 환경의 버전을 동기화하라.** `.ruby-version`, `Gemfile.lock`, `Dockerfile`이 각각 다른 버전을 가리키고 있으면 어디선가 터진다.
+1. **Keep Ruby versions in sync across all files.** If `.ruby-version`, `Gemfile.lock`, and `Dockerfile` each point to a different version, something will eventually break. Without CI, this drift can hide for a long time.
 
-2. **Pundit class-level authorize는 함정이다.** `authorize ModelClass` 대신 `authorize @parent.children.build`로 인스턴스를 넘겨라. Policy에서 부모 리소스에 접근할 수 있다.
+2. **Pundit class-level authorize is a trap.** Use `authorize @parent.children.build` instead of `authorize ModelClass`. This gives the Policy clean access to the parent resource through `record.trip`, eliminating awkward `is_a?(Class)` workaround logic.
 
-3. **UUID PK를 쓴다면 `order(:id)`에 의존하지 마라.** 테스트에서 순서를 가정하면 간헐적 실패의 원인이 된다.
+3. **Do not rely on `order(:id)` when using UUID primary keys.** Assuming a sort order in tests leads to intermittent failures. If you see a test that "randomly fails," UUID ordering is a likely culprit.
 
-4. **Ruby의 keyword argument와 positional argument는 조용히 다르게 동작한다.** `method(a, b)` vs `method(a, key: b)` — 에러가 바로 나면 다행이지만, 예상과 다른 값이 들어가면 찾기 어렵다.
+4. **Ruby keyword and positional arguments fail silently when default values are involved.** `method(a, b)` versus `method(a, key: b)` — if a default value is defined, the wrong value can be used without raising any error.
 
-5. **테스트가 없는 코드는 "동작하는 코드"가 아니라 "아직 문제를 모르는 코드"다.**
+5. **Public endpoints are easy to miss in QA.** Auth-gated endpoints get exercised naturally during development. Endpoints that require no authentication sit outside the normal flow and can go untested for months. Cover them explicitly with Request specs.
+
+6. **Code without tests is not "working code" — it is "code where the problems are not yet known."** None of the 8 bugs found during this inspection were obvious from reading the code alone. They only surfaced when the tests ran and forced the code to prove its correctness.

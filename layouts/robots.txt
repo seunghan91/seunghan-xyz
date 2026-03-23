@@ -2,8 +2,8 @@ User-agent: *
 Allow: /
 Disallow: /tags/*/index.xml
 Disallow: /categories/*/index.xml
-Disallow: /en/tags/*/index.xml
-Disallow: /en/categories/*/index.xml
+Disallow: /en/tags/
+Disallow: /en/categories/
 
 # AI Crawlers - explicitly allowed
 User-agent: GPTBot

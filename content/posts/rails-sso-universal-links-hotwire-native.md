@@ -16,6 +16,8 @@ series: ["Hotwire Native Mobile App"]
 
 거기에 iOS Hotwire Native 앱이 설치돼 있으면, 브라우저 대신 네이티브 앱에서 인증이 진행되도록 Universal Links까지 붙였다.
 
+OAuth 2.0 같은 표준 프로토콜을 쓰지 않고 직접 구현한 이유는 두 서비스 모두 직접 운영하는 내부 시스템이고, 외부 IdP(Auth0, Cognito 등)를 붙이기에는 오버엔지니어링이었기 때문이다. 핵심 개념(토큰 발급, 검증, 세션 관리)은 표준과 동일하다.
+
 ---
 
 ## 목표 플로우
@@ -30,6 +32,8 @@ series: ["Hotwire Native Mobile App"]
   → "인증 완료" 페이지 (2초 대기) → 콜백 URL로 리다이렉트
   → 연동 서비스가 토큰 검증 → 로그인 완료
 ```
+
+RP(Relying Party) 쪽에서는 로그인 버튼 클릭 시 `state` 파라미터를 생성해서 세션에 저장하고, 콜백에서 이를 검증해 CSRF를 방지한다.
 
 ---
 
@@ -48,6 +52,8 @@ SSO authorize 엔드포인트에 `before_action :require_authentication`을 걸�
 
 `store_location`은 `request.fullpath`를 저장하니까 쿼리 파라미터도 포함되어야 하는데, OTP 인증 플로우가 여러 단계(코드 입력, 매직링크, 이메일 답장 등)를 거치면서 세션이 꼬이는 경우가 있었다.
 
+Rails의 `store_location` 구현을 직접 들여다보면, `request.fullpath`를 그대로 저장하는 건 맞다. 문제는 다단계 인증 과정에서 각 단계마다 POST 요청이 들어오고, 일부 구현에서는 각 단계마다 `store_location`이 새 값으로 덮어씌워진다. OTP 코드 입력 페이지, 매직링크 클릭 후 처리 페이지 등을 거치면서 원래 SSO 파라미터가 포함된 URL이 사라지는 것이다.
+
 ### 해결
 
 `before_action :require_authentication`을 제거하고, SSO 파라미터를 명시적으로 세션에 저장하는 방식으로 변경했다:
@@ -56,6 +62,8 @@ SSO authorize 엔드포인트에 `before_action :require_authentication`을 걸�
 # IdP: SSO Controller
 def authorize
   # 파라미터 검증 (client_id, redirect_uri, state)
+  validate_sso_params! # client_id 허용 목록, redirect_uri 허용 목록 검증
+
   unless signed_in?
     session[:sso_params] = {
       redirect_uri: redirect_uri,
@@ -67,7 +75,11 @@ def authorize
   end
 
   # 토큰 발급 + 인증 완료 페이지
-  sso_token = SsoToken.create!(...)
+  sso_token = SsoToken.create!(
+    user: current_user,
+    client_id: client_id,
+    expires_at: 5.minutes.from_now
+  )
   @callback_url = "#{redirect_uri}?token=#{CGI.escape(sso_token.token)}&state=#{CGI.escape(state)}"
   render :authorize_complete
 end
@@ -102,6 +114,8 @@ def redirect_after_sign_in
 end
 ```
 
+OTP, 매직링크, 이메일 인증 등 모든 로그인 방식에서 이 메서드를 공통으로 호출하도록 리팩터링했다.
+
 **핵심**: 프레임워크의 `store_location`/`redirect_back_or`에 의존하지 말고, 중요한 컨텍스트는 명시적으로 세션에 저장할 것. 특히 다단계 인증 플로우(OTP, 매직링크 등)에서는 중간에 세션 데이터가 예상과 다르게 동작할 수 있다.
 
 ---
@@ -117,7 +131,11 @@ RP → POST /auth/sso/verify (token + HMAC signature) → IdP
 IdP → 서명 검증 + 토큰 유효성 확인 → 사용자 정보 반환
 ```
 
+front-channel(브라우저 리다이렉트)로만 토큰을 주고받으면, 중간자가 토큰을 탈취해서 다른 사용자인 척 RP에 요청을 보낼 수 있다. back-channel 검증은 이를 막기 위한 것이다.
+
 로컬에서는 잘 되는데 배포 환경에서 서명 불일치가 발생했다. 원인: **양쪽 서버의 `SSO_SHARED_SECRET` 환경변수가 달랐다.**
+
+Render 같은 배포 플랫폼에서 환경변수를 각각 설정할 때, 복사붙여넣기 과정에서 앞뒤 공백이 들어가는 경우가 있다. HMAC은 바이트 단위로 비교하므로 공백 하나만 달라도 100% 불일치가 발생한다.
 
 ### 해결
 
@@ -125,10 +143,14 @@ IdP → 서명 검증 + 토큰 유효성 확인 → 사용자 정보 반환
 
 ```bash
 # 시크릿 생성
-openssl rand -hex 32
+SECRET=$(openssl rand -hex 32)
+echo $SECRET  # 이 값을 양쪽 서비스에 동일하게 설정
 
-# 양쪽 서비스에 동일한 값 설정
-# (배포 플랫폼의 환경변수 관리 기능 사용)
+# Render API로 환경변수 설정 (IdP와 RP 서비스 각각 실행)
+curl -X PUT "https://api.render.com/v1/services/$SERVICE_ID/env-vars" \
+  -H "Authorization: Bearer $RENDER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '[{"key":"SSO_SHARED_SECRET","value":"'"$SECRET"'"}]'
 ```
 
 HMAC 검증 코드:
@@ -138,14 +160,37 @@ HMAC 검증 코드:
 body = { token: token }.to_json
 signature = "sha256=#{OpenSSL::HMAC.hexdigest('SHA256', shared_secret, body)}"
 
+response = HTTP.headers(
+  "Content-Type" => "application/json",
+  "X-SSO-Signature" => signature
+).post("#{IDP_URL}/auth/sso/verify", json: { token: token })
+
 # IdP에서 검증
-expected = "sha256=#{OpenSSL::HMAC.hexdigest('SHA256', shared_secret, request.body.read)}"
-unless ActiveSupport::SecurityUtils.secure_compare(signature_header, expected)
-  render json: { error: "invalid_signature" }, status: :unauthorized
+def verify
+  body = request.body.read
+  expected = "sha256=#{OpenSSL::HMAC.hexdigest('SHA256', shared_secret, body)}"
+  signature_header = request.headers["X-SSO-Signature"]
+
+  unless ActiveSupport::SecurityUtils.secure_compare(signature_header.to_s, expected)
+    render json: { error: "invalid_signature" }, status: :unauthorized
+    return
+  end
+
+  # 토큰 유효성 확인
+  params = JSON.parse(body)
+  sso_token = SsoToken.find_by(token: params["token"])
+
+  if sso_token.nil? || sso_token.expires_at < Time.current || sso_token.used_at.present?
+    render json: { error: "invalid_token" }, status: :unauthorized
+    return
+  end
+
+  sso_token.update!(used_at: Time.current)
+  render json: { user: { id: sso_token.user.id, email: sso_token.user.email } }
 end
 ```
 
-**핵심**: `secure_compare`로 타이밍 공격 방지. 일반 `==` 비교는 문자열 길이에 따라 응답 시간이 달라져서 시크릿을 추론할 수 있다.
+**핵심**: `secure_compare`로 타이밍 공격 방지. 일반 `==` 비교는 문자열 길이에 따라 응답 시간이 달라져서 시크릿을 추론할 수 있다. 또한 `request.body.read`는 한 번만 읽을 수 있으므로, 검증과 파싱 중 어느 쪽을 먼저 하든 body를 변수에 저장해서 재사용해야 한다.
 
 ---
 
@@ -156,6 +201,7 @@ end
 SSO 인증 성공 후 즉시 `redirect_to callback_url`을 하면:
 - 사용자 입장에서 "뭐가 된 거지?" 하고 혼란스러움
 - 특히 앱 간 전환 시 화면이 순간적으로 깜빡이기만 함
+- 에러가 나도 너무 빠르게 지나가서 디버깅이 어려움
 
 ### 해결
 
@@ -177,6 +223,10 @@ SSO 인증 성공 후 즉시 `redirect_to callback_url`을 하면:
 </script>
 ```
 
+`j` 헬퍼(= `escape_javascript`)로 콜백 URL을 이스케이프하는 게 중요하다. 콜백 URL에 따옴표나 슬래시가 있으면 XSS가 발생할 수 있다.
+
+이 중간 페이지는 Hotwire Native 앱에서도 잘 동작한다. 2초 후 `window.location.href`를 변경하면 Hotwire가 이를 감지해서 적절히 처리한다.
+
 ---
 
 ## 삽질 4: iOS 앱이 설치돼 있어도 브라우저에서 열림
@@ -192,6 +242,8 @@ SSO 리다이렉트 URL이 `https://example.com/auth/sso/authorize?...`인데, i
 1. 서버: `/.well-known/apple-app-site-association` (AASA) 파일
 2. iOS 앱: `Associated Domains` entitlement
 3. Apple Developer Console: capability 활성화
+
+iOS는 앱 설치 시 및 주기적으로 AASA 파일을 CDN을 통해 내려받아 캐시한다. 이 파일이 없거나 잘못 설정되어 있으면 Universal Links가 동작하지 않는다. 에러 메시지나 로그가 전혀 없어서 원인 파악이 어렵다.
 
 ### 해결
 
@@ -221,6 +273,8 @@ end
 ```
 
 `paths`에 앱에서 열고 싶은 경로만 명시하는 게 중요하다. `["*"]`로 하면 모든 URL이 앱으로 열려서 웹 공유 링크 등에서 문제가 생긴다.
+
+AASA 파일은 반드시 HTTPS로 서빙되어야 하며, 리다이렉트 없이 직접 응답해야 한다. `Content-Type: application/json`이 설정되어 있어야 한다.
 
 **2단계: iOS Entitlements**
 
@@ -309,7 +363,7 @@ private func handleUniversalLinks(from connectionOptions: UIScene.ConnectionOpti
 }
 ```
 
-cold start 시 0.5초 딜레이를 주는 이유: Hotwire Native의 WebView가 초기화되기 전에 route를 호출하면 무시된다.
+cold start 시 0.5초 딜레이를 주는 이유: Hotwire Native의 WebView가 초기화되기 전에 route를 호출하면 무시된다. 앱이 이미 실행 중일 때는 딜레이 없이 바로 처리해도 된다.
 
 ---
 
@@ -318,6 +372,8 @@ cold start 시 0.5초 딜레이를 주는 이유: Hotwire Native의 WebView가 �
 ### 문제
 
 SSO 인증 완료 후 콜백 URL(`https://rp-app.com/auth/sso/callback?token=...`)로 리다이렉트될 때, IdP 앱의 WebView 안에서 열린다. RP 서비스의 세션 쿠키가 IdP 앱 WebView에는 없으므로 로그인이 안 된다.
+
+Hotwire Native는 기본적으로 모든 링크 클릭을 WebView 내에서 처리한다. RP 도메인이 IdP 앱의 도메인과 다르므로, 아무 처리 없이 두면 RP 콜백 URL도 IdP 앱의 WKWebView 안에서 열린다. WKWebView는 Safari와 쿠키를 공유하지 않기 때문에 RP 서비스의 세션 쿠키가 없는 상태다.
 
 ### 해결
 
@@ -340,6 +396,8 @@ func handle(proposal: VisitProposal) -> ProposalResult {
 ```
 
 `SFSafariViewController`는 앱 내에서 열리지만 쿠키가 앱과 격리되어 있다. `UIApplication.shared.open`은 시스템 Safari에서 열려서 RP 서비스의 기존 세션 쿠키를 사용할 수 있다.
+
+이 처리 덕분에 SSO 콜백 흐름이 완성된다: IdP 앱 WebView → 인증 완료 페이지 → 시스템 Safari로 RP 콜백 URL 열기 → RP 세션 쿠키 사용 → 로그인 완료.
 
 ---
 
@@ -367,6 +425,8 @@ end
 ```
 
 SHA256 fingerprint는 `keytool -list -v -keystore your.keystore`로 확인한다.
+
+iOS의 AASA와 달리 Android의 assetlinks.json은 CDN 캐시 없이 직접 서버에서 가져온다. 배포 후 즉시 적용되는 장점이 있지만, 서버가 느리면 App Links 인증이 실패할 수 있다.
 
 ---
 
@@ -413,6 +473,8 @@ SHA256 fingerprint는 `keytool -list -v -keystore your.keystore`로 확인한다
 - [x] HMAC-SHA256으로 back-channel 요청 서명
 - [x] SSO 세션 타임아웃 (10분)
 - [x] 토큰/state 값 URL 인코딩 (`CGI.escape`)
+- [x] AASA `paths`에 필요한 경로만 명시 (와일드카드 `*` 전체 사용 금지)
+- [x] back-channel 검증 후 토큰 즉시 소각 (`used_at` 설정)
 
 ---
 
@@ -427,3 +489,14 @@ SHA256 fingerprint는 `keytool -list -v -keystore your.keystore`로 확인한다
 4. **인증 완료 중간 페이지가 UX를 크게 개선한다.** 즉시 리다이렉트하면 사용자가 뭐가 된 건지 모른다. 2초 대기 + 체크마크 하나만 넣어도 체감이 다르다.
 
 5. **App Store Connect API로 capability를 코드로 관리할 수 있다.** Apple Developer Console 웹에서 클릭클릭하는 것보다 재현 가능하고 자동화할 수 있다.
+
+---
+
+## Key Takeaways
+
+- **SSO 파라미터는 별도 세션 키로 보존하라.** `session[:sso_params]`에 `client_id`, `redirect_uri`, `state`를 직접 저장하면 다단계 인증 도중 URL이 바뀌어도 컨텍스트를 잃지 않는다.
+- **back-channel 검증 + HMAC 서명은 필수다.** front-channel(브라우저 리다이렉트)만으로 토큰을 교환하면 탈취 위험이 있다.
+- **Universal Links 디버깅은 3곳을 동시에 봐야 한다.** AASA 파일(서버), Associated Domains(앱), Apple Developer Console(capability) 중 하나라도 빠지면 작동하지 않으며 OS가 아무 에러도 내지 않는다.
+- **WKWebView는 Safari 쿠키를 공유하지 않는다.** Hotwire Native 앱에서 다른 도메인으로 리다이렉트할 때는 `UIApplication.shared.open`으로 시스템 Safari를 사용해야 기존 세션이 유지된다.
+- **Cold start 시 WebView 초기화 딜레이를 고려하라.** Universal Link로 앱이 처음 열릴 때는 0.5초 정도 대기 후 라우팅해야 WebView가 준비된 상태에서 URL을 처리할 수 있다.
+- **토큰은 일회용이어야 한다.** `used_at` 타임스탬프를 기록해 재사용을 방지하고, 5분 만료 시간을 설정해 탈취된 토큰의 유효 시간을 최소화한다.

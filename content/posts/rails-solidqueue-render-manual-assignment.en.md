@@ -11,16 +11,17 @@ cover:
 categories: ["Rails"]
 ---
 
+While deploying a Rails 8-based ITSM system to Render today, I ran into three consecutive issues that each had different root causes but were connected like links in a chain. I'm documenting the process of reading deployment logs, debugging, patching code, and discovering the next problem.
 
-오늘 Rails 8 기반 ITSM 시스템을 Render에 배포하면서 연속으로 삽질을 했다. 각각 원인이 달랐지만 사슬처럼 연결된 문제들이었다.
+The stack covered in this post: Rails 8.1, SolidQueue 1.3.1, Puma, PostgreSQL, deployed on Render.com.
 
 ---
 
-## 삽질 1 — `Application exited early` with SolidQueue
+## Issue 1 — `Application exited early` with SolidQueue
 
 ### Symptoms
 
-Render 배포 로그에 빌드는 성공인데 실행하자마자 죽는다.
+The build succeeds in the Render deployment log, but the application dies immediately on startup.
 
 ```
 ==> Build successful 🎉
@@ -31,9 +32,11 @@ Render 배포 로그에 빌드는 성공인데 실행하자마자 죽는다.
 ==> Application exited early
 ```
 
-### Cause 찾기
+The `Build successful` message means the build phase is fine. The problem is in the run phase. The Puma process terminates before it even finishes starting.
 
-Render 로그를 자세히 보면 스택 트레이스가 있다.
+### Finding the Root Cause
+
+Looking more carefully at the Render logs reveals a stack trace:
 
 ```
 from solid_queue-1.3.1/lib/solid_queue/configuration.rb in 'recurring_tasks'
@@ -43,22 +46,38 @@ from solid_queue-1.3.1/lib/puma/plugin/solid_queue.rb:81 in 'start_solid_queue'
 [69] Detected Solid Queue has gone away, stopping Puma...
 ```
 
-`SolidQueue::RecurringTask.from_configuration` 내부에서 `load_schema!`가 호출되고, `SchemaCache#columns`에서 터진다. 즉 **`solid_queue_recurring_tasks` 테이블이 DB에 없다**.
+Inside `SolidQueue::RecurringTask.from_configuration`, `load_schema!` is called, and it blows up at `SchemaCache#columns`. In other words, **the `solid_queue_recurring_tasks` table does not exist in the database**.
 
-### 왜 테이블이 없나?
+When SolidQueue runs as a Puma plugin, it checks the DB schema during application boot. If the required tables are missing at that point, the SolidQueue supervisor exits immediately, the Puma plugin detects this and shuts down Puma itself. That is what produces `Application exited early`.
 
-Rails 8의 SolidQueue, SolidCache, SolidCable은 gem에서 마이그레이션 파일을 복사해와야 한다.
+### Why Are the Tables Missing?
+
+The Solid family of gems introduced in Rails 8 — SolidQueue, SolidCache, SolidCable — package their migration files inside the gem itself. You have to explicitly copy those migrations into your project's `db/migrate/` folder using a separate install command:
 
 ```bash
 rails solid_queue:install:migrations
+rails solid_cache:install:migrations
+rails solid_cable:install:migrations
 rails db:migrate
 ```
 
-이 과정을 빠뜨리면 `db/migrate/` 폴더에 solid_queue 관련 마이그레이션이 없다. `db:prepare`가 아무리 돌아도 테이블이 생기지 않는다.
+If you skip this step, no SolidQueue-related migration files exist in `db/migrate/`. No matter how many times `db:prepare` or `db:schema:load` runs, those tables will never be created. Rails' standard migration mechanism only processes files that are actually present inside `db/migrate/`.
 
-### Solution책 — render-build.sh에 수동 CREATE
+SolidQueue requires a total of 10 tables:
+- `solid_queue_jobs`
+- `solid_queue_recurring_tasks`
+- `solid_queue_scheduled_executions`
+- `solid_queue_ready_executions`
+- `solid_queue_claimed_executions`
+- `solid_queue_blocked_executions`
+- `solid_queue_failed_executions`
+- `solid_queue_pauses`
+- `solid_queue_processes`
+- `solid_queue_semaphores`
 
-이미 `solid_cache`와 `solid_cable` 테이블을 `render-build.sh`에서 수동으로 만들고 있었다. 같은 방식으로 solid_queue 10개 테이블을 추가했다.
+### Fix — Manual CREATE in render-build.sh
+
+We were already manually creating `solid_cache` and `solid_cable` tables inside `render-build.sh`. This pattern is common when you need to manage DB schema within a single service on Render, particularly on plans without a separate release command phase. We applied the same approach to add all 10 SolidQueue tables.
 
 ```bash
 # render-build.sh
@@ -91,43 +110,45 @@ bundle exec rails runner "
     created_at timestamp NOT NULL,
     updated_at timestamp NOT NULL
   )),
-  # ... 나머지 8개 테이블
+  # ... remaining 8 tables
 ].each { |sql| ActiveRecord::Base.connection.execute(sql) rescue nil }
 "
 ```
 
-`CREATE TABLE IF NOT EXISTS` 패턴이라 이미 테이블이 있으면 무시한다. 안전하다.
+The `CREATE TABLE IF NOT EXISTS` pattern makes this safe: if the table already exists, the statement is silently ignored. This script runs on every redeploy but causes no harm when tables are already in place.
 
-`puma.rb`에서 SolidQueue 플러그인 설정도 확인.
+There is a trade-off worth noting with this approach. Because you are stepping outside Rails' standard migration version tracking, if SolidQueue releases an upgrade that changes the schema, you must manually update `render-build.sh` to match. The proper long-term solution is to run `rails solid_queue:install:migrations` and commit those migration files to the repository.
+
+Also verify the SolidQueue plugin configuration in `puma.rb`:
 
 ```ruby
 # config/puma.rb
 plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"]
 ```
 
-`SOLID_QUEUE_IN_PUMA` 환경변수가 설정되어 있으면 Puma 부팅 시 SolidQueue를 같이 띄운다. 이게 테이블 없이 실행되면 위의 crash가 발생한다.
+When the `SOLID_QUEUE_IN_PUMA` environment variable is set, Puma starts SolidQueue together during boot. Running this without the tables in place produces exactly the crash described above. Because `SOLID_QUEUE_IN_PUMA=1` was set in Render's environment variables, the tables had to exist before Puma could start.
 
 ---
 
-## 삽질 2 — OpenClaw(AI 에이전트)가 티켓 담당자가 됨
+## Issue 2 — OpenClaw (AI Agent) Becomes Ticket Assignee
 
 ### Symptoms
 
-티켓을 생성하면 담당자가 AI 에이전트 계정으로 자동 배정되고, 그 상태에서 에스컬레이션이 발생한다.
+When a ticket is created, it is automatically assigned to the AI agent account, and escalation occurs from that state.
 
 ```
-담당자: OpenClaw
-활동: 작업 시작 → 에스컬레이션
+Assignee: OpenClaw
+Activity: Work started → Escalation
 ```
 
-인간 에이전트에게 가야 할 티켓이 AI 에이전트가 들고 있는 상황.
+A ticket that should go to a human agent is being held by the AI agent. The AI agent accepts tickets up to its WIP limit, but since it cannot actually resolve them, it eventually triggers escalation. The manager notification fires, but the ticket ends up in limbo.
 
-### Cause
+### Root Cause
 
-`SmartAssignmentService`의 에이전트 조회 쿼리가 문제였다.
+The agent lookup query inside `SmartAssignmentService` was the problem.
 
 ```ruby
-# 문제가 된 코드
+# Problematic code
 def find_best_skilled_agent
   available_agents = User.where(role: [:agent, :ai_agent], status: :available)
                          .select { |u| u.wip_count < u.max_wip }
@@ -135,21 +156,23 @@ def find_best_skilled_agent
 end
 ```
 
-`role: [:agent, :ai_agent]` — 인간 에이전트(`agent`)와 AI 에이전트(`ai_agent`)를 같은 풀에 넣어서 조회한다. 인간 에이전트가 없거나 모두 offline이면 AI 에이전트가 자동 선택된다.
+`role: [:agent, :ai_agent]` — human agents (`agent`) and AI agents (`ai_agent`) are placed in the same pool. If no human agent is available or all are offline, an AI agent is automatically selected.
 
-아키텍처 의도는 이랬을 것이다:
-- AI 에이전트는 봇 채널에서 들어온 티켓만 처리
-- 일반 티켓은 인간 에이전트에게만 배정
+The intended architecture was:
+- AI agents handle only tickets coming from bot channels
+- Regular tickets are assigned exclusively to human agents
 
-하지만 코드가 그렇게 동작하지 않았다.
+But the code did not behave that way. `SmartAssignmentService` always ran the same query regardless of the ticket's source channel (bot vs. regular). As a result, during hours when all human agents were offline — overnight, during lunch — every incoming ticket went to OpenClaw.
 
-### Solution
+This bug was initially invisible because the development environment always had human agents seeded in an `available` state. The condition that causes AI agent selection was never exercised in tests.
 
-일반 배정 풀에서 `ai_agent`를 제외한다.
+### Fix
+
+Exclude `ai_agent` from the standard assignment pool.
 
 ```ruby
 def find_best_skilled_agent
-  # role: :agent 만 — AI 에이전트 제외
+  # role: :agent only — AI agents excluded
   available_agents = User.where(role: :agent, status: :available)
                          .select { |u| u.wip_count < u.max_wip }
 
@@ -162,43 +185,55 @@ def find_best_skilled_agent
   best_busy = select_best_agent(scored_busy)
   return best_busy[:agent] if best_busy
 
-  nil  # 없으면 escalate_to_manager 호출
+  nil  # If none found, escalate_to_manager is called upstream
 end
 ```
 
-같은 이유로 `find_alternative_available_agent`도 수정.
+`find_alternative_available_agent` was updated for the same reason. This method finds a replacement agent when the primary assignee suddenly goes offline. If `ai_agent` is included here too, the same problem would repeat.
 
-#### 배정 흐름 정리
+The `score_candidates` method internally computes a score based on skill matching, current WIP ratio, and average response time. No matter how sophisticated the scoring logic is, it is meaningless if the agent pool itself is incorrectly assembled.
 
-| 상황 | 동작 |
-|------|------|
-| 인간 에이전트 available | 즉시 배정 |
-| 인간 에이전트 모두 busy | 큐에 추가 (Case B/C/D) |
-| 인간 에이전트 없음 | escalate_to_manager → 관리자 알림 |
-| 봇 소스 티켓 | AI 에이전트에 round-robin 배정 (별도 로직) |
+#### Assignment Flow Summary
+
+| Situation | Behavior |
+|-----------|----------|
+| Human agent available | Assign immediately |
+| All human agents busy | Add to queue (Case B/C/D) |
+| No human agents at all | escalate_to_manager → admin notification |
+| Bot-sourced ticket | Round-robin to AI agent (separate logic) |
+
+AI agent assignment for bot-sourced tickets is handled by a separate `BotTicketAssignmentService`. The two services do not share the same agent pool, which makes the architectural boundary explicit.
 
 ---
 
-## 삽질 3 — 수동 배정 기능 필요성
+## Issue 3 — Need for a Manual Assignment Feature
 
 ### Problem
 
-인간 에이전트가 없거나 모두 offline이면 에스컬레이션만 되고 티켓이 방치된다. 관리자가 직접 배정할 방법이 없다.
+When no human agents are available or all are offline, tickets just escalate and sit unattended. There is no way for an admin to assign tickets directly.
 
-### 설계
+`escalate_to_manager` only sends a notification to the manager. Receiving a notification without being able to take action inside the system means the manager has to issue manual instructions through Slack or email. That defeats the purpose of an ITSM tool.
 
-**사이드바 버튼 (관리자 전용)**
+Automation systems need a fallback escape hatch for when they fail.
+
+### Design
+
+**Sidebar button (admin only)**
 ```
-AI 티켓 접수
-수동 배정  [3]  ← 대기 중 티켓 수 뱃지
+AI Ticket Intake
+Manual Assignment  [3]  ← badge showing waiting ticket count
 ```
 
-**`/admin/manual_assignments` 페이지**
+**`/admin/manual_assignments` page**
 
-- AI 에이전트가 담당인 미해결 티켓 + escalated 상태 티켓 목록
-- 각 행에 에이전트 드롭다운 + 배정 버튼
+- List of unresolved tickets assigned to AI agents + tickets in `escalated` state
+- Each row has an agent dropdown and an assign button
 
-### 구현
+When the badge number is non-zero, the admin immediately knows manual intervention is needed. Simply showing "3 pending" gives the admin enough context to open the page and act.
+
+### Implementation
+
+The controller handles two responsibilities: `index` renders the list of stuck tickets, and `assign` processes the actual assignment.
 
 ```ruby
 # app/controllers/admin/manual_assignments_controller.rb
@@ -228,13 +263,17 @@ module Admin
       end
 
       redirect_to admin_manual_assignments_path,
-                  notice: "티켓 ##{@ticket.id}이(가) #{@agent.name}에게 배정되었습니다."
+                  notice: "Ticket ##{@ticket.id} has been assigned to #{@agent.name}."
     end
   end
 end
 ```
 
-라우트.
+The reason `assign` uses a transaction is important. `@ticket.update!`, `@ticket.assign!` (AASM state transition), and `TicketAssignment.create!` must all succeed together or all fail together. If only one of them fails midway, you can end up in an inconsistent state — the assignee changed but the state did not, or the state changed but no assignment record was created. These partial-success bugs are among the hardest to debug.
+
+Calling `may_assign?` before `assign!` is a safety guard. If the ticket is already `in_progress`, calling `assign!` would raise an AASM InvalidTransition error. Always checking whether a state transition is permitted before executing it makes the code more resilient.
+
+Routes:
 
 ```ruby
 namespace :admin do
@@ -246,7 +285,9 @@ namespace :admin do
 end
 ```
 
-사이드바에서 뱃지 숫자는 매 요청마다 쿼리한다. 캐시를 도입할 수도 있지만 관리자 페이지 트래픽이 많지 않아 일단 이걸로 충분하다.
+Using `only: [:index]` and separating `assign` as a member action is intentional. Assignment is an action targeting a specific ticket ID, so `/admin/manual_assignments/:id/assign` is a clearer and more RESTful path than a generic collection endpoint.
+
+The badge counter in the sidebar queries the database on every request. Caching could be introduced, but admin page traffic is low enough that a direct query is perfectly acceptable for now.
 
 ```erb
 <% stuck_count = Ticket.where("...").count rescue 0 %>
@@ -255,12 +296,25 @@ end
 <% end %>
 ```
 
+The `rescue 0` is intentional. This code runs in the layout on every request. If the DB connection flickers or the query fails, you do not want a minor counter query to take down the entire page with a 500 error. A secondary UI element should never be able to bring down the main interface.
+
 ---
 
-## Lessons Learned 요약
+## Lessons Learned
 
-1. **Rails 8 Solid* 계열 gem은 마이그레이션 파일을 직접 복사해야 한다.** `db:prepare`가 자동으로 해주지 않는다.
+1. **Rails 8 Solid* gems require explicit migration file installation.** `db:prepare` will not do it automatically. `rails solid_queue:install:migrations` must be included explicitly in initial project setup. If you work around this with manual CREATE statements in `render-build.sh` as shown here, you are responsible for manually tracking schema changes whenever the gem is upgraded.
 
-2. **자동 배정 로직에서 role 필터링은 의도적으로 명시해야 한다.** `[:agent, :ai_agent]` 대신 `:agent`만 쓰는 것이 아키텍처 의도와 일치했다.
+2. **Role filtering in auto-assignment logic must be explicit and deliberate.** Using only `:agent` instead of `[:agent, :ai_agent]` matched the architectural intent. This category of bug is difficult to spot when development seed data does not cover production-level scenarios. Add explicit test cases for "all human agents are offline" situations.
 
-3. **자동화 로직이 실패할 때를 위한 수동 폴백이 반드시 필요하다.** escalate_to_manager 알림만으로는 부족하다. 관리자가 직접 개입할 수 있는 UI가 있어야 한다.
+3. **Manual fallback is mandatory when automation fails.** An `escalate_to_manager` notification alone is not enough. Admins need a UI where they can intervene directly within the system. Every automated workflow should include a human escape hatch from the design phase onwards.
+
+---
+
+## Key Takeaways
+
+- **Solid gem migrations**: Run `rails solid_queue:install:migrations` first. Skipping this step causes a crash at Puma startup due to missing tables. The stack trace is buried in the middle of the Render log, not at the very top — scroll carefully.
+- **Puma + SolidQueue integration failure pattern**: When `SOLID_QUEUE_IN_PUMA=1`, a SolidQueue initialization failure takes down the entire Puma process. The build phase succeeds but the run phase crashes immediately. Always verify tables exist before enabling this env var.
+- **Separating AI and human agents**: Putting both agent types in the same query pool causes AI agents to pick up human work when humans are unavailable. Role filters must be written defensively and explicitly — never rely on implicit exclusion.
+- **Manual assignment UI is not optional**: No matter how sophisticated the auto-assignment logic, edge cases will occur. Without an in-system way to assign tickets manually, incident response cost goes up significantly.
+- **Transaction integrity for assignment operations**: Updates spanning multiple tables (ticket record, AASM state, assignment log) must be wrapped in a transaction. Partial success creates inconsistent state that is notoriously hard to diagnose.
+- **`rescue 0` pattern for layout counters**: Any query embedded in a layout that runs on every request should have exception handling. A transient DB error on a sidebar counter should never produce a 500 for the entire page.

@@ -10,7 +10,6 @@ cover:
   hidden: true
 ---
 
-
 Right after a successful `xcrun altool --upload-app`, an email arrived from App Store Connect.
 
 ```
@@ -20,23 +19,33 @@ ITMS-90905: Missing Info.plist value - CFBundleIconName
 ITMS-90474: The orientations UIInterfaceOrientationPortrait were provided... you need to include all orientations to support iPad multitasking
 ```
 
-4 errors at once. Here is the record of fixing them one by one.
+The upload itself succeeded, but four validation errors fired at once. This post covers what each error code means and exactly which configuration was missing in the xcodegen project.
 
 ---
 
-## Cause Analysis
+## Background: What Is xcodegen
 
-In the xcodegen-based project, the sources path in `project.yml` was the issue.
+xcodegen is a tool that generates `.xcodeproj` files from a `project.yml` configuration. The main benefit is that `.xcodeproj` does not need to be committed to version control — anyone on the team or any CI environment can reproduce an identical Xcode project from the YAML file.
+
+The catch is that xcodegen requires you to explicitly declare everything in `project.yml` that Xcode would otherwise configure automatically through its GUI. If you are not aware of these differences, you end up in a situation where local builds succeed but TestFlight validation fails every time.
+
+---
+
+## Root Cause
+
+In this xcodegen-based project, the sources path defined in `project.yml` was the culprit.
 
 ```yaml
 # project.yml
 targets:
   MyApp:
     sources:
-      - path: MyApp      # <- Only this was included
+      - path: MyApp      # <- Only this directory was included
 ```
 
-`Assets.xcassets` was created under `Sources/`, but since sources only pointed to the `MyApp/` folder, **icons were not included in the build at all**.
+`Assets.xcassets` had been placed under `Sources/`, but since the sources entry only pointed to the `MyApp/` folder, **the icon assets were never included in the build bundle at all**.
+
+xcodegen only includes files found under the declared sources paths when generating the Xcode project. If `Assets.xcassets` falls outside that scope, it never makes it into the compiled `.app` bundle. Uploading that bundle to App Store Connect triggers ITMS-90704 and ITMS-90905 together.
 
 ---
 
@@ -46,7 +55,26 @@ targets:
 mv ios/Sources/Assets.xcassets ios/MyApp/Assets.xcassets
 ```
 
-It must be inside the sources path (`MyApp/`) for xcodegen to recognize it.
+The asset catalog must be inside the sources path (`MyApp/`) for xcodegen to pick it up.
+
+After moving it, run `xcodegen generate` again so the change is reflected in `.xcodeproj`. Dragging files into Xcode directly has no lasting effect on an xcodegen project — the next `xcodegen generate` call will overwrite anything not described in `project.yml`. Always treat `project.yml` as the single source of truth.
+
+### Expected Directory Layout
+
+```
+ios/
+  MyApp/
+    Assets.xcassets/         <- Must be here
+      AppIcon.appiconset/
+        Contents.json
+        icon_120x120.png
+        icon_180x180.png
+        ...
+    Info.plist
+    AppDelegate.swift
+    ...
+  project.yml
+```
 
 ---
 
@@ -61,13 +89,24 @@ info:
     CFBundleIconName: AppIcon      # <- Missing this causes ITMS-90905
 ```
 
-Even if you add `ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon` to settings, `CFBundleIconName` does not automatically get added to Info.plist. Both are needed.
+Even if you add `ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon` to the build settings section, `CFBundleIconName` does not automatically get written into Info.plist. Both entries are required.
+
+### What Each Setting Does
+
+| Key | Location | Purpose |
+|---|---|---|
+| `ASSETCATALOG_COMPILER_APPICON_NAME` | Build Settings | Tells the asset catalog compiler which icon set to include in the build |
+| `CFBundleIconName` | Info.plist | Tells the system which asset name to look for at runtime when loading the app icon |
+
+When you create a project through the Xcode GUI, these two values are wired together and filled in automatically. xcodegen manages Build Settings and Info.plist independently, so both must be declared explicitly.
+
+ITMS-90905 fires when App Store Connect cannot find the `CFBundleIconName` key in the uploaded bundle's Info.plist. Without it, the system has no way to know which asset name to use when loading the app icon.
 
 ---
 
 ## Fix 3: iPad Multitasking Orientations
 
-Setting only iPhone orientations causes errors when iPad multitasking support is required. You need to specify them separately with the `~ipad` suffix key.
+Setting only iPhone orientations triggers an error when iPad multitasking support is evaluated. The fix is to declare them separately using the `~ipad` suffix key.
 
 ```yaml
 properties:
@@ -80,7 +119,13 @@ properties:
     - UIInterfaceOrientationLandscapeRight
 ```
 
-Even for an iPhone app, all 4 orientations must be included in the `~ipad` key for the multitasking error to disappear.
+Even for an iPhone-only app, all four orientations must be included in the `~ipad` key for the multitasking error to go away.
+
+### Why an iPhone App Needs iPad Orientations
+
+The App Store allows iPhone-only apps to run on iPad in Compatibility Mode. When an iPhone app runs in a multitasking environment on iPad, the system reads the `UISupportedInterfaceOrientations~ipad` key. If that key is absent or does not list all four orientations, ITMS-90474 is triggered.
+
+The `~ipad` suffix in Info.plist is the standard platform-specific override mechanism. xcodegen supports the same syntax directly in `project.yml`, so no manual Info.plist editing is needed.
 
 ---
 
@@ -118,6 +163,25 @@ IOS_SIZES = [
 ]
 ```
 
+### Validating Contents.json
+
+After running the icon script, inspect `Contents.json` to confirm every entry has a `filename` field. Any size that was not generated will either be missing the field or have an empty string.
+
+```json
+{
+  "images": [
+    {
+      "size": "60x60",
+      "idiom": "iphone",
+      "scale": "2x",
+      "filename": "icon_120x120.png"
+    }
+  ]
+}
+```
+
+If any size is missing, ITMS-90704 will fire, and the error message will tell you exactly which resolution is absent.
+
 ---
 
 ## Final project.yml Structure (Key Parts)
@@ -147,7 +211,7 @@ targets:
 
 ---
 
-## Build -> Upload Flow
+## Build to Upload Flow
 
 ```bash
 # 1. Regenerate Xcode project
@@ -186,9 +250,9 @@ xcrun altool --upload-app \
 
 ---
 
-## Note: authenticationKeyPath Must Be an Absolute Path
+## authenticationKeyPath Must Be an Absolute Path
 
-Using a relative path in a Makefile causes `xcodebuild` to not find it.
+Using a relative path in a Makefile causes `xcodebuild` to fail silently when it cannot locate the key file.
 
 ```makefile
 # Wrong
@@ -198,4 +262,49 @@ ASC_KEY_PATH = ios/secrets/AuthKey_XXXX.p8
 ASC_KEY_PATH = $(PWD)/ios/secrets/AuthKey_XXXX.p8
 ```
 
-After fixing all 4 issues, `UPLOAD SUCCEEDED with no errors` appears.
+`xcodebuild` does not always resolve relative paths from the working directory. Using `$(PWD)` in a Makefile produces an absolute path reliably. In CI environments, `$(CURDIR)` or `$(shell pwd)` works the same way.
+
+---
+
+## ExportOptions.plist Notes
+
+The `ExportOptions.plist` used with `xcodebuild -exportArchive` has its own pitfall worth noting.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" ...>
+<plist version="1.0">
+<dict>
+    <key>method</key>
+    <string>app-store</string>
+    <key>teamID</key>
+    <string>YOUR_TEAM_ID</string>
+    <!-- Only include this key if the app actually uses iCloud -->
+    <!-- <key>iCloudContainerEnvironment</key> -->
+    <!-- <string>Production</string> -->
+</dict>
+</plist>
+```
+
+The `iCloudContainerEnvironment` key must only be present if the app genuinely uses iCloud. Including it in an app that does not use iCloud causes a separate upload error.
+
+---
+
+## Quick Error Reference
+
+| Code | Cause | Fix |
+|---|---|---|
+| ITMS-90704 | Specific icon resolution missing from the bundle | Check Assets.xcassets location, verify Contents.json size list |
+| ITMS-90905 | CFBundleIconName absent from Info.plist | Add to project.yml info.properties explicitly |
+| ITMS-90474 | iPad multitasking orientations incomplete | Add all four orientations under the `~ipad` suffix key |
+
+---
+
+## Key Takeaways
+
+- xcodegen does not automatically sync Build Settings and Info.plist values the way the Xcode GUI does. `ASSETCATALOG_COMPILER_APPICON_NAME` and `CFBundleIconName` must both be declared explicitly.
+- `Assets.xcassets` must live inside the directory listed under the sources path in `project.yml`. If it falls outside that scope it will not be included in the build bundle.
+- Even for an iPhone-only app, `UISupportedInterfaceOrientations~ipad` must list all four orientations to avoid ITMS-90474 on App Store submission.
+- Run `xcodegen generate` every time you change `project.yml`. Changes to the YAML are not reflected in `.xcodeproj` until the project is regenerated.
+- Pass `authenticationKeyPath` as an absolute path. Use `$(PWD)` in Makefiles to construct it reliably.
+- Fix all four of these and the upload ends with `UPLOAD SUCCEEDED with no errors`.
