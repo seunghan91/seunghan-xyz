@@ -1,10 +1,11 @@
 User-agent: *
 Allow: /
-Disallow:
+Disallow: /tags/*/index.xml
+Disallow: /categories/*/index.xml
+Disallow: /en/tags/*/index.xml
+Disallow: /en/categories/*/index.xml
 
 User-agent: Yeti
 Allow: /
 
 Sitemap: {{ .Site.BaseURL }}sitemap.xml
-Sitemap: {{ .Site.BaseURL }}ko/sitemap.xml
-Sitemap: {{ .Site.BaseURL }}en/sitemap.xml

@@ -1,5 +1,10 @@
 {{- /* PaperMod custom head extension point. */ -}}
 <meta name="naver-site-verification" content="4aff3baeafe680ba320dbda5a51bc963b58356c3" />
+{{- /* noindex for thin taxonomy pages (tags/categories with few posts) */ -}}
+{{- if .Data.Terms }}{{- /* taxonomy list page (e.g. /tags/, /categories/) */ -}}
+{{- else if and (eq .Kind "term") (le (len .Pages) 1) }}
+<meta name="robots" content="noindex, follow" />
+{{- end -}}
 {{- /* Google Analytics 4 */ -}}
 {{ template "_internal/google_analytics.html" . }}
 {{- /* Google AdSense */ -}}
