@@ -4,6 +4,13 @@ date: 2026-03-22
 draft: false
 tags: ["iOS", "CSS", "Rails", "Hotwire Native", "WebView"]
 description: "Rails 8 Hotwire Native 앱에서 채팅 메시지가 컨테이너를 넘치는 버그를 overflow-wrap: anywhere로 수정한 과정. Tailwind break-words가 flexbox에서 작동하지 않는 이유와 iOS WKWebView 대응 best practice."
+faq:
+  - q: "Tailwind의 break-words 클래스를 썼는데 왜 iOS에서 텍스트가 넘치나요?"
+    a: "Tailwind의 break-words는 overflow-wrap: break-word를 적용합니다. 이 값은 단어를 줄바꿈하지만, flexbox min-content 계산에서 줄바꿈 가능성을 고려하지 않습니다. 그 결과 flex item의 최소 너비가 텍스트 전체 길이로 계산되어 컨테이너를 넘칩니다. overflow-wrap: anywhere를 사용해야 min-content 계산에 줄바꿈이 반영되어 문제가 해결됩니다."
+  - q: "overflow-wrap: anywhere를 지원하지 않는 구형 iOS는 어떻게 대응하나요?"
+    a: "anywhere 값은 iOS Safari 15.4(2022년 3월)부터 지원됩니다. 구형 기기를 지원해야 한다면 word-break: break-word를 fallback으로 함께 선언하세요. 스펙상 deprecated된 값이지만 구형 WebKit에서도 동작합니다. 또는 @supports를 이용해 anywhere를 지원하면 anywhere, 그렇지 않으면 break-word를 적용하는 progressive enhancement 방식을 쓸 수 있습니다."
+  - q: "min-w-0 없이 overflow-wrap: anywhere만 적용해도 되나요?"
+    a: "flexbox 레이아웃에서는 min-w-0도 함께 필요합니다. flex item의 기본 min-width는 auto(콘텐츠의 min-content 크기)이므로, anywhere로 min-content 계산이 줄어들어도 min-width: auto가 flex item이 작아지는 것을 막을 수 있습니다. min-w-0(min-width: 0)으로 이 제약을 해제해야 두 속성이 함께 완전하게 작동합니다."
 ---
 
 ## 증상: 긴 메시지가 채팅 버블을 뚫고 나간다
@@ -364,3 +371,56 @@ Svelte나 React에서 scoped style을 쓰는 경우, inline style의 specificity
 4. 한 프로젝트에서 발견한 문제는 같은 스택의 다른 프로젝트에도 있을 확률이 높다 — 크로스프로젝트 점검 습관을 들이자.
 
 CSS 한 줄이 레이아웃을 살리기도 하고, 깨뜨리기도 한다.
+
+---
+
+## 자주 묻는 질문 (FAQ)
+
+### Q: Tailwind의 `break-words` 클래스를 적용했는데 왜 iOS WebView에서 텍스트가 여전히 넘치나요?
+
+Tailwind의 `break-words`는 `overflow-wrap: break-word`를 적용한다. 이 값은 단어를 줄바꿈하지만, **flexbox의 `min-content` 계산에서 줄바꿈 가능성을 고려하지 않는다**. 결과적으로 flex item의 최소 너비가 URL 전체 길이(예: 800px)로 계산되어 부모 컨테이너를 벗어난다. `overflow-wrap: anywhere`를 사용해야 min-content 계산에 줄바꿈이 반영되어 flex item이 부모 크기에 맞게 줄어들 수 있다.
+
+### Q: `overflow-wrap: anywhere`를 지원하지 않는 구형 iOS는 어떻게 대응하나요?
+
+`anywhere` 값은 iOS Safari 15.4(2022년 3월)부터 지원된다. 구형 기기를 지원해야 한다면 `word-break: break-word`를 fallback으로 함께 선언하면 된다. 스펙상 deprecated된 값이지만 구형 WebKit에서도 동작한다. 또는 `@supports (overflow-wrap: anywhere) { .class { overflow-wrap: anywhere; } } @supports not (overflow-wrap: anywhere) { .class { word-break: break-word; } }`처럼 progressive enhancement 방식을 쓸 수 있다.
+
+### Q: `min-w-0` 없이 `overflow-wrap: anywhere`만 적용해도 되나요?
+
+flexbox 레이아웃에서는 `min-w-0`도 함께 필요하다. CSS 스펙에 따르면 flex item의 기본 `min-width`는 `auto`(콘텐츠의 `min-content` 크기)로, `anywhere`로 min-content가 줄어들어도 `min-width: auto`가 flex item이 부모보다 작아지는 것을 막을 수 있다. `min-w-0`(`min-width: 0`)을 추가해야 이 제약이 해제되어 두 속성이 완전하게 협력한다. 반대로 `min-w-0`만 있고 `overflow-wrap: anywhere`가 없으면 텍스트가 작아진 공간에서 줄바꿈되지 않아 버그가 남는다.
+
+---
+
+## 관련 이슈 및 추가 팁
+
+### Svelte + Inertia.js 프로젝트에서의 적용
+
+Rails + Hotwire Native 외에 Svelte + Inertia.js로 만든 채팅 컴포넌트에서도 동일한 문제가 발생한다. Svelte의 scoped style에서는 다음과 같이 적용한다:
+
+```svelte
+<p class="message-body" style="overflow-wrap: anywhere; word-break: break-word;">
+  {message.body}
+</p>
+
+<style>
+  .message-body {
+    white-space: pre-wrap;
+    min-width: 0;
+  }
+</style>
+```
+
+Svelte의 scoped style은 class 기반으로 동작하므로 `overflow-wrap: anywhere`를 style 블록에서 설정하면 되지만, 특이성(specificity) 충돌 시에는 inline style이 더 확실하다.
+
+### WKWebView의 가로 스크롤 전역 차단
+
+Hotwire Native 앱 전체에서 의도치 않은 가로 스크롤을 원천 차단하고 싶다면, 앱 전용 CSS 파일에 다음을 추가하는 방법도 있다:
+
+```css
+/* native.css */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+```
+
+다만 이 방식은 의도적으로 가로 스크롤이 필요한 컴포넌트(코드 블록, 가로 슬라이더 등)까지 차단하므로, 특정 컨테이너에만 `overflow-x: hidden`을 적용하는 것이 더 안전하다.

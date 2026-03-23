@@ -4,6 +4,13 @@ date: 2026-03-22
 draft: false
 tags: ["Claude Code", "Telegram", "AI", "개발환경", "자동화", "MCP", "원격개발"]
 description: "Claude Code Channels로 Telegram 봇을 통해 로컬 Mac의 Claude Code 세션을 원격 제어하는 방법. 설치 과정에서 만난 에러, 올바른 명령어, tmux 영구 실행, macOS 재부팅 자동시작, OpenClaw 비교까지 삽질 기록을 전부 담았다."
+faq:
+  - q: "Claude Code Channels 실행 후 Telegram 메시지를 보내도 응답이 없습니다. 원인은?"
+    a: "--channels 플래그 없이 실행했을 가능성이 높습니다. 환경변수에 토큰만 설정하고 일반 claude로 실행하면 Bun 서브프로세스가 뜨더라도 채널 이벤트가 비활성화됩니다. 반드시 claude --channels plugin:telegram@claude-plugins-official 명령어로 실행해야 하며, 시작 화면에 'Listening for channel messages from:' 메시지가 있는지 확인하세요."
+  - q: "--dangerously-skip-permissions 플래그는 얼마나 위험한가요?"
+    a: "이 플래그를 사용하면 Telegram으로 받은 메시지가 로컬 머신에서 파일 읽기/쓰기, 쉘 명령 실행 등 거의 모든 작업을 승인 없이 수행할 수 있습니다. 3계층 보안의 발신자 allowlist로 '누가 보낼 수 있는가'는 통제하지만, '무엇을 실행하는가'는 통제하지 않습니다. 개인 개발 머신에서 혼자 사용한다면 관리 가능한 위험이지만, 프로덕션 서버나 민감한 자격증명이 있는 머신에서는 사용하지 않는 것이 좋습니다."
+  - q: "여러 Mac에서 같은 Telegram 봇을 쓸 수 있나요?"
+    a: "봇 토큰은 하나지만 여러 머신에서 동시에 같은 토큰으로 Claude Code Channels를 실행할 수 있습니다. 단, 메시지는 가장 최근에 poll을 시작한 인스턴스가 받게 되며, 여러 인스턴스가 동시에 폴링하면 메시지가 분산되어 혼동이 생길 수 있습니다. 머신별로 별도 봇을 만들어 구분하거나, 하나의 머신만 활성화하는 것을 권장합니다."
 ---
 
 2026년 3월 20일, Anthropic이 **Claude Code Channels** 리서치 프리뷰를 공개했다. 한마디로 요약하면, Telegram이나 Discord에서 메시지를 보내면 집에 있는 내 Mac의 Claude Code가 코드를 짜고 파일을 수정한 뒤 결과를 답장으로 보내주는 기능이다.
@@ -391,3 +398,39 @@ Claude Code Channels는 완벽하지 않다. 세션을 계속 켜둬야 하고, 
 그럼에도 **공식 도구라는 점에서 오는 신뢰성**, **Claude Code 세션과 완전히 통합된 컨텍스트**, **5분이면 끝나는 설정**은 확실한 장점이다. OpenClaw처럼 별도 서버를 운영하거나 복잡한 설정을 할 필요 없이, 지금 쓰는 Claude Code에 플래그 하나 추가하는 것만으로 Telegram 원격 제어가 된다.
 
 폰에서 Telegram 보내면 집 맥미니가 코딩한다는 게 신기하긴 하다.
+
+---
+
+## 자주 묻는 질문 (FAQ)
+
+### Q: 설치 후 Telegram 메시지를 보내도 Claude가 응답하지 않습니다. 어떻게 디버깅하나요?
+
+가장 먼저 Claude Code 시작 화면에 `Listening for channel messages from: plugin:telegram@claude-plugins-official` 메시지가 있는지 확인한다. 이 줄이 없으면 `--channels` 플래그 없이 실행된 것이다. 다음으로 `ps aux | grep bun`으로 Bun 서브프로세스가 실행 중인지 확인한다. Bun이 없으면 Telegram 폴링 자체가 되지 않는다. 마지막으로 페어링이 완료된 상태인지 확인한다. Telegram에서 봇에게 DM을 보내면 페어링 코드를 요구하는 메시지가 와야 하며, 그 코드를 `/telegram:access pair <코드>` 명령으로 승인해야 한다.
+
+### Q: `--dangerously-skip-permissions`는 얼마나 위험한가요? 꼭 써야 하나요?
+
+이 플래그를 사용하면 allowlist 발신자의 Telegram 메시지가 파일 쓰기, 쉘 실행, Git 커밋 등 거의 모든 로컬 작업을 권한 확인 없이 수행할 수 있다. 개인 개발 머신에서 혼자 사용한다면 관리 가능한 위험이다. 그러나 반드시 먼저 `/telegram:access policy allowlist`로 내 Telegram ID만 허용하도록 설정해야 한다. 민감한 API 키, SSH 키, 프로덕션 자격증명이 있는 머신이라면 권한 확인이 있는 일반 모드로 실행하되, 터미널에서 직접 응답할 수 있는 환경에서만 사용하는 것이 안전하다.
+
+### Q: 여러 Mac에서 같은 Telegram 봇 토큰을 쓸 수 있나요?
+
+기술적으로는 가능하지만 권장하지 않는다. 하나의 봇 토큰에 여러 인스턴스가 동시에 폴링하면 메시지가 인스턴스 사이에 무작위로 분산되어, 어느 머신에서 작업이 처리됐는지 파악하기 어렵다. 맥북과 맥미니 같이 여러 머신을 쓴다면 머신별로 별도 봇(`@mybot_macmini`, `@mybot_macbook`)을 만들거나, 한 번에 하나의 머신만 채널을 활성화하는 방식으로 운영하는 것이 깔끔하다.
+
+---
+
+## 관련 이슈 및 추가 팁
+
+### 작업 지시 프롬프트 템플릿 패턴
+
+Telegram에서 Claude에게 작업을 지시할 때 구체적인 컨텍스트를 함께 줄수록 결과가 좋다. 다음과 같은 템플릿을 만들어두면 유용하다:
+
+```
+[프로젝트]: tennis_bracket
+[작업]: auth.rb에서 JWT 토큰 만료 처리 버그 수정
+[확인]: 수정 후 bundle exec rspec spec/auth_spec.rb 실행해서 결과 알려줘
+```
+
+Claude Code 세션이 이미 특정 프로젝트 디렉토리에서 열려있다면 `[프로젝트]` 부분을 생략해도 된다. 세션이 가진 컨텍스트(`CLAUDE.md`, MCP 설정 등)가 자동으로 활성화된 상태에서 작업이 실행된다.
+
+### Telegram vs Discord 선택 기준
+
+간단한 단발성 요청(`"이 함수 리팩토링해줘"`, `"빌드 에러 원인 찾아줘"`)이라면 Telegram이 더 편리하다. 봇과의 DM 형식으로 빠르게 메시지를 주고받을 수 있다. 반면 여러 사람이 함께 Claude에게 요청을 보내거나 대화 히스토리를 참고하며 진행하는 긴 작업이라면 Discord가 낫다. Discord는 메시지 히스토리가 보존되어 Claude가 이전 대화 맥락을 이어받을 수 있고, 스레드 기능으로 작업 단위를 구분하기도 좋다.

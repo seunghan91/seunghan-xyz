@@ -4,6 +4,15 @@ date: 2026-03-22
 draft: false
 tags: ["rails", "turbo-native", "ios", "hotwire", "wkwebview"]
 description: "Rails의 data-turbo-confirm이 iOS 네이티브 앱에서 아무 반응이 없는 문제. WKWebView가 JavaScript confirm()을 기본 차단하는 보안 모델과 WKUIDelegate 해결법을 정리한다."
+faq:
+  - q: "WKUIDelegate를 구현했는데도 iOS 앱에서 confirm 창이 뜨지 않습니다. 확인해야 할 것은?"
+    a: "가장 먼저 JSDialogHandler 인스턴스가 ARC에 의해 해제되지 않았는지 확인하세요. WKWebView의 uiDelegate는 weak 참조이므로, 지역 변수로 생성한 핸들러는 클로저 종료 후 즉시 해제됩니다. AppDelegate의 인스턴스 프로퍼티로 선언해서 앱 전체 생명주기 동안 strong reference를 유지해야 합니다."
+  - q: "button_to와 link_to에서 turbo_confirm을 쓸 때 넣는 위치가 다른 이유는 무엇인가요?"
+    a: "button_to는 내부적으로 form 태그를 생성하며, Turbo는 form 태그의 data-turbo-confirm 속성을 읽습니다. 따라서 button_to에서는 form: { data: { turbo_confirm: '...' } } 형태로 form에 넣어야 합니다. 반면 link_to에서는 a 태그 자체에 data: { turbo_confirm: '...' }로 넣어야 합니다. 웹 브라우저에서는 두 방식 모두 동작하는 경우가 있어 혼동하기 쉽습니다."
+  - q: "Safari Web Inspector로 WKWebView 내 JavaScript를 디버깅하는 방법은?"
+    a: "먼저 Swift 코드에서 webView.isInspectable = true를 설정합니다. 그 다음 Mac의 Safari 설정 > 고급 > '웹 개발자용 기능 표시'를 활성화합니다. iOS Simulator에서 앱을 실행한 뒤 Safari의 개발자 메뉴 > Simulator > 해당 WebView를 선택하면 됩니다. 콘솔에서 confirm('test')를 직접 입력해 아무 반응이 없으면 WKUIDelegate가 구현되지 않은 것입니다."
+  - q: "turbo_confirm 대신 커스텀 모달로 확인 다이얼로그를 구현하고 싶을 때 어떻게 하나요?"
+    a: "Turbo는 Turbo.config.confirmMethod를 재정의해서 기본 confirm() 대신 커스텀 함수를 사용하도록 설정할 수 있습니다. 예를 들어 Turbo.config.confirmMethod = (message, element) => new Promise((resolve) => { /* 커스텀 모달 표시 후 resolve(true/false) */ }) 형태로 구현하면 됩니다. 이 경우 WKUIDelegate의 confirm 메서드는 호출되지 않으므로 네이티브 앱에서도 별도 처리가 필요합니다."
 ---
 
 ## 버튼을 눌러도 아무 일도 일어나지 않는다
@@ -375,3 +384,35 @@ WKWebView가 JavaScript `confirm()`을 기본 차단하는 것은 iOS 개발에�
 해결 자체는 간단하다. `JSDialogHandler.swift` 파일 하나와 AppDelegate에서 `webView.uiDelegate = handler` 한 줄이면 된다. 하지만 이 문제를 **발견하는 것**이 어렵다. 에러도 없고 로그도 없으니까.
 
 이 글을 읽는 사람이 같은 삽질을 하지 않기를 바란다. HotwireNative iOS 프로젝트를 시작한다면, 첫 번째로 할 일은 `JSDialogHandler`를 추가하는 것이다.
+
+---
+
+## 자주 묻는 질문 (FAQ)
+
+### Q: WKUIDelegate를 구현했는데도 iOS 앱에서 confirm 창이 뜨지 않습니다. 확인해야 할 것은?
+
+가장 먼저 `JSDialogHandler` 인스턴스가 ARC에 의해 해제되지 않았는지 확인해야 한다. `WKWebView`의 `uiDelegate`는 **weak 참조**이므로, `makeCustomWebView` 클로저 내부에서 `let handler = JSDialogHandler()`로 생성하면 클로저가 종료되는 순간 `uiDelegate`가 `nil`이 된다. `AppDelegate`에서 `private let jsDialogHandler = JSDialogHandler()`로 선언해 strong reference를 유지해야 한다. Safari Web Inspector 콘솔에서 `confirm("test")`를 직접 입력해 반응이 없으면 핸들러가 해제된 것이다.
+
+### Q: `button_to`와 `link_to`에서 `turbo_confirm`을 넣는 위치가 다른 이유는 무엇인가요?
+
+`button_to`는 내부적으로 `<form>` 태그를 생성하고, Turbo는 **폼 태그**에서 `data-turbo-confirm` 속성을 읽는다. 따라서 `button_to`에서는 반드시 `form: { data: { turbo_confirm: "..." } }` 형태로 form에 넣어야 한다. 반면 `link_to`는 `<a>` 태그에 직접 속성이 붙으므로 `data: { turbo_confirm: "..." }`를 쓴다. 웹 브라우저에서는 두 방식 모두 동작하는 경우가 있어 혼동하기 쉽지만, 공식 동작은 form 태그 기준이다.
+
+### Q: Safari Web Inspector로 WKWebView 내 JavaScript를 디버깅하는 방법은?
+
+Swift 코드에서 `webView.isInspectable = true`를 설정한 다음, Mac의 Safari 설정 > 고급 > "웹 개발자용 기능 표시"를 활성화한다. iOS Simulator에서 앱을 실행한 뒤 Safari 메뉴바에서 개발자 > Simulator > 해당 WebView를 선택하면 Elements, Console, Network 탭을 모두 사용할 수 있다. 콘솔에서 `confirm("test")`를 직접 입력해 다이얼로그가 표시되지 않으면 WKUIDelegate가 연결되지 않은 것이다.
+
+### Q: `turbo_confirm` 대신 커스텀 모달로 확인 다이얼로그를 대체하고 싶을 때는 어떻게 하나요?
+
+Turbo는 `Turbo.config.confirmMethod`를 재정의해서 기본 `window.confirm()` 대신 커스텀 함수를 사용할 수 있다. JavaScript에서 `Turbo.config.confirmMethod = (message, element, submitter) => new Promise(resolve => { /* 커스텀 모달 표시 후 resolve(true) 또는 resolve(false) */ })`처럼 Promise를 반환하는 형태로 구현한다. 이 방식을 선택하면 `window.confirm()`이 호출되지 않으므로 WKUIDelegate의 confirm 메서드는 사용되지 않는다. 다만 네이티브 앱 전용 커스텀 모달을 구현하려면 별도의 Turbo Bridge 이벤트 연동이 필요하다.
+
+---
+
+## 관련 이슈 및 추가 팁
+
+### Turbo Native Bridge를 활용한 커스텀 확인 UI
+
+WKUIDelegate가 표시하는 기본 `UIAlertController`는 iOS 네이티브 앱치고는 다소 밋밋하게 느껴질 수 있다. [Turbo Native Bridge](https://github.com/hotwired/hotwire-native-bridge)를 사용하면 웹 페이지에서 네이티브 커스텀 UI를 트리거하는 더 정교한 방법을 구현할 수 있다. 예를 들어, JavaScript에서 `BridgeElement`를 통해 iOS에 "이 삭제 작업은 커스텀 확인 화면을 보여줘"라고 요청하고, Swift 쪽에서 완전히 커스텀한 확인 화면을 표시한 뒤 결과를 다시 웹으로 돌려보내는 양방향 통신이 가능하다. 간단한 confirm 다이얼로그라면 WKUIDelegate가 충분하지만, 복잡한 확인 플로우가 필요하다면 Bridge가 더 적합하다.
+
+### Android Turbo Native에서의 동일한 문제
+
+iOS뿐 아니라 Android에서도 `Turbo Native` (또는 Hotwire Native Android)를 사용할 때 비슷한 문제가 발생한다. Android의 `WebView`도 기본적으로 JavaScript 다이얼로그를 차단하며, `WebChromeClient`를 구현하고 `onJsConfirm()` 메서드를 오버라이드해야 한다. Rails 앱이 iOS와 Android 모두를 네이티브 앱으로 감싸고 있다면 두 플랫폼 모두 동일한 처리가 필요하다는 점을 기억하자.

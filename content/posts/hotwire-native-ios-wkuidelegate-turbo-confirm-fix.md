@@ -4,6 +4,15 @@ date: 2026-03-22
 draft: false
 tags: ["hotwire-native", "ios", "wkwebview", "turbo", "rails"]
 description: "Hotwire Native iOS 앱에서 data-turbo-confirm이 붙은 버튼이 동작하지 않는 원인과 WKUIDelegate 구현으로 해결하는 방법. WKWebView의 JavaScript confirm() 보안 모델부터 실전 코드까지."
+faq:
+  - q: "WKUIDelegate를 구현했는데도 confirm 다이얼로그가 안 뜹니다. 원인이 뭔가요?"
+    a: "가장 흔한 원인은 JSDialogHandler 인스턴스가 ARC에 의해 해제된 경우입니다. WKWebView의 uiDelegate는 weak 참조이므로, JSDialogHandler를 클로저 안에서 지역 변수로 생성하면 클로저 종료 후 즉시 해제됩니다. AppDelegate의 인스턴스 프로퍼티(private let jsDialogHandler = JSDialogHandler())로 선언해서 strong reference를 유지해야 합니다."
+  - q: "completionHandler를 호출하지 않으면 어떻게 되나요?"
+    a: "앱이 크래시합니다. WKWebView는 내부적으로 completionHandler가 반드시 호출될 것을 기대하며, 호출되지 않으면 'Completion handler passed to ... was not called' NSInternalInconsistencyException 예외가 발생합니다. topViewController를 찾지 못하는 예외 경로에서도 반드시 completionHandler(false)를 호출해야 합니다."
+  - q: "Hotwire Native 없이 WKWebView만 쓰는 앱에서도 같은 방법으로 적용할 수 있나요?"
+    a: "네, 완전히 동일하게 적용할 수 있습니다. WKWebView 인스턴스를 생성할 때 webView.uiDelegate = jsDialogHandler를 설정하면 됩니다. Hotwire Native의 makeCustomWebView 클로저는 Hotwire 전용 진입점일 뿐이며, 핵심 원리는 WKWebView + WKUIDelegate 프로토콜 구현 자체에 있습니다."
+  - q: "iOS 앱에서 turbo_confirm 메시지를 한국어로 바꾸고 싶은데, UIAlertAction 버튼 텍스트를 커스터마이즈할 수 있나요?"
+    a: "네, JSDialogHandler 내의 UIAlertAction 타이틀을 원하는 언어로 수정하면 됩니다. 파괴적인 동작(삭제 등)에는 style: .destructive를 사용하면 빨간색으로 표시되어 사용자에게 경고를 줄 수 있습니다. data-turbo-confirm에 넘기는 message 문자열 자체는 Rails 뷰에서 I18n.t()로 다국어 처리하면 됩니다."
 ---
 
 ## 삭제 버튼을 눌렀는데 아무 일도 일어나지 않는다
@@ -388,3 +397,23 @@ Hotwire Native iOS 앱을 만들 때 `WKUIDelegate`는 **선택이 아니라 필
 - `completionHandler`를 모든 경로에서 반드시 호출
 
 Hotwire Native 공식 문서에도, 37signals의 공식 가이드에도 이 내용이 빠져있다. Joe Masilotti의 블로그(masilotti.com)가 이 문제를 다룬 거의 유일한 영어 자료다. 이 글이 같은 문제로 삽질하는 개발자에게 도움이 되길 바란다.
+
+---
+
+## 자주 묻는 질문 (FAQ)
+
+### Q: WKUIDelegate를 구현했는데도 confirm 다이얼로그가 안 뜹니다. 원인이 뭔가요?
+
+가장 흔한 원인은 JSDialogHandler 인스턴스가 ARC에 의해 해제된 경우다. WKWebView의 `uiDelegate`는 **weak 참조**이므로, `JSDialogHandler`를 `makeCustomWebView` 클로저 안에서 지역 변수로 생성하면 클로저가 끝난 직후 인스턴스가 해제된다. 반드시 `AppDelegate`의 인스턴스 프로퍼티(`private let jsDialogHandler = JSDialogHandler()`)로 선언해서 strong reference를 앱 생명주기 내내 유지해야 한다.
+
+### Q: completionHandler를 호출하지 않으면 어떻게 되나요?
+
+앱이 크래시한다. WKWebView는 내부적으로 `completionHandler`가 반드시 호출될 것을 기대하며, 호출되지 않으면 `NSInternalInconsistencyException`이 발생한다. 메시지는 `'Completion handler passed to -[YourApp.JSDialogHandler webView:runJavaScriptConfirmPanelWithMessage:...] was not called'`와 같이 나타난다. `topViewController()`를 찾지 못하는 guard 분기에서도 반드시 `completionHandler(false)`를 호출해야 한다.
+
+### Q: Hotwire Native 없이 WKWebView만 쓰는 앱에서도 같은 방법으로 적용할 수 있나요?
+
+네, 완전히 동일하게 적용된다. `WKWebView` 인스턴스를 직접 생성할 때 `webView.uiDelegate = jsDialogHandler`를 설정하면 된다. `makeCustomWebView` 클로저는 Hotwire Native 전용 진입점일 뿐이며, 핵심은 `WKWebView`와 `WKUIDelegate` 구현 자체에 있다. 순수 `WKWebView` 기반 앱이라면 `ViewController`에 weak 참조 없이 핸들러를 프로퍼티로 유지하면 된다.
+
+### Q: iOS 앱에서 확인/취소 버튼 텍스트를 한국어가 아닌 다른 언어로 바꿀 수 있나요?
+
+`JSDialogHandler` 내 `UIAlertAction`의 타이틀 문자열을 직접 수정하면 된다. Rails 뷰에서 `data-turbo-confirm` 속성에 넘기는 메시지 자체는 `I18n.t(:confirm_delete)` 같은 방식으로 다국어 처리하면 되고, iOS 쪽의 "확인"/"취소" 버튼 텍스트는 `Localizable.strings` 또는 `String(localized:)` API를 통해 iOS 현지화 파일에서 관리하는 것이 좋다. 파괴적인 동작(삭제)에는 `style: .destructive`를 사용하면 버튼이 빨간색으로 표시되어 사용자에게 시각적 경고를 준다.

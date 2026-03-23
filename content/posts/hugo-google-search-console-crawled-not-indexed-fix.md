@@ -5,6 +5,13 @@ draft: false
 tags: ["SEO", "Hugo", "Google Search Console", "robots.txt", "PaperMod"]
 categories: ["DevOps"]
 description: "Google Search Console에서 '크롤링됨 - 현재 색인이 생성되지 않음' 14개 페이지 문제를 robots.txt RSS 피드 차단과 noindex 태그로 해결한 과정. Hugo PaperMod 테마 기준 실전 가이드."
+faq:
+  - q: "robots.txt로 차단하면 색인이 완전히 방지되나요?"
+    a: "아닙니다. robots.txt는 크롤링을 막지만 색인을 완전히 방지하지는 않습니다. 외부 사이트에서 차단된 URL로 링크를 걸면 Google은 URL 자체를 색인할 수 있습니다(내용 없이). 색인을 확실하게 막으려면 noindex 메타 태그나 X-Robots-Tag HTTP 헤더를 사용해야 합니다. RSS 피드처럼 외부 링크 가능성이 낮은 페이지는 robots.txt 차단으로 충분합니다."
+  - q: "Hugo에서 특정 태그 페이지만 sitemap에서 제외하는 방법이 있나요?"
+    a: "layouts/sitemap.xml 커스텀 템플릿을 만들어 term Kind 페이지 중 글 수가 적은 것을 필터링할 수 있습니다. 단, noindex를 적용한 페이지는 sitemap에서도 제거해야 Google에 일관된 신호를 줄 수 있습니다. noindex 페이지가 sitemap에 남아있으면 Google이 혼동할 수 있고, 처리 속도도 느려집니다."
+  - q: "유효성 검사를 요청했는데 반영이 너무 느립니다. 얼마나 기다려야 하나요?"
+    a: "GSC 유효성 검사는 일반적으로 수일에서 수 주가 걸립니다. Google이 재크롤링하는 시점에 따라 달라지며, 개인 블로그 규모에서는 대개 1~3주 정도 기다리면 상태가 업데이트됩니다. 개별 URL은 GSC 상단 검색창에 URL 입력 후 '색인 생성 요청'으로 우선 크롤링을 요청할 수 있습니다. robots.txt나 noindex 변경 후 sitemap을 GSC에 재제출하면 처리가 조금 빨라질 수 있습니다."
 ---
 
 ## 어느 날 날아온 Google Search Console 경고 메일
@@ -322,3 +329,35 @@ Google Search Console의 "크롤링됨 - 현재 색인이 생성되지 않음" �
 - **robots.txt + noindex 동시 사용 금지**: 용도에 맞게 분리
 
 블로그를 운영한다면 GSC를 주기적으로 확인하는 습관을 들이자. "통과"라고 표시되어도 "크롤링됨 - 색인 안 됨" 항목은 따로 챙겨봐야 한다.
+
+---
+
+## 자주 묻는 질문 (FAQ)
+
+### Q: `robots.txt`로 차단하면 Google 색인이 완전히 방지되나요?
+
+아니다. `robots.txt`는 크롤링을 막지만 **색인을 완전히 방지하지는 않는다**. Google 공식 문서에 명시된 대로, 외부 사이트가 차단된 URL로 링크를 걸면 Google은 URL 자체를 색인할 수 있다(내용 없이). 색인을 확실하게 막으려면 `noindex` 메타 태그나 `X-Robots-Tag: noindex` HTTP 헤더를 사용해야 한다. RSS 피드처럼 외부에서 직접 링크될 가능성이 낮은 페이지는 `robots.txt` 차단만으로 충분하다. 단, 절대로 `robots.txt`로 차단한 페이지에 `noindex`를 동시에 적용하지 말아야 한다. Googlebot이 페이지를 방문하지 못하면 `noindex` 태그를 읽을 수도 없기 때문이다.
+
+### Q: Hugo에서 특정 태그 페이지만 `sitemap.xml`에서 제외할 수 있나요?
+
+`layouts/sitemap.xml` 커스텀 템플릿을 만들어서 `term` Kind이면서 글이 적은 페이지를 필터링할 수 있다. 예를 들어 `{{- if and (ne .Kind "term") (gt (len .Pages) 1) -}}` 같은 조건을 추가하면 된다. `noindex`를 적용한 페이지는 사이트맵에서도 제거하는 것이 권장된다. `noindex` 페이지가 사이트맵에 남아있으면 Google에 상충된 신호를 보내게 되어 처리가 지연되거나 혼동을 줄 수 있다.
+
+### Q: GSC 유효성 검사를 요청했는데 반영이 너무 느립니다. 얼마나 기다려야 하나요?
+
+GSC 유효성 검사는 일반적으로 수일에서 수 주가 걸린다. 개인 블로그 규모에서는 대개 1~3주를 기다려야 상태가 업데이트된다. 개별 URL의 경우 GSC 상단 검색창에 URL을 입력하고 "색인 생성 요청"을 클릭하면 우선 크롤링을 요청할 수 있다. `robots.txt`나 `noindex` 변경 후 GSC의 사이트맵 섹션에서 사이트맵을 재제출하면 Google이 변경 사항을 인식하는 속도가 조금 빨라진다.
+
+### Q: 글이 적은 태그 페이지를 noindex하면 해당 태그에 달린 글의 검색 노출에도 영향이 있나요?
+
+없다. `noindex, follow`를 사용하기 때문에 태그 페이지 자체는 색인되지 않지만, 해당 페이지에서 링크된 실제 포스트는 Google이 계속 크롤링하고 색인한다. `follow`는 "이 페이지의 링크는 따라가도 된다"는 의미로, 태그 페이지를 허브로 삼아 연결된 글들은 영향받지 않는다. 만약 `noindex, nofollow`를 사용했다면 링크 추적도 차단되므로 반드시 `follow`와 함께 써야 한다.
+
+---
+
+## 관련 이슈 및 추가 팁
+
+### Core Web Vitals와 색인의 관계
+
+"크롤링됨 - 현재 색인이 생성되지 않음" 중 RSS나 태그 페이지가 아닌 **실제 포스트**가 포함되어 있다면, 해당 페이지의 Core Web Vitals(LCP, CLS, INP) 점수가 낮을 가능성이 있다. Google은 페이지 경험(Page Experience) 신호를 색인 순위 결정에 활용하며, 극단적으로 나쁜 페이지 경험은 색인 자체를 늦추는 요인이 될 수 있다. GSC의 "Core Web Vitals" 섹션에서 모바일/데스크톱 상태를 함께 확인해보는 것이 좋다.
+
+### Hugo PaperMod 다국어 블로그의 robots.txt 주의사항
+
+한국어/영어 다국어 Hugo 블로그에서는 `/ko/tags/*/index.xml`, `/en/tags/*/index.xml`처럼 언어 prefix가 붙은 경로가 별도로 생성된다. `robots.txt`에서 언어 prefix 없는 경로만 차단하면 다른 언어의 RSS 피드는 여전히 크롤링된다. 다국어 설정을 사용한다면 각 언어 prefix별 경로를 모두 `Disallow`에 추가하거나, `Disallow: /*/tags/*/index.xml` 같은 와일드카드 패턴을 사용해야 한다.
