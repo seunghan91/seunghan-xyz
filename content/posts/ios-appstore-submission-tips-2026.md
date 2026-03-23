@@ -1,9 +1,9 @@
 ---
-title: "iOS 앱 배포 삽질 모음: Bundle ID 계정 이전, ITMS-90683, AI 아이콘/스크린샷 생성"
+title: "iOS 앱 배포 막히는 순간들 — Bundle ID 이전 불가·ITMS-90683·AI 아이콘 생성까지"
 date: 2026-03-08
 draft: false
 tags: ["iOS", "Flutter", "App Store Connect", "TestFlight", "AI", "Gemini", "앱배포"]
-description: "Apple Developer 계정 전환, Bundle ID 신규 등록, 권한 누락 에러 수정, BizRouter + Gemini 3 Pro로 앱 아이콘/스크린샷 자동 생성까지 — 실제로 겪은 삽질을 정리했다."
+description: "계정이 달라서 Bundle ID를 이전할 수 없다. ITMS-90683 에러는 왜 나는지. AI로 앱 아이콘과 스크린샷을 자동 생성하는 방법까지 — iOS 배포에서 실제로 막혔던 순간들을 정리했다."
 ---
 
 Flutter 앱을 TestFlight에 올리는 과정에서 겪은 삽질들을 기록한다. Apple Developer 계정 전환, Bundle ID 등록, 권한 누락 에러, 그리고 AI로 아이콘과 스크린샷을 자동 생성하는 방법까지.

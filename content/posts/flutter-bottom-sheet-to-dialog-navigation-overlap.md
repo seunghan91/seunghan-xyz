@@ -1,9 +1,9 @@
 ---
-title: "Flutter BottomSheet가 네비게이션 바를 가리는 문제: showDialog로 전환하기"
+title: "Flutter BottomSheet가 네비게이션 바를 덮는다면 — showDialog로 바꿔야 하는 이유"
 date: 2026-03-09
 draft: false
 tags: ["Flutter", "UI", "BottomSheet", "Dialog", "share_plus", "SQLite", "디버깅"]
-description: "showModalBottomSheet가 하단 네비게이션 바를 가리는 문제를 showDialog 중앙 모달로 해결하고, TextButton 색상 가독성 문제와 SQLite 백업 PlatformException까지 함께 잡은 과정을 정리한다."
+description: "하단 네비게이션 바 있는 앱에서 BottomSheet를 쓰면 네비바가 가려진다. showDialog로 교체하면 깔끔하게 해결된다. TextButton 색상 버그와 share_plus PlatformException 수정도 함께."
 ---
 
 폼 입력이 필요한 화면에서 `showModalBottomSheet`를 쓰다 보면 자연스러운 UX처럼 느껴진다. 그런데 앱에 하단 네비게이션 바가 있으면 바텀시트가 올라오면서 네비게이션을 덮어버리는 문제가 생긴다. 기능적으로는 동작하지만, 시각적으로 답답하다.

@@ -1,9 +1,9 @@
 ---
-title: "Rails SSO Implementation + iOS Universal Links for Automatic App Switching"
+title: "How I Built Rails SSO Between Two Apps — Plus iOS Universal Links Auto-Switching"
 date: 2026-02-17
 draft: false
 tags: ["Rails", "SSO", "iOS", "Universal Links", "Hotwire Native", "Security"]
-description: "Implementing custom SSO between two Rails apps and integrating iOS Universal Links for automatic native app authentication when the app is installed. Session loss, redirect loops, and AASA configuration debugging."
+description: "How to build custom SSO between two Rails 8 apps — then add iOS Universal Links so the native app handles auth automatically. Covers session loss, redirect loops, and AASA debugging."
 cover:
   image: "/images/og/rails-sso-universal-links-hotwire-native.png"
   alt: "Rails Sso Universal Links Hotwire Native"

@@ -1,0 +1,22 @@
+# Seunghan's Tech Blog
+
+> Personal tech blog by Seunghan, an AI-Native Engineer sharing development experiences with Flutter, iOS, Rails, and AI-powered workflows.
+
+## About
+- Author: Seunghan (김승한)
+- Site: https://seunghan.xyz
+- Languages: Korean (primary), English
+- Topics: Flutter, iOS development, Rails, Hotwire Native, debugging, AI-assisted development
+- Brand: Personal blog (NOT affiliated with any company)
+
+## Key Content Areas
+- Flutter mobile app development (BLoC, state management, iOS builds, TestFlight)
+- Rails 8 web development (Inertia.js, Svelte 5, Hotwire, Stimulus)
+- iOS app deployment (codesign, App Store Connect, TestFlight automation)
+- Chrome extension development
+- AI-assisted development workflows
+- Hugo blog management and SEO
+
+## Contact
+- GitHub: https://github.com/seunghan91
+- Blog: https://seunghan.xyz

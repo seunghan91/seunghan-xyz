@@ -1,9 +1,9 @@
 ---
-title: "Flutter BLoC - Designing State Management for Complex Q&A Sessions"
+title: "Flutter BLoC State Design Beyond Lists — Handling Multi-Step Session Flows"
 date: 2025-07-06
 draft: false
 tags: ["Flutter", "BLoC", "State Management", "UX"]
-description: "How to structure events and states in BLoC for complex flows like session creation, question addition, answering, and completion, beyond simple list/detail views."
+description: "BLoC is easy for simple lists. But how do you model multi-step flows — create session, add questions, receive answers, complete? Here's a state design approach that scales without spaghetti."
 cover:
   image: "/images/og/flutter-bloc-complex-state-management.png"
   alt: "Flutter Bloc Complex State Management"

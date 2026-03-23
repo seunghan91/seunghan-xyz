@@ -1,9 +1,9 @@
 ---
-title: "Lessons from Integrating 5 Cryptocurrency Exchange APIs"
+title: "What 5 Crypto Exchange APIs Don't Tell You in Their Docs — Rails Integration Lessons"
 date: 2025-12-06
 draft: false
 tags: ["Ruby", "Rails", "API", "Cryptocurrency", "Debugging", "Faraday", "Circuit Breaker"]
-description: "Problems and solutions encountered while integrating funding rate APIs from Binance, Bybit, OKX, Bitget, and HyperLiquid in Rails. API docs vs actual behavior, error handling patterns, and Faraday retry configuration."
+description: "Binance, Bybit, OKX, Bitget, HyperLiquid — each exchange's API behaves differently from its docs. Here's what actually broke in Rails and how I fixed it with Faraday retry and circuit breaker."
 cover:
   image: "/images/og/crypto-exchange-api-integration-lessons.png"
   alt: "Crypto Exchange Api Integration Lessons"

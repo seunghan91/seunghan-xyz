@@ -1,9 +1,9 @@
 ---
-title: "Flutter BottomSheet Overlapping Navigation Bar: Switching to showDialog"
+title: "Flutter BottomSheet Covers Navigation Bar — Fix It with showDialog"
 date: 2026-03-09
 draft: false
 tags: ["Flutter", "UI", "BottomSheet", "Dialog", "share_plus", "SQLite", "Debugging"]
-description: "Solving the issue of showModalBottomSheet covering the bottom navigation bar by switching to a centered showDialog, while also fixing TextButton color readability and a SQLite backup PlatformException."
+description: "showModalBottomSheet covers your bottom nav bar — here's why showDialog is the cleaner fix. Also covers TextButton color gone yellow and SQLite share_plus PlatformException."
 ---
 
 Using `showModalBottomSheet` for form input screens feels natural. But when your app has a bottom navigation bar, the sheet slides up and covers the navigation — it works functionally, but looks cluttered.

@@ -1,9 +1,9 @@
 ---
-title: "Rails 간 SSO 구현 + iOS Universal Links로 앱 자동 전환까지"
+title: "Rails 두 앱 사이에 SSO 구현하기 — 세션 유실·리다이렉트 루프·Universal Links 삽질까지"
 date: 2026-02-17
 draft: false
 tags: ["Rails", "SSO", "iOS", "Universal Links", "Hotwire Native", "보안"]
-description: "두 Rails 앱 간 커스텀 SSO를 구현하고, iOS Universal Links를 연동해 앱이 설치돼 있으면 자동으로 네이티브 앱에서 인증하도록 만든 과정. 세션 유실, 리다이렉트 루프, AASA 설정까지 삽질 기록."
+description: "Rails 8 두 앱 사이에 커스텀 SSO를 구현하고, Hotwire Native 앱이 설치돼 있으면 Universal Links로 자동 전환되도록 만든 과정. 세션 유실·리다이렉트 루프·AASA 설정 삽질까지."
 cover:
   image: "/images/og/rails-sso-universal-links-hotwire-native.png"
   alt: "Rails Sso Universal Links Hotwire Native"

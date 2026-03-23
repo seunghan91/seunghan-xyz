@@ -1,9 +1,9 @@
 ---
-title: "5개 암호화폐 거래소 API 연동하면서 겪은 삽질 모음"
+title: "Binance·Bybit·OKX 5개 거래소 API — 공식 문서가 틀렸을 때 Rails에서 살아남기"
 date: 2025-12-06
 draft: false
 tags: ["Ruby", "Rails", "API", "암호화폐", "디버깅", "Faraday", "Circuit Breaker"]
-description: "Binance, Bybit, OKX, Bitget, HyperLiquid 5개 거래소 펀딩레이트 API를 Rails에서 연동하면서 마주친 문제들과 해결 방법. 문서와 다른 실제 API 동작, 에러 처리 패턴, Faraday 재시도 설정까지."
+description: "5개 거래소 API를 Rails에서 붙이면서 각 거래소마다 문서와 다른 실제 동작을 마주쳤다. Faraday retry, Circuit Breaker, 거래소별 타임스탬프 단위 차이까지 실전 해결법을 정리했다."
 cover:
   image: "/images/og/crypto-exchange-api-integration-lessons.png"
   alt: "Crypto Exchange Api Integration Lessons"

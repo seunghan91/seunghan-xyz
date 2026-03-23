@@ -1,9 +1,9 @@
 ---
-title: "Hugo 블로그 AdSense 승인 준비 — 사이트 구조 정리와 필수 페이지 세팅"
+title: "Hugo 블로그 AdSense 승인 안 되는 이유 — 콘텐츠가 아니라 구조 문제였다"
 date: 2026-03-08
 draft: false
 tags: ["AdSense", "Hugo", "블로그", "SEO", "Netlify", "PaperMod"]
-description: "Hugo + PaperMod 블로그에서 Google AdSense 승인을 위해 사이트 구조를 정리한 실제 작업 기록. 필수 페이지 생성, 앱 정책 페이지 noindex 처리, 빈 카테고리 제거까지."
+description: "글이 80개나 있는데 AdSense 승인이 안 됐다. 알고 보니 콘텐츠가 아니라 사이트 구조 문제였다. Hugo + PaperMod에서 실제로 고친 내용을 정리했다."
 cover:
   image: ""
   alt: "Hugo AdSense 승인 준비"

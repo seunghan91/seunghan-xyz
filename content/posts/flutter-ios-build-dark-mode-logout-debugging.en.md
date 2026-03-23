@@ -1,9 +1,9 @@
 ---
-title: "Flutter iOS Deployment Debugging Collection: 5 Build Errors + Dark Mode Hardcoding + Logout Bug"
+title: "Flutter iOS Build Broke Before TestFlight — 5 Errors, Dark Mode & Logout Bug Fixed"
 date: 2025-11-01
 draft: false
 tags: ["Flutter", "iOS", "TestFlight", "Dart", "Retrofit", "Freezed", "build_runner", "Dark Mode", "Makefile"]
-description: "Code generation failures (Retrofit syntax errors, Freezed sealed class), missing file restoration, TestFlight deployment without Xcode account, dark mode color hardcoding, and logout token deletion bug — all in one day."
+description: "Five build errors hit at once before a TestFlight push: Retrofit codegen failed, files were missing, build number rejected, UI hardcoded dark colors, and logout didn't clear tokens. All fixed."
 cover:
   image: "/images/og/flutter-ios-build-dark-mode-logout-debugging.png"
   alt: "Flutter Ios Build Dark Mode Logout Debugging"

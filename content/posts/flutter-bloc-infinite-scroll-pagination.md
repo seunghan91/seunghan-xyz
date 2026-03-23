@@ -1,9 +1,9 @@
 ---
-title: "Flutter BLoC 무한스크롤 구현 — 외부 패키지 없이 레이어별로 설계하기"
+title: "Flutter BLoC 무한스크롤 — infinite_scroll_pagination 없이 직접 구현하는 법"
 date: 2025-09-20
 draft: false
 tags: ["Flutter", "BLoC", "무한스크롤", "페이지네이션", "ScrollController", "UX"]
-description: "infinite_scroll_pagination 없이 순수 BLoC + ScrollController로 무한스크롤을 구현하는 방법. Datasource → Repository → BLoC → UI까지 레이어별로 어떻게 나눠야 하는지 정리했다."
+description: "infinite_scroll_pagination 없이 BLoC + ScrollController만으로 무한스크롤을 만들 수 있다. Datasource → Repository → BLoC → UI 레이어별 책임 분리 방법을 실제 코드로 정리했다."
 cover:
   image: "/images/og/flutter-bloc-infinite-scroll-pagination.png"
   alt: "Flutter Bloc Infinite Scroll Pagination"

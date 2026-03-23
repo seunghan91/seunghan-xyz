@@ -1,9 +1,9 @@
 ---
-title: "7 Real-World Pitfalls Building a Hotwire Native Mobile App with Rails 8 — CSP, Turbo Conflicts, and Performance"
+title: "7 Hotwire Native + Rails 8 Pitfalls That Only Break on Real Devices"
 date: 2026-03-21
 draft: false
 tags: ["Hotwire Native", "Rails 8", "Turbo", "Stimulus", "WKWebView", "iOS", "mobile app", "hybrid app", "bridge components", "Content Security Policy", "backdrop-filter performance", "Tailwind CSS", "importmap", "37signals", "web-first mobile", "Rails mobile app"]
-description: "Practical debugging guide for building hybrid mobile apps with Hotwire Native and Rails 8. From CSP blocking CDN imports, Turbo const/let redeclaration errors, to backdrop-filter blur killing scroll performance with 120 GPU composite layers. Real fixes from a production app."
+description: "7 bugs that only surface on real iOS devices with Hotwire Native + Rails 8: CSP blocking CDN, Turbo const/let redeclaration, and 120 backdrop-filter layers tanking scroll. Each with root cause and fix."
 cover:
   image: ""
   alt: "Hotwire Native Rails 8 Dashboard UX Optimization"

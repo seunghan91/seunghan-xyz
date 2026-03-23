@@ -1,9 +1,9 @@
 ---
-title: "Hotwire Native 앱 대시보드 UX 삽질기 — CSP, Turbo 재선언, backdrop-filter 성능까지"
+title: "Hotwire Native + Rails 8 삽질 7가지 — 실기기에서만 터지는 버그들"
 date: 2026-03-21
 draft: false
 tags: ["Rails 8", "Hotwire", "Turbo", "Stimulus", "CSP", "Content Security Policy", "backdrop-filter", "모바일 WebView", "성능 최적화", "Tailwind CSS", "WKWebView", "iOS", "Hotwire Native"]
-description: "Rails 8 + Hotwire Native 모바일 앱의 대시보드 페이지에서 발생한 레이아웃 깨짐, CSP 차단, Turbo 변수 재선언 에러, 스크롤 성능 저하를 해결한 실전 디버깅 기록. 120개 backdrop-filter blur 레이어가 GPU를 죽이고, IIFE 패턴이 Turbo와 인라인 스크립트의 충돌을 해결한다."
+description: "개발 환경에선 멀쩡한데 실기기 WKWebView에서만 터지는 버그들. CSP CDN 차단, Turbo const 재선언, backdrop-filter 120개가 스크롤을 죽이는 원인과 해결 방법을 정리했다."
 cover:
   image: ""
   alt: "Hotwire Native Dashboard UX Optimization"

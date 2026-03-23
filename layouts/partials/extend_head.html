@@ -5,6 +5,7 @@
 {{- else if and (eq .Kind "term") (le (len .Pages) 1) }}
 <meta name="robots" content="noindex, follow" />
 {{- end -}}
+{{- partial "faq-schema.html" . }}
 {{- /* Google Analytics 4 */ -}}
 {{ template "_internal/google_analytics.html" . }}
 {{- /* Google AdSense */ -}}

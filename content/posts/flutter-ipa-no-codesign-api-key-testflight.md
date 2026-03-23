@@ -1,9 +1,9 @@
 ---
-title: "flutter build ipa 실패 원인과 --no-codesign + API Key로 TestFlight 배포하기"
+title: "flutter build ipa가 갑자기 실패한다면 — Development 인증서 없이 TestFlight 배포하는 법"
 date: 2025-11-04
 draft: false
 tags: ["Flutter", "iOS", "TestFlight", "Xcode", "Makefile", "코드서명", "배포자동화"]
-description: "Development 인증서 없이 flutter build ipa가 실패하는 이유와, --no-codesign + App Store Connect API Key로 Xcode 계정 로그인 없이 TestFlight 배포하는 방법"
+description: "Distribution 인증서가 있는데도 flutter build ipa가 실패하는 이유는 Development 인증서가 없어서다. --no-codesign + API Key 조합으로 Xcode 로그인 없이 TestFlight에 올리는 방법을 정리했다."
 cover:
   image: "/images/og/flutter-ipa-no-codesign-api-key-testflight.png"
   alt: "Flutter Ipa No Codesign Api Key Testflight"
