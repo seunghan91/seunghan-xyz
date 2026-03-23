@@ -1,0 +1,25 @@
+{{/* Coupang Partners product card shortcode
+     Usage: {{</* coupang url="https://link.coupang.com/..." name="상품명" price="12,900원" img="https://..." */>}}
+     Simple: {{</* coupang url="https://link.coupang.com/..." name="상품명" */>}}
+*/}}
+<div style="border:1px solid #e0e0e0; border-radius:8px; padding:16px; margin:20px 0; display:flex; align-items:center; gap:16px; background:#fafafa;">
+  {{ if .Get "img" }}
+  <a href="{{ .Get "url" }}" target="_blank" rel="noopener noreferrer nofollow" style="flex-shrink:0;">
+    <img src="{{ .Get "img" }}" alt="{{ .Get "name" }}" style="width:100px; height:100px; object-fit:contain; border-radius:4px;" loading="lazy">
+  </a>
+  {{ end }}
+  <div style="flex:1; min-width:0;">
+    <a href="{{ .Get "url" }}" target="_blank" rel="noopener noreferrer nofollow" style="text-decoration:none; color:#333; font-weight:600; font-size:15px; display:block; margin-bottom:4px;">
+      {{ .Get "name" }}
+    </a>
+    {{ if .Get "price" }}
+    <span style="color:#ae0000; font-weight:700; font-size:16px;">{{ .Get "price" }}</span>
+    {{ end }}
+    {{ if .Get "rocket" }}
+    <span style="background:#00a0e0; color:#fff; font-size:11px; padding:2px 6px; border-radius:3px; margin-left:6px;">로켓배송</span>
+    {{ end }}
+    <div style="margin-top:8px;">
+      <a href="{{ .Get "url" }}" target="_blank" rel="noopener noreferrer nofollow" style="background:#ae0000; color:#fff; padding:6px 16px; border-radius:4px; text-decoration:none; font-size:13px; font-weight:600;">쿠팡에서 보기</a>
+    </div>
+  </div>
+</div>

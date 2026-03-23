@@ -342,3 +342,9 @@ client = Signet::OAuth2::Client.new(
 ---
 
 관련 글: [API 응답 래퍼와 토큰 파싱 디버깅](/posts/api-response-wrapper-token-parsing-debug/)
+
+## 개발자 추천 장비
+
+{{< coupang url="https://link.coupang.com/re/AFFSDP?lptag=AF3486423&pageKey=8189842355&itemId=23433983921&vendorItemId=90460914324&traceid=V0-153-b89cce56defcbeca&requestid=20260323105137686044907300&token=31850C%7CMIXED&landing_exp=APP_LANDING_A" name="HP 450 프로그래밍 무선 키보드" price="36,600원" img="https://ads-partners.coupang.com/image1/-tKIoE3x8p2aHuvR-naPNG25uUGPYnK0BeMFDahk53vK-f27q9dRoYNa1Pp1CYyeqcDQHkXDvMzCgyYJOCfGjb04Bu7ZQGEFf3wl9l1hr5upJV3kQzL8WsQ5QWit0QggkVsZWc-RHPdMavIgZLjNSRhyj-xe5C5d2t44YcoNiKzJ1SEbf-2JxG1XqEnXIWxcDQhxn69fktf06CmgaFynL97G44fXehjRFdhwngYNpF_ArBGTrycix2Hc8Y2rA8ICUUOqhF4TSgrXOUjPSPDVE6IuHBwfchbD21sWbDHl6FVlA9q34JU=" rocket="true" >}}
+
+{{< coupang-disclosure >}}
