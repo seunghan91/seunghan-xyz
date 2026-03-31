@@ -37,6 +37,12 @@ ShowPostNavLinks: false
 
 ---
 
+<div style="text-align:center; margin: 32px 0;">
+  <img src="/images/passpass/demo.gif" alt="PassPass 데모 - 간편인증 자동입력" style="max-width:100%; border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.12);">
+</div>
+
+---
+
 ## 어떤 문제를 해결하나요?
 
 홈택스, 정부24, 건강보험공단 등 공공기관 사이트에서 본인인증을 할 때마다
