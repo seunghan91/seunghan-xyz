@@ -1,0 +1,15 @@
+name: Daily Build
+
+on:
+  schedule:
+    - cron: "0 0 * * *"  # 매일 오전 9시 KST (UTC 00:00)
+  workflow_dispatch:       # 수동 실행도 가능
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Netlify build
+        run: curl -s -X POST "https://api.netlify.com/build_hooks/${TOKEN}"
+        env:
+          TOKEN: ${{ secrets.NETLIFY_CRON_BUILD_HOOK }}
