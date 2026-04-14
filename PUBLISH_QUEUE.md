@@ -6,7 +6,7 @@
 |------|--------|----------|
 | 2026-04-08 | ai-design-system-vs-css-reskin-atomic-4-layer.md | AI로 디자인 시스템 마이그레이션했는데 사실 CSS 리스킨이었다 — 4-layer 재설계 회고 |
 | 2026-04-09 | llm-citation-verification-korean-law.md | LLM이 지어낸 법령을 DB로 걸러내기 — 한국어 법률 인용 환각 방지 실전 |
-| 2026-04-10 | mdm-mcp-gateway-integration.md | HWP 변환기를 MCP 툴로 만들기 — 기존 Gateway에 3줄 추가하는 법 |
+| 2026-04-15 | mdm-mcp-gateway-integration.md | HWP 변환기를 MCP 툴로 만들기 — 기존 Gateway에 3줄 추가하는 법 |
 
 ## 사용법
 - 포스트 작성 시 `date: YYYY-MM-DDT09:00:00+09:00` 설정

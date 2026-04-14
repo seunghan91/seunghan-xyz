@@ -11,12 +11,14 @@ weight: 2
 
 `![[name:preset | attr=val]]` 문법 하나로 이미지, 비디오, 오디오를 마크다운 문서에 자유롭게 임베드하고 제어하는 오픈소스 프로젝트입니다.
 
-**GitHub** → [seunghan91/markdown-media](https://github.com/seunghan91/markdown-media)
-**Playground** → [seunghan91.github.io/markdown-media/playground](https://seunghan91.github.io/markdown-media/playground/)
-**npm** → [@mdm/parser](https://www.npmjs.com/package/@mdm/parser)
-**PyPI** → [mdm-parser](https://pypi.org/project/mdm-parser/)
-**데스크톱 앱** → [mdm-desktop releases](https://github.com/seunghan91/mdm-desktop/releases)
-**MCP 서버** → [law-check.com/api/mcp](https://law-check.com) (mdm_convert_document / mdm_extract_text / mdm_detect_format)
+| 링크 | 주소 |
+|------|------|
+| **GitHub** | [seunghan91/markdown-media](https://github.com/seunghan91/markdown-media) |
+| **Playground** | [seunghan91.github.io/markdown-media/playground](https://seunghan91.github.io/markdown-media/playground/) |
+| **npm** | [@mdm/parser](https://www.npmjs.com/package/@mdm/parser) |
+| **PyPI** | [mdm-parser](https://pypi.org/project/mdm-parser/) |
+| **데스크톱 앱** | [mdm-desktop releases](https://github.com/seunghan91/mdm-desktop/releases) |
+| **MCP 서버** | [law-check.com/api/mcp](https://law-check.com) — `mdm_convert_document` · `mdm_extract_text` · `mdm_detect_format` |
 
 ---
 
