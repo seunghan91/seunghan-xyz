@@ -14,6 +14,37 @@ weight: 2
 **GitHub** → [seunghan91/markdown-media](https://github.com/seunghan91/markdown-media)
 **Playground** → [seunghan91.github.io/markdown-media/playground](https://seunghan91.github.io/markdown-media/playground/)
 **npm** → [@mdm/parser](https://www.npmjs.com/package/@mdm/parser)
+**PyPI** → [mdm-parser](https://pypi.org/project/mdm-parser/)
+**데스크톱 앱** → [mdm-desktop releases](https://github.com/seunghan91/mdm-desktop/releases)
+**MCP 서버** → [law-check.com/api/mcp](https://law-check.com) (mdm_convert_document / mdm_extract_text / mdm_detect_format)
+
+---
+
+## 1분 세팅 — 상황별 최단 경로
+
+| 상황 | 명령어 / 링크 |
+|------|---------------|
+| **데스크톱 앱 (GUI)** | [mdm-desktop releases](https://github.com/seunghan91/mdm-desktop/releases) 에서 다운로드 → 드래그앤드롭 |
+| **Python 설치** | `pip install mdm-parser` |
+| **CLI 파이프** | `cat file.hwp \| hwp2mdm stream --ext hwp --mode body` |
+| **AI Agent (MCP)** | law-check.com에서 MCP 키 발급 → `~/.claude.json`에 gateway 등록 |
+
+### MCP 설정 (Claude Code 예시)
+
+```json
+{
+  "mcpServers": {
+    "korea-law-hub": {
+      "url": "https://law-check.com/api/mcp",
+      "headers": { "Authorization": "McpKey YOUR_KEY" }
+    }
+  }
+}
+```
+
+설정 후 재시작하면 `mdm_convert_document`, `mdm_extract_text`, `mdm_detect_format` 3개 tool이 자동 로드된다.
+
+전체 가이드: [GETTING-STARTED.md](https://github.com/seunghan91/markdown-media/blob/master/GETTING-STARTED.md)
 
 ---
 
