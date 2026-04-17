@@ -1,6 +1,7 @@
 ---
 title: "MDM — Markdown+Media"
 date: 2026-03-13
+lastmod: 2026-04-17
 draft: false
 tags: ["Rust", "Python", "JavaScript", "Markdown", "Parser", "Open Source"]
 description: "이미지·비디오·오디오를 ![[]] 문법으로 직관적으로 제어하는 마크다운 슈퍼셋"
@@ -13,11 +14,13 @@ weight: 2
 
 | 링크 | 주소 |
 |------|------|
-| **GitHub** | [seunghan91/markdown-media](https://github.com/seunghan91/markdown-media) |
+| **GitHub** | [seunghan91/markdown-media](https://github.com/seunghan91/markdown-media) · 최신 `v0.3.0` (2026-04-16) |
 | **Playground** | [seunghan91.github.io/markdown-media/playground](https://seunghan91.github.io/markdown-media/playground/) |
-| **npm** | [@mdm/parser](https://www.npmjs.com/package/@mdm/parser) |
-| **PyPI** | [mdm-parser](https://pypi.org/project/mdm-parser/) |
-| **데스크톱 앱** | [mdm-desktop releases](https://github.com/seunghan91/mdm-desktop/releases) |
+| **npm (Native)** | [@markdown-media/core](https://www.npmjs.com/package/@markdown-media/core) `1.0.0` — napi Node.js 바인딩 |
+| **npm (WASM)** | [@markdown-media/wasm](https://www.npmjs.com/package/@markdown-media/wasm) `0.1.0` — 브라우저/Node 공용 WASM (PDF 포함, 1.5 MB) |
+| **PyPI** | [mdm-parser](https://pypi.org/project/mdm-parser/) `0.1.0` |
+| **데스크톱 앱** | [mdm-desktop v0.1.1](https://github.com/seunghan91/mdm-desktop/releases) — macOS 코드사이닝 + 공증 완료 |
+| **Chrome 확장** | MDM Converter (HWP/PDF/DOCX → Markdown) — 오프라인 WASM, 권한 0개 · 심사 중 |
 | **MCP 서버** | [law-check.com/api/mcp](https://law-check.com) — `mdm_convert_document` · `mdm_extract_text` · `mdm_detect_format` |
 
 ---
@@ -26,8 +29,10 @@ weight: 2
 
 | 상황 | 명령어 / 링크 |
 |------|---------------|
-| **데스크톱 앱 (GUI)** | [mdm-desktop releases](https://github.com/seunghan91/mdm-desktop/releases) 에서 다운로드 → 드래그앤드롭 |
-| **Python 설치** | `pip install mdm-parser` |
+| **데스크톱 앱 (GUI)** | [mdm-desktop v0.1.1](https://github.com/seunghan91/mdm-desktop/releases) 에서 DMG 다운로드 → 드래그앤드롭 (공증 완료) |
+| **Python** | `pip install mdm-parser` |
+| **Node.js (Native)** | `npm install @markdown-media/core` |
+| **브라우저 / WASM** | `npm install @markdown-media/wasm` (PDF 포함 1.5 MB) |
 | **CLI 파이프** | `cat file.hwp \| hwp2mdm stream --ext hwp --mode body` |
 | **AI Agent (MCP)** | law-check.com에서 MCP 키 발급 → `~/.claude.json`에 gateway 등록 |
 
@@ -47,6 +52,42 @@ weight: 2
 설정 후 재시작하면 `mdm_convert_document`, `mdm_extract_text`, `mdm_detect_format` 3개 tool이 자동 로드된다.
 
 전체 가이드: [GETTING-STARTED.md](https://github.com/seunghan91/markdown-media/blob/master/GETTING-STARTED.md)
+
+---
+
+## 최신 업데이트 — v0.3.0 (2026-04-16)
+
+### HWPX 파서 추출 품질 상향
+
+- **문자 스타일 정규화** — 취소선 / 밑줄 판정을 블랙리스트 → **화이트리스트**로 전환. 한컴 내보내기의 `shape="3D"` 같은 placeholder 값을 본문 전체 취소선으로 오해석하던 버그 제거.
+- **강조점 (`<mark>`)** — OWPML `symMark` (`DOT`/`CIRCLE`/`TICK`/`TILDE`/`MIDDLE_DOT`/`COLON`) 를 `<mark>…</mark>` 로 보존. 공공문서 핵심 용어 신호가 살아남음.
+- **루비 (덧말)** — `<hp:dutmal>` subText를 `한자(hanja)` 괄호 주석으로 보존.
+- **각주 / 미주 / 머리말 / 꼬리말** — paragraph-level 컨트롤 4종을 `[각주: …]` · `[미주: …]` · `[머리말: …]` · `[꼬리말: …]` 로 인라인 확장.
+- **수식 → LaTeX** — `<hp:equation>` 내용을 단일 라인 `$…$`, 다중 라인 `$$ … $$` 블록으로 출력. GitHub/Obsidian/LLM 바로 렌더.
+- **Depth-aware paragraph scanner** — 중첩 `<hp:p>` 때문에 본문이 조기 종료되던 버그 수정.
+
+### 데스크톱 뷰어 — 6개 액션 버튼 + 원본 충실도 뷰
+
+| 버튼 | 동작 |
+|---|---|
+| 📋 복사 | 마크다운 클립보드 복사 |
+| 📊 통계 | 9개 지표 모달 (문자·어절·문단·헤딩·표·이미지·강조·취소선·체크리스트) |
+| 🔀 비교 | 두 번째 파일 선택 → 신구대조표 side-by-side |
+| 📝 메모 | 사이드카(.mdm.json) 메모, 원본 HWP 불변 |
+| ✨ AI에 묻기 | 4개 프리셋 × 4개 프로바이더 (Claude / ChatGPT / Gemini / Perplexity) |
+| 💾 내보내기 | JSON · HTML · TXT |
+
+**원본 모드** — 외부 HWP 에디터(iframe) 임베드로 픽셀-충실 렌더링을 MDM 안에서 바로 확인. 나란히 모드에선 렌더 ↔ 소스 판이 비율 기반으로 함께 스크롤.
+
+### 보안 — ZIP 폭탄 방어
+
+`MAX_HWPX_XML` · `MAX_HWPX_BINDATA` 디컴프레션 상한 도입. 악의적 HWPX의 메모리 폭탄 차단.
+
+### 테스트 — Golden-file 회귀 스캐폴드
+
+`core/tests/golden_hwpx.rs` 신설. `UPDATE_GOLDEN=1` 로 재생성, diff 리포트. 10개 초기 고정점(취소선/밑줄/강조/루비/각주/미주/수식 inline·block/머리말+꼬리말).
+
+전체 릴리즈 노트: [v0.3.0 CHANGELOG](https://github.com/seunghan91/markdown-media/blob/master/CHANGELOG.md)
 
 ---
 
@@ -119,8 +160,12 @@ presets:
 | 구성 요소 | 기술 | 역할 |
 |-----------|------|------|
 | **Rust Core** | Rust + olefile/zip | HWP/HWPX/DOCX/PDF 파서 |
-| **JS Parser** | Vanilla JS + Rollup | Tokenizer → Renderer → HTML |
-| **Python Parser** | Python 3.8+ | 동일 API, 서버 사이드 변환 |
+| **Native Node 바인딩** | `@markdown-media/core` (napi-rs) | Node.js 네이티브 연동 |
+| **WASM 엔진** | `@markdown-media/wasm` (wasm-bindgen) | 브라우저 / Node 공용, PDF 포함 1.5 MB |
+| **JS Viewer** | `@markdown-media/viewer` (Vanilla JS + Rollup) | Tokenizer → Renderer → HTML |
+| **Python Parser** | `mdm-parser` (Python 3.8+) | 동일 API, 서버 사이드 변환 |
+| **데스크톱 앱** | Tauri v2 + SvelteKit | macOS 코드사이닝 + 공증 |
+| **Chrome 확장** | Manifest V3 + WASM | 완전 오프라인, 권한 0개 |
 | **API Server** | FastAPI + Uvicorn | 문서 업로드 → MDM 변환 REST API |
 | **Playground** | 순수 HTML/JS | 브라우저 라이브 데모 |
 | **GitHub Pages** | Hugo + Actions | 랜딩·플레이그라운드 배포 |
@@ -165,8 +210,10 @@ curl -X POST https://mdm-api.onrender.com/api/convert \
 
 ## 테스트
 
-- **JS**: Node.js built-in test runner, 85개 테스트 통과
-- **Python**: pytest, 84개 테스트 통과
+- **Rust Core**: `cargo test` 260 passed (4개 스위트 합산, v0.3.0 기준)
+- **JS Viewer**: Node.js built-in test runner
+- **Python**: pytest
+- **Golden-file 회귀**: `core/tests/golden_hwpx.rs` (취소선/밑줄/강조/루비/각주/미주/수식/머리말·꼬리말)
 - **CI**: GitHub Actions (build + test + deploy)
 
 ---
@@ -176,4 +223,7 @@ curl -X POST https://mdm-api.onrender.com/api/convert \
 - [GitHub Repository](https://github.com/seunghan91/markdown-media)
 - [Interactive Playground](https://seunghan91.github.io/markdown-media/playground/)
 - [API 문서](https://mdm-api.onrender.com/docs)
-- [npm @mdm/parser](https://www.npmjs.com/package/@mdm/parser)
+- [npm @markdown-media/core](https://www.npmjs.com/package/@markdown-media/core) (native)
+- [npm @markdown-media/wasm](https://www.npmjs.com/package/@markdown-media/wasm) (브라우저)
+- [PyPI mdm-parser](https://pypi.org/project/mdm-parser/)
+- [CHANGELOG](https://github.com/seunghan91/markdown-media/blob/master/CHANGELOG.md)
