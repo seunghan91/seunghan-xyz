@@ -9,6 +9,7 @@
 | 2026-04-15 | mdm-mcp-gateway-integration.md | HWP 변환기를 MCP 툴로 만들기 — 기존 Gateway에 3줄 추가하는 법 |
 | 2026-04-16 | flutter-rails-realtime-auth-fcm-actioncable-jwt.md | Flutter+Rails 실시간 인프라 4대 단절 고치기 — FCM 딥링크, ActionCable JWT, 익명→회원 연결 |
 | 2026-04-17 | mdm-desktop-latex-mathml-pulldown-latex.md | Tauri 앱에 LaTeX 수식 달기 — KaTeX 버리고 pulldown-latex + MathML 선택 |
+| 2026-04-20 | threads-api-oauth-token-reply-collection.md | Threads API OAuth 토큰 발급부터 내 게시물 댓글 151개 수집까지 실전 |
 
 ## 사용법
 - 포스트 작성 시 `date: YYYY-MM-DDT09:00:00+09:00` 설정
