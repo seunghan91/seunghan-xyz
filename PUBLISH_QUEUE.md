@@ -11,7 +11,7 @@
 | 2026-04-17 | mdm-desktop-latex-mathml-pulldown-latex.md | Tauri 앱에 LaTeX 수식 달기 — KaTeX 버리고 pulldown-latex + MathML 선택 |
 | 2026-04-20 | threads-api-oauth-token-reply-collection.md | Threads API OAuth 토큰 발급부터 내 게시물 댓글 151개 수집까지 실전 |
 | 2026-04-21 | tailwind-v4-theme-migration-oklch-fallback.md | Tailwind v4 @theme 함정 — tailwind.config.js가 무시되고 기본 OKLCH로 폴백되던 문제 |
-| 2026-04-22 | reinsman-paradigm-harness-engineering-next.md | 레인스맨 패러다임 — 하네스 엔지니어링 다음은 '고삐를 쥐는 사람'이다 |
+| 2026-04-25 | reinsman-paradigm-harness-engineering-next.md | 레인스맨 패러다임 — 하네스 엔지니어링 다음은 '고삐를 쥐는 사람'이다 |
 
 ## 사용법
 - 포스트 작성 시 `date: YYYY-MM-DDT09:00:00+09:00` 설정
