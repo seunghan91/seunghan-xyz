@@ -3,6 +3,7 @@ title: "Tailwind v4로 올렸는데 tailwind.config.js가 무시되고 있었다
 date: 2026-04-21T09:00:00+09:00
 draft: false
 tags: ["tailwindcss", "svelte", "chrome-devtools-mcp", "css", "oklch"]
+categories: ["AI Engineering", "Frontend"]
 description: "Tailwind v4 프로젝트에서 브랜드 컬러가 푸르스름하게 보였다. tailwind.config.js의 커스텀 토큰이 전혀 반영되지 않고 v4 기본 OKLCH blue-600으로 폴백되던 것. @theme로 포팅하고 Chrome DevTools MCP로 픽셀 단위 검증한 기록."
 ---
 

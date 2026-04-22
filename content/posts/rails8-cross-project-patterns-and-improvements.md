@@ -8,7 +8,7 @@ cover:
   image: "/images/og/rails8-cross-project-patterns-and-improvements.png"
   alt: "Rails8 Cross Project Patterns And Improvements"
   hidden: true
-categories: ["Rails"]
+categories: ["Flutter", "Rails"]
 ---
 
 두 개의 Rails 8 프로젝트를 병렬로 운영하다 보면 한쪽에서 공들여 만든 패턴이 다른 쪽에는 빠져있는 경우가 자주 생긴다. 기능을 구현할 때는 당장의 요구사항에 집중하다 보니 다른 프로젝트의 좋은 구현을 챙기지 못하는 것이다. 시간이 지날수록 두 프로젝트 사이의 품질 격차가 벌어지고, 한쪽에서는 해결된 문제를 다른 쪽에서 다시 삽질하는 상황이 생긴다.

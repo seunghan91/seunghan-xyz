@@ -3,6 +3,7 @@ title: "Flutter BLoC Infinite Scroll Without infinite_scroll_pagination — Clea
 date: 2025-09-20
 draft: false
 tags: ["Flutter", "BLoC", "Infinite Scroll", "Pagination", "ScrollController", "UX"]
+categories: ["Flutter"]
 description: "Skip infinite_scroll_pagination and build it right in BLoC. How to split pagination logic cleanly across Datasource, Repository, BLoC, and UI layers using only ScrollController."
 cover:
   image: "/images/og/flutter-bloc-infinite-scroll-pagination.png"

@@ -3,6 +3,7 @@ title: "7 Patterns Learned from OpenAI Symphony Applied to Rails ITSM"
 date: 2026-01-16
 draft: false
 tags: ["Rails", "Automation", "ITSM", "Symphony", "SolidQueue", "Architecture"]
+categories: ["AI Engineering", "Rails"]
 description: "Applying 7 core patterns from the issue tracker automation orchestrator Symphony to a Rails-based ticket system."
 cover:
   image: "/images/og/symphony-patterns-itsm-automation.png"

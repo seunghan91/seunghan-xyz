@@ -3,6 +3,7 @@ title: "웹 캘린더 인쇄 기능의 함정: window.print()는 off-screen 엘�
 date: 2026-01-20
 draft: false
 tags: ["Svelte", "CSS", "인쇄", "jsPDF", "html2canvas", "디버깅", "UX"]
+categories: ["Frontend"]
 description: "PDF/PNG 다운로드는 정상인데 브라우저 인쇄만 이미지 위치가 틀어지는 버그. html2canvas vs window.print()의 렌더링 차이, @media print 동적 주입으로 해결한 과정과 용지 크기/스케일 기능 구현기."
 cover:
   image: "/images/og/calendar-print-browser-print-bug-paper-sizes.png"

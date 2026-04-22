@@ -3,6 +3,7 @@ title: "iOS Code Signing Full Setup — From Distribution Cert to TestFlight Wit
 date: 2025-06-18
 draft: false
 tags: ["iOS", "Flutter", "Xcode", "TestFlight", "Provisioning", "Deployment"]
+categories: ["iOS", "Flutter"]
 description: "Step-by-step iOS code signing setup without Xcode auto-sign: Distribution cert, APNs cert, Provisioning Profile, and uploading to TestFlight via App Store Connect API Key with xcodebuild."
 cover:
   image: "/images/og/ios-codesign-testflight-full-setup.png"

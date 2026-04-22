@@ -3,6 +3,7 @@ title: "Flutter AAB 빌드 서명 오류 해결 — Play Store 업로드 시 wro
 date: 2026-03-26
 draft: false
 tags: ["Flutter", "Android", "Play Store", "keystore", "AAB"]
+categories: ["Flutter"]
 description: "Flutter 앱을 Google Play Store에 업로드할 때 발생하는 'Android App Bundle is signed with the wrong key' 에러의 원인과 해결법. key.properties 설정부터 build.gradle.kts 서명 구성까지 실전 삽질 기록."
 ---
 

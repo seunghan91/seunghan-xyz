@@ -3,6 +3,7 @@ title: "iOS 앱 배포 막히는 순간들 — Bundle ID 이전 불가·ITMS-906
 date: 2026-03-08
 draft: false
 tags: ["iOS", "Flutter", "App Store Connect", "TestFlight", "AI", "Gemini", "앱배포"]
+categories: ["AI Engineering", "iOS"]
 description: "계정이 달라서 Bundle ID를 이전할 수 없다. ITMS-90683 에러는 왜 나는지. AI로 앱 아이콘과 스크린샷을 자동 생성하는 방법까지 — iOS 배포에서 실제로 막혔던 순간들을 정리했다."
 ---
 

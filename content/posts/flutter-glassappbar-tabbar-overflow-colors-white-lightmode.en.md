@@ -3,6 +3,7 @@ title: "Flutter UI Full Audit — GlassAppBar TabBar Overflow and Colors.white L
 date: 2025-09-24
 draft: false
 tags: ["Flutter", "UI", "GlassAppBar", "TabBar", "overflow", "Dark Mode", "Light Mode"]
+categories: ["Flutter"]
 description: "Full audit of bottom overflow and Colors.white text bugs across all app screens. The preferredSize mechanism and why white text disappears in light mode."
 cover:
   image: "/images/og/flutter-glassappbar-tabbar-overflow-colors-white-lightmode.png"

@@ -3,6 +3,7 @@ title: "Fixing Unnecessary Error Exposure in Flutter Sync Queue"
 date: 2025-10-04
 draft: false
 tags: ["Flutter", "Sync", "Offline-First", "Debugging", "Mobile"]
+categories: ["Flutter"]
 description: "Analyzing and fixing the issue where retryable failures were treated as blocking failures in a Transactional Outbox pattern sync queue, repeatedly exposing errors to users."
 cover:
   image: "/images/og/flutter-sync-queue-aggressive-error-handling.png"

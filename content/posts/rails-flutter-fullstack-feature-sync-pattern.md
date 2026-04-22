@@ -3,6 +3,7 @@ title: "Rails + Flutter 풀스택에서 기능 하나를 웹-API-앱까지 관�
 date: 2025-03-25
 draft: false
 tags: ["Rails", "Flutter", "Freezed", "Web Share API", "Stimulus"]
+categories: ["Flutter", "Rails"]
 description: "Rails 백엔드에 성별 토글, 코트 선수 교체 모달, 초대 링크 공유를 구현하고 API serializer를 거쳐 Flutter Freezed 모델까지 동기화한 실전 기록. before_action 누락, private method 에러, precompiled assets 캐시 등 삽질 포함."
 ---
 

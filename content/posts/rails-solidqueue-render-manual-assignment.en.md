@@ -8,7 +8,7 @@ cover:
   image: "/images/og/rails-solidqueue-render-manual-assignment.png"
   alt: "Rails Solidqueue Render Manual Assignment"
   hidden: true
-categories: ["Rails"]
+categories: ["AI Engineering", "Rails"]
 ---
 
 While deploying a Rails 8-based ITSM system to Render today, I ran into three consecutive issues that each had different root causes but were connected like links in a chain. I'm documenting the process of reading deployment logs, debugging, patching code, and discovering the next problem.

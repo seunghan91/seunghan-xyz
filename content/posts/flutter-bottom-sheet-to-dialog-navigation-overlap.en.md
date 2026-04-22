@@ -3,6 +3,7 @@ title: "Flutter BottomSheet Covers Navigation Bar — Fix It with showDialog"
 date: 2026-03-09
 draft: false
 tags: ["Flutter", "UI", "BottomSheet", "Dialog", "share_plus", "SQLite", "Debugging"]
+categories: ["Flutter"]
 description: "showModalBottomSheet covers your bottom nav bar — here's why showDialog is the cleaner fix. Also covers TextButton color gone yellow and SQLite share_plus PlatformException."
 ---
 

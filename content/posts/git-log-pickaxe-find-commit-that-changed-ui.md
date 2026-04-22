@@ -3,6 +3,7 @@ title: "git log -S로 UI가 언제 바뀌었는지 추적하기 — pickaxe, bla
 date: 2026-03-25
 draft: false
 tags: ["git", "debugging", "pickaxe", "git-log", "code-archaeology"]
+categories: ["Dev"]
 description: "사이드바 타이틀이 언제 팀명으로 바뀌었는지 git log -S, git show, git blame을 조합해 원인 커밋을 추적한 실전 기록. pickaxe 옵션의 동작 원리와 -G 옵션과의 차이까지 정리했다."
 ---
 

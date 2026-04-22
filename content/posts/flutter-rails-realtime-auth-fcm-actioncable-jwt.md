@@ -3,6 +3,7 @@ title: "Flutter+Rails 실시간 인프라 4대 단절 고치기 — FCM 딥링�
 date: 2026-04-16T09:00:00+09:00
 draft: false
 tags: ["Flutter", "Rails", "FCM", "ActionCable", "JWT"]
+categories: ["Flutter", "Rails"]
 description: "모바일 앱에서 푸시 알림 탭이 특정 화면으로 안 열리는 이유, ActionCable이 WebSocket에서 JWT를 못 받는 이유, 익명 게스트 데이터를 회원가입 시 이관하는 race-safe 패턴까지 한 세션에서 다 고친 기록."
 ---
 

@@ -8,7 +8,7 @@ cover:
   image: "/images/og/rails8-deploy-lessons.png"
   alt: "Rails8 Deploy Lessons"
   hidden: true
-categories: ["Rails"]
+categories: ["Rails", "DevOps"]
 ---
 
 Rails 8 프로젝트를 처음 클라우드 서비스에 배포하면서 하루 동안 연속으로 5가지 문제를 만났다. 각각 독립적인 문제처럼 보였지만, 하나를 고치면 다음 문제가 드러나는 패턴이었다. 특히 Rails 8에서 새로 도입된 Solid Suite의 멀티 DB 구조는 기존 Rails 개발자에게도 낯선 부분이 많았다. 시간 순서대로 마주친 문제와 해결 과정을 기록한다.

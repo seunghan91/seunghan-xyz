@@ -3,6 +3,7 @@ title: "Flutter iOS TestFlight Upload Failure: objective_c.framework Simulator S
 date: 2026-03-09
 draft: false
 tags: ["Flutter", "iOS", "Xcode", "TestFlight", "Makefile", "Build Error"]
+categories: ["iOS", "Flutter"]
 description: "Root cause and Makefile automation fix for IOSSIMULATOR platform tag and x86_64 slice errors when uploading a Flutter IPA to TestFlight via altool"
 ---
 

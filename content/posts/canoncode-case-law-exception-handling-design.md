@@ -3,6 +3,7 @@ title: "판례(Case Law)로 예외 처리 설계하기 — CanonCode에서 배�
 date: 2026-03-21
 draft: false
 tags: ["CanonCode", "Exception Handling", "Architecture", "Design Pattern", "LaunchCrew"]
+categories: ["AI Engineering"]
 description: "CanonCode의 판례(Case Law) 시스템을 활용한 예외 처리 설계 방법론. 실제 LaunchCrew 프로젝트에서 6가지 판례를 작성하고 코드에 적용한 과정을 정리했다."
 ---
 

@@ -3,6 +3,7 @@ title: "Flutter Sync Queue에서 불필요한 에러가 반복 노출되는 문�
 date: 2025-10-04
 draft: false
 tags: ["Flutter", "Sync", "Offline-First", "디버깅", "모바일"]
+categories: ["Flutter"]
 description: "Transactional Outbox 패턴 기반 sync queue에서 retryable failure를 blocking failure로 취급하여 사용자에게 에러가 반복 노출되던 문제를 분석하고 해결한 과정"
 cover:
   image: "/images/og/flutter-sync-queue-aggressive-error-handling.png"

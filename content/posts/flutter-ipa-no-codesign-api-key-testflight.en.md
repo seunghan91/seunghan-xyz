@@ -3,6 +3,7 @@ title: "Fix: flutter build ipa Fails Without Dev Cert — Use --no-codesign + AP
 date: 2025-11-04
 draft: false
 tags: ["Flutter", "iOS", "TestFlight", "Xcode", "Makefile", "Code Signing", "Deployment Automation"]
+categories: ["iOS", "Flutter"]
 description: "flutter build ipa throws 'No signing certificate iOS Development found' even with a valid Distribution cert. Here's why — and how --no-codesign + API Key lets you upload to TestFlight anyway."
 cover:
   image: "/images/og/flutter-ipa-no-codesign-api-key-testflight.png"

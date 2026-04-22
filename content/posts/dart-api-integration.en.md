@@ -3,6 +3,7 @@ title: "DART Open API Integration Journey (Rails + Flutter)"
 date: 2025-06-01
 draft: false
 tags: ["Rails", "Flutter", "DART", "PostgreSQL", "ActiveJob"]
+categories: ["Flutter", "Rails"]
 description: "Migration errors, field name mismatches, and permission structure design while integrating Korea FSS DART Open API with a Rails backend."
 cover:
   image: "/images/og/dart-api-integration.png"

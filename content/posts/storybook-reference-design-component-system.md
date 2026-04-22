@@ -3,6 +3,7 @@ title: "레퍼런스 디자인을 분석해서 컴포넌트 시스템 확장하�
 date: 2026-02-27
 draft: false
 tags: ["Svelte 5", "Storybook", "디자인 시스템", "CSS Custom Properties", "컴포넌트", "레퍼런스 분석", "Vite 7"]
+categories: ["Frontend"]
 description: "레퍼런스 앱의 시각적 구조를 분석하고, 기존 23개 컴포넌트에 9개를 추가하면서 디자인 토큰과 템플릿 체계를 잡은 과정. 구성만 따라가되 스타일은 기존 다크 테마를 유지하는 전략."
 cover:
   image: "/images/og/storybook-reference-design-component-system.png"

@@ -3,6 +3,7 @@ title: "SPA 배포 후 빈 화면: Inertia.js usePage().url은 string이다"
 date: 2025-11-22
 draft: false
 tags: ["Rails", "Inertia.js", "Svelte", "SPA", "디버깅", "배포", "Playwright"]
+categories: ["Rails", "Frontend"]
 description: "Rails + Inertia.js + Svelte 앱 배포 후 빈 화면이 나오는 문제를 Playwright 콘솔 에러 분석으로 해결한 과정. usePage().url이 URL 객체가 아닌 string인 점을 놓쳐서 발생한 런타임 에러였다."
 cover:
   image: "/images/og/spa-blank-screen-inertia-usepage-url-debugging.png"

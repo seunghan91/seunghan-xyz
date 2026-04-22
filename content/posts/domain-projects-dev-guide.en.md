@@ -3,6 +3,7 @@ title: "Multi-Domain Static Site Operations Development Guide"
 date: 2025-09-13
 draft: false
 tags: ["Hugo", "Netlify", "Static Site", "DevOps", "Deployment"]
+categories: ["DevOps"]
 description: "Hugo + Netlify based multi-site static hosting architecture and deployment workflow guide."
 cover:
   image: "/images/og/domain-projects-dev-guide.png"

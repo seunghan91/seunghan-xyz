@@ -3,6 +3,7 @@ title: "로그인이 자꾸 풀린다 — API 래퍼 포맷 불일치가 만든 
 date: 2025-12-02
 draft: false
 tags: ["Flutter", "Rails", "BLoC", "디버깅", "JWT", "Chrome Extension"]
+categories: ["Flutter", "Rails"]
 description: "모바일 앱 로그인이 자꾸 풀리는 증상을 추적해보니, 서버 응답 래퍼 포맷 불일치 하나가 Flutter, Rails, Chrome Extension 3개 클라이언트에 걸쳐 5개 버그로 이어져 있었다."
 cover:
   image: "/images/og/api-response-wrapper-token-parsing-debug.png"

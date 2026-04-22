@@ -3,6 +3,7 @@ title: "한국 주식 수급분석 대시보드 만들기 — pykrx 사망부터
 date: 2026-03-24
 draft: false
 tags: ["python", "nextjs", "pykrx", "주식", "크롤링"]
+categories: ["Frontend"]
 description: "pykrx가 pandas 2.x와 KRX 사이트 변경으로 완전히 깨진 상황에서, 네이버 증권 크롤링으로 외국인/기관 수급 데이터를 수집하고 Next.js + lightweight-charts로 실시간 대시보드를 만든 과정을 정리했다."
 ---
 

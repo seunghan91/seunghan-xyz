@@ -3,6 +3,7 @@ title: "The Trap of Web Calendar Printing: window.print() Ignores Off-Screen Ele
 date: 2026-01-20
 draft: false
 tags: ["Svelte", "CSS", "Printing", "jsPDF", "html2canvas", "Debugging", "UX"]
+categories: ["Frontend"]
 description: "PDF/PNG downloads work fine but browser print breaks image positions. The rendering difference between html2canvas and window.print(), solved with dynamic @media print injection, plus paper size/scale implementation."
 cover:
   image: "/images/og/calendar-print-browser-print-bug-paper-sizes.png"

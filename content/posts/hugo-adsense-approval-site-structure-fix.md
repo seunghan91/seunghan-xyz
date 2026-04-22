@@ -3,6 +3,7 @@ title: "Hugo 블로그 AdSense 승인 안 되는 이유 — 콘텐츠가 아니�
 date: 2026-03-08
 draft: false
 tags: ["AdSense", "Hugo", "블로그", "SEO", "Netlify", "PaperMod"]
+categories: ["DevOps"]
 description: "글이 80개나 있는데 AdSense 승인이 안 됐다. 알고 보니 콘텐츠가 아니라 사이트 구조 문제였다. Hugo + PaperMod에서 실제로 고친 내용을 정리했다."
 cover:
   image: ""

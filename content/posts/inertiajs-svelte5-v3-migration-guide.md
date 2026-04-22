@@ -3,6 +3,7 @@ title: "Inertia.js v2→v3 마이그레이션 — Svelte 5 + Rails 8 실전 삽�
 date: 2026-04-04
 draft: false
 tags: ["inertia.js", "svelte5", "rails", "migration", "frontend"]
+categories: ["Rails", "Frontend"]
 description: "@inertiajs/svelte v2에서 v3로 업그레이드하면서 겪은 삽질 과정. $page store 제거, persistent layout 변환, script element 전환까지 실전 기록."
 ---
 

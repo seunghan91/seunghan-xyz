@@ -3,6 +3,7 @@ title: "CanonCode의 Rust 엔진 — .lex 파서부터 조항 충돌 감지까�
 date: 2026-03-19
 draft: false
 tags: ["CanonCode", "Rust", "Parser", "Architecture", "CLI"]
+categories: ["AI Engineering"]
 description: "CanonCode의 핵심인 Rust 기반 lex_engine의 내부 구조. JSON 파서, 조항 의존성 그래프, 헌법-법률 충돌 감지, CLI 인터페이스까지 설계 결정과 삽질을 기록했다."
 ---
 

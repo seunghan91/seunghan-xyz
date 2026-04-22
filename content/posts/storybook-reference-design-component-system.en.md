@@ -3,6 +3,7 @@ title: "Analyzing Reference Design to Extend Component System — Svelte 5 + Sto
 date: 2026-02-27
 draft: false
 tags: ["Svelte 5", "Storybook", "Design System", "CSS Custom Properties", "Components", "Reference Analysis", "Vite 7"]
+categories: ["Frontend"]
 description: "Analyzing the visual structure of a reference app, adding 9 components to existing 23 while establishing design tokens and template system. Following the structure but maintaining the existing dark theme."
 cover:
   image: "/images/og/storybook-reference-design-component-system.png"

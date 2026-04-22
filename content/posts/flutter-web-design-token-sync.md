@@ -3,6 +3,7 @@ title: "Flutter + Web 디자인 토큰 동기화 — Storybook 기반 디자인 
 date: 2026-03-08
 draft: false
 tags: ["Flutter", "Svelte", "Storybook", "디자인시스템", "토큰", "CSS"]
+categories: ["Flutter", "Frontend"]
 description: "모바일 앱(Flutter)과 웹 디자인 키트(Svelte+Storybook)의 디자인 토큰을 하나의 소스로 맞추는 작업. 색상·라디우스·그림자를 CSS 변수와 Dart 상수로 동기화하고, 카테고리 카드 overflow까지 고친 과정."
 ---
 

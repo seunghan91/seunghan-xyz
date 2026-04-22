@@ -3,6 +3,7 @@ title: "Claude Code Channels 완전 가이드 — Telegram으로 로컬 AI 세�
 date: 2026-03-22
 draft: false
 tags: ["Claude Code", "Telegram", "AI", "개발환경", "자동화", "MCP", "원격개발"]
+categories: ["AI Engineering"]
 description: "Claude Code Channels로 Telegram 봇을 통해 로컬 Mac의 Claude Code 세션을 원격 제어하는 방법. 설치 과정에서 만난 에러, 올바른 명령어, tmux 영구 실행, macOS 재부팅 자동시작, OpenClaw 비교까지 삽질 기록을 전부 담았다."
 faq:
   - q: "Claude Code Channels 실행 후 Telegram 메시지를 보내도 응답이 없습니다. 원인은?"

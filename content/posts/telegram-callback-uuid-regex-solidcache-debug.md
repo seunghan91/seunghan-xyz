@@ -3,6 +3,7 @@ title: "Telegram 봇 Inline Keyboard 버튼이 무반응인 버그 — UUID Rege
 date: 2026-03-11
 draft: false
 tags: ["Rails", "Telegram", "디버깅", "Ruby", "Regex", "Cache"]
+categories: ["Rails"]
 description: "Telegram 봇의 확인 버튼을 눌러도 아무 반응이 없는 버그를 추적한 과정. \\d+ 정규식이 UUID를 매칭 못 하는 문제와, Solid Cache write/read 추적을 위한 디버그 로그 추가까지."
 ---
 

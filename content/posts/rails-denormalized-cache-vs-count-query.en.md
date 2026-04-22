@@ -8,7 +8,7 @@ cover:
   image: "/images/og/rails-denormalized-cache-vs-count-query.png"
   alt: "Rails Denormalized Cache Vs Count Query"
   hidden: true
-categories: ["Rails"]
+categories: ["Rails", "DevOps"]
 ---
 
 

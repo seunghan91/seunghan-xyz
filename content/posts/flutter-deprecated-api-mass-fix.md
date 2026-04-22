@@ -3,6 +3,7 @@ title: "Flutter Deprecated API 대규모 수정 - withOpacity, DropdownButtonFor
 date: 2025-07-20
 draft: false
 tags: ["Flutter", "Dart", "deprecated", "flutter analyze", "리팩터링", "코드품질"]
+categories: ["Flutter"]
 description: "flutter analyze에서 쏟아지는 deprecated API 경고를 일괄 수정하는 방법. withOpacity, DropdownButtonFormField, Switch.activeColor, GoRouter 등 케이스별 패턴 정리"
 cover:
   image: "/images/og/flutter-deprecated-api-mass-fix.png"

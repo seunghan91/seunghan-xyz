@@ -3,6 +3,7 @@ title: "스마트폰으로 문 여는 시대, CSA '알리로(Aliro) 1.0' 표준 
 date: 2026-03-05
 draft: false
 tags: ["알리로", "Aliro", "스마트홈", "도어락", "CSA", "NFC", "UWB", "디지털키"]
+categories: ["Dev"]
 description: "애플·삼성·구글이 함께 만든 통합 디지털 출입 표준 Aliro 1.0. 폰·워치로 집·사무실 문을 열 수 있는 새로운 시대가 열린다."
 ---
 

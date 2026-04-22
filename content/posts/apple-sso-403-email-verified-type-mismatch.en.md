@@ -3,6 +3,7 @@ title: "Apple Sign-In 403 Error: email_verified Type Mismatch and 3 Copy-Paste B
 date: 2025-10-25
 draft: false
 tags: ["Rails", "Apple Sign-In", "OAuth", "JWT", "Debugging", "Flutter"]
+categories: ["iOS", "Flutter"]
 description: "When Apple SSO login fails with 403 while Google works fine, the issue is the email_verified type difference in JWT and 3 bugs from code copy-paste."
 cover:
   image: "/images/og/apple-sso-403-email-verified-type-mismatch.png"

@@ -3,7 +3,7 @@ title: "Hugo 블로그 Google Search Console '크롤링됨 - 현재 색인이 �
 date: 2026-03-23
 draft: false
 tags: ["SEO", "Hugo", "Google Search Console", "robots.txt", "PaperMod"]
-categories: ["DevOps"]
+categories: ["Dev"]
 description: "Google Search Console에서 '크롤링됨 - 현재 색인이 생성되지 않음' 14개 페이지 문제를 robots.txt RSS 피드 차단과 noindex 태그로 해결한 과정. Hugo PaperMod 테마 기준 실전 가이드."
 faq:
   - q: "robots.txt로 차단하면 색인이 완전히 방지되나요?"

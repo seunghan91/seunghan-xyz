@@ -3,6 +3,7 @@ title: "Flutter image_picker 카메라/갤러리 바텀시트 + Riverpod 빈도 
 date: 2026-03-09
 draft: false
 tags: ["Flutter", "Riverpod", "image_picker", "UX", "SharedPreferences", "DraggableScrollableSheet", "삽질"]
+categories: ["AI Engineering", "Flutter"]
 description: "Flutter 앱에서 image_picker 카메라/갤러리 분기 바텀시트, Riverpod AsyncNotifier로 사용 빈도 기반 카테고리 자동 정렬, 긴급 대상에 따른 버튼 색상 동적 변경까지 구현하면서 겪은 과정을 정리한다."
 ---
 

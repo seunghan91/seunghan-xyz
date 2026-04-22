@@ -3,6 +3,7 @@ title: "Apple Sign-In 403 에러: email_verified 타입 불일치와 복붙 버�
 date: 2025-10-25
 draft: false
 tags: ["Rails", "Apple Sign-In", "OAuth", "JWT", "디버깅", "Flutter"]
+categories: ["iOS", "Flutter"]
 description: "Apple SSO 로그인이 403으로 실패하는데 Google은 정상인 경우, JWT의 email_verified 타입 차이와 코드 복붙에서 발생한 버그 3가지를 정리한다."
 cover:
   image: "/images/og/apple-sso-403-email-verified-type-mismatch.png"

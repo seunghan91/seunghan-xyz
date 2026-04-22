@@ -3,6 +3,7 @@ title: "App Store 스크린샷 리젝 2.3.3 해결기 — AI 생성 이미지에
 date: 2026-03-11
 draft: false
 tags: ["iOS", "App Store", "Flutter", "스크린샷", "앱심사", "Python", "PIL"]
+categories: ["iOS", "Flutter"]
 description: "App Store 심사에서 Guideline 2.3.3 (Accurate Metadata)으로 리젝된 경험. AI 생성 마케팅 이미지 대신 시뮬레이터 실제 캡처 + Python PIL로 App Store 스타일 스크린샷을 만들어 해결한 과정."
 ---
 

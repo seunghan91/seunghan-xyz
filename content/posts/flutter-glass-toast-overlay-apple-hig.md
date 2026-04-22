@@ -3,6 +3,7 @@ title: "Flutter Material SnackBar 걷어내기 --- Overlay 기반 Glassmorphism 
 date: 2026-03-24
 draft: false
 tags: ["Flutter", "Glassmorphism", "Apple HIG", "Overlay", "UI"]
+categories: ["Flutter"]
 description: "Flutter 앱에서 Material SnackBar를 걷어내고 Overlay 기반 글라스모피즘 토스트를 직접 만든 과정. Apple HIG 시스템 색상, CupertinoIcons, BackdropFilter 성능까지 정리했다."
 ---
 

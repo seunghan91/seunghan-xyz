@@ -3,6 +3,7 @@ title: "Hotwire Native에서 Flutter BLoC으로 — 네이티브 앱 전환 실�
 date: 2026-03-31
 draft: false
 tags: ["flutter", "bloc", "hotwire-native", "rails", "clean-architecture"]
+categories: ["Hotwire Native", "Flutter"]
 description: "Hotwire Native iOS 앱이 심사에서 반복 반려되어 Flutter BLoC으로 전환한 실전 기록. Clean Architecture 설계, Rails API 구축, Firebase 시뮬레이터 행 이슈 해결까지."
 ---
 

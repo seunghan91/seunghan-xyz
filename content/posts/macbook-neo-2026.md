@@ -3,6 +3,7 @@ title: "Apple MacBook Neo 완전 분석: 드디어 나온 59만원대 맥북"
 date: 2026-03-04
 draft: false
 tags: ["Apple", "MacBook", "MacBook Neo", "신제품", "A18 Pro", "맥OS"]
+categories: ["Dev"]
 description: "Apple이 공식 발표한 MacBook Neo — $599부터 시작하는 역대 가장 저렴한 맥북. A18 Pro 칩, 13인치 Liquid Retina 디스플레이, 4가지 컬러. 3월 11일 출시 전 모든 것을 정리했습니다."
 cover:
   image: "https://www.apple.com/v/macbook-neo/a/images/overview/welcome/hero_endframe__c62q483im5si_large.jpg"

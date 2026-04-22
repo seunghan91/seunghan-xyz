@@ -3,6 +3,7 @@ title: "Managing 8 App Landing Pages from a Single Repository"
 date: 2025-10-11
 draft: false
 tags: ["Netlify", "TailwindCSS", "Static Site", "Deployment", "Landing Page", "Workflow"]
+categories: ["Frontend", "DevOps"]
 description: "Operating multiple app landing pages from a single repository using Pure HTML + Tailwind CDN without build tools, deployed via Netlify CLI."
 cover:
   image: "/images/og/multi-landing-page-netlify-workflow.png"

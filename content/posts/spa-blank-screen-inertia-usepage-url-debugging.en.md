@@ -3,6 +3,7 @@ title: "SPA Blank Screen After Deploy: Inertia.js usePage().url is a String"
 date: 2025-11-22
 draft: false
 tags: ["Rails", "Inertia.js", "Svelte", "SPA", "Debugging", "Deployment", "Playwright"]
+categories: ["Rails", "Frontend"]
 description: "Resolving blank screen after Rails + Inertia.js + Svelte app deployment through Playwright console error analysis. Runtime error from not knowing usePage().url is a string, not a URL object."
 cover:
   image: "/images/og/spa-blank-screen-inertia-usepage-url-debugging.png"

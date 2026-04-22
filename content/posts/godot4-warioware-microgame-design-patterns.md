@@ -3,6 +3,7 @@ title: "WarioWare에서 훔친 미니게임 설계 원칙 — Godot 4로 3종 �
 date: 2026-03-24
 draft: false
 tags: ["godot", "gamedev", "minigame", "게임디자인", "WarioWare"]
+categories: ["Dev"]
 description: "닌텐도 WarioWare의 마이크로게임 설계 원칙을 분석하고, Godot 4 다마고치 프로젝트에 3종의 미니게임을 실제로 구현한 과정. 즉각적 이해, 단순 입력, 점진적 난이도의 실전 적용기."
 ---
 

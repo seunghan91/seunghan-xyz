@@ -8,7 +8,7 @@ cover:
   image: "/images/og/rails-solidqueue-render-manual-assignment.png"
   alt: "Rails Solidqueue Render Manual Assignment"
   hidden: true
-categories: ["Rails"]
+categories: ["Rails", "DevOps"]
 ---
 
 오늘 Rails 8 기반 ITSM 시스템을 Render에 배포하면서 연속으로 삽질을 했다. 각각 원인이 달랐지만 사슬처럼 연결된 문제들이었다. 배포 로그를 보고 디버깅하고, 코드를 고치고, 새로운 문제를 발견하는 과정을 기록해 둔다.

@@ -3,6 +3,7 @@ title: "Git 브랜치 정리 — worktree 에러 포함 완전 클린업 가이�
 date: 2026-03-31
 draft: false
 tags: ["git", "worktree", "브랜치관리", "github", "개발환경"]
+categories: ["Dev"]
 description: "머지된 브랜치 한 번에 정리하다 'cannot delete branch used by worktree' 에러 만났을 때 해결법. 로컬·원격 브랜치, dependabot 브랜치까지 전부 정리하는 방법 정리."
 ---
 

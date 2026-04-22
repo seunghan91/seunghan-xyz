@@ -3,6 +3,7 @@ title: "Rails 8에서 Devise 걷어내기 — has_secure_password로 마이그�
 date: 2026-03-31
 draft: false
 tags: ["rails", "authentication", "devise", "has_secure_password", "inertia"]
+categories: ["Rails", "Frontend"]
 description: "Rails 8.1 프로젝트에서 Devise를 제거하고 has_secure_password로 전환한 실전 경험. Warden의 request.params 버그, encrypted_password→password_digest 마이그레이션, JWT 직접 구현까지."
 ---
 

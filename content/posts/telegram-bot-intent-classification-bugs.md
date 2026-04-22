@@ -3,6 +3,7 @@ title: "Telegram 봇 의도 분류 버그 3가지와 Inline Keyboard 확인 플�
 date: 2025-06-25
 draft: false
 tags: ["Rails", "Telegram", "AI", "디버깅", "Ruby"]
+categories: ["Rails"]
 description: "AI 기반 Telegram 봇에서 발생한 시간 파싱 오류, 완료 패턴 과잉 매칭 문제를 수정하고, 즉시 실행 방식에서 inline keyboard 확인 방식으로 UX를 개선한 과정"
 cover:
   image: "/images/og/telegram-bot-intent-classification-bugs.png"

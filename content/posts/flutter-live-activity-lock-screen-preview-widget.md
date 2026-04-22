@@ -3,6 +3,7 @@ title: "Flutter에서 iOS Live Activity 잠금화면 미리보기 만들기 — 
 date: 2026-03-26
 draft: false
 tags: ["Flutter", "iOS", "Live Activity", "CustomPainter", "UX"]
+categories: ["iOS", "Flutter"]
 description: "Flutter 설정 화면에서 iOS Live Activity 잠금화면을 미리 보여주는 위젯을 구현한 과정. CustomPainter로 원형 게이지를 그리고, 디스플레이 모드별 실시간 프리뷰를 제공하는 방법을 정리했다."
 ---
 

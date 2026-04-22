@@ -8,7 +8,7 @@ cover:
   image: "/images/og/rails-turbo-actioncable-500-debug.png"
   alt: "Rails Turbo Actioncable 500 Debug"
   hidden: true
-categories: ["Rails", "Hotwire"]
+categories: ["Rails"]
 ---
 
 When running a Rails 8 + Hotwire (Turbo) application in production, `broadcast_append_to` callbacks can silently throw 500 errors. When that's compounded by a SolidCable setup issue and Telegram Bot message parsing errors, interpreting the logs becomes genuinely confusing. All three hit at the same time in a recent project — here's how each one was diagnosed and resolved.

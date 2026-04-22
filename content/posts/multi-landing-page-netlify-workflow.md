@@ -3,6 +3,7 @@ title: "앱 랜딩 페이지 8개를 하나의 저장소로 관리하는 법"
 date: 2025-10-11
 draft: false
 tags: ["Netlify", "TailwindCSS", "정적사이트", "배포", "랜딩페이지", "워크플로우"]
+categories: ["Frontend", "DevOps"]
 description: "빌드 도구 없이 Pure HTML + Tailwind CDN으로 여러 앱의 랜딩 페이지를 단일 저장소에서 운영하고, Netlify CLI로 배포하는 실전 구조"
 cover:
   image: "/images/og/multi-landing-page-netlify-workflow.png"

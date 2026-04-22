@@ -8,7 +8,7 @@ cover:
   image: "/images/og/rails8-hotwire-native-production-checklist.png"
   alt: "Rails 8 Hotwire Native Production Checklist"
   hidden: true
-categories: ["Hotwire Native", "Rails"]
+categories: ["Hotwire Native", "iOS"]
 series: ["Hotwire Native Mobile App"]
 ---
 

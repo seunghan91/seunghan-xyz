@@ -3,7 +3,7 @@ title: "멀티 도메인 정적 사이트 운영 개발 가이드"
 date: 2025-09-13
 draft: false
 tags: ["Hugo", "Netlify", "Static Site", "DevOps", "Deployment"]
-categories: ["Dev Guide"]
+categories: ["DevOps"]
 description: "Hugo + Netlify 기반 멀티 사이트 정적 호스팅 아키텍처와 배포 워크플로우 정리"
 cover:
   image: "/images/og/domain-projects-dev-guide.png"

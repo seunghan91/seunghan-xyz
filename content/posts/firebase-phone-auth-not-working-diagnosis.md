@@ -3,6 +3,7 @@ title: "Flutter Firebase Phone Auth - SMS가 안 와요? 진단부터 코드 수
 date: 2025-07-02
 draft: false
 tags: ["Flutter", "Firebase", "Phone Auth", "Rails", "Firebase Auth"]
+categories: ["Flutter", "Rails"]
 description: "Firebase 전화 인증을 연동했는데 SMS가 안 오는 경우의 원인 분석과, 개발용 bypass 버튼이 Production에서 동작하지 않는 문제 해결"
 cover:
   image: "/images/og/firebase-phone-auth-not-working-diagnosis.png"

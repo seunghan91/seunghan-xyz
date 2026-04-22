@@ -3,6 +3,7 @@ title: "iOS 26 Liquid Glass 디자인 시스템을 웹에 적용하기 — Svelt
 date: 2026-03-31
 draft: false
 tags: ["ios26", "design-system", "svelte", "css-custom-properties", "liquid-glass"]
+categories: ["iOS", "Frontend"]
 description: "Apple iOS 26의 Liquid Glass 디자인 토큰을 CSS Custom Properties로 추출하고, Svelte 5 Runes 컴포넌트로 만들어 Rails + Inertia.js 프로젝트에 적용한 실전 기록. backdrop-filter, 다크모드 셀렉터 삽질, npm 패키지화까지."
 ---
 

@@ -3,6 +3,7 @@ title: "Threads API로 내 게시물 댓글 151개 수집하기 — OAuth 토큰
 date: 2026-04-20T09:00:00+09:00
 draft: false
 tags: ["threads-api", "oauth", "meta-graph-api", "scraping", "curl"]
+categories: ["Dev"]
 description: "Meta Threads API OAuth 2.0 flow로 단기/장기 토큰 발급받고, /replies 엔드포인트로 커뮤니티 모집글 댓글 151개를 수집한 과정. 실제 삽질 포인트와 curl 명령어 포함."
 ---
 

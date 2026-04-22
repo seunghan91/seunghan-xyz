@@ -8,7 +8,7 @@ cover:
   image: "/images/og/hotwire-native-webview-8-fixes.png"
   alt: "Hotwire Native Webview 8 Fixes"
   hidden: true
-categories: ["Hotwire Native", "Rails"]
+categories: ["Hotwire Native", "iOS"]
 series: ["Hotwire Native Mobile App"]
 ---
 

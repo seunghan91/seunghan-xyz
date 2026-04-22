@@ -3,6 +3,7 @@ title: "Rails에서 Slack 메시지 렌더링하기 — HTML 엔티티, 이모�
 date: 2025-03-25
 draft: false
 tags: ["rails", "slack", "html-escape", "erb", "emoji"]
+categories: ["Rails", "DevOps"]
 description: "Slack 채팅 데이터를 Rails ERB 뷰에서 렌더링할 때 발생하는 HTML 엔티티 이중 이스케이프, 이모지 shortcode 미변환, mrkdwn 마크업 파싱, whitespace-pre-wrap 들여쓰기 버그를 실전 코드와 함께 해결한다."
 ---
 

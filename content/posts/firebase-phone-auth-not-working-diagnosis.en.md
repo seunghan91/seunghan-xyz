@@ -3,6 +3,7 @@ title: "Flutter Firebase Phone Auth - SMS Not Arriving? From Diagnosis to Code F
 date: 2025-07-02
 draft: false
 tags: ["Flutter", "Firebase", "Phone Auth", "Rails", "Firebase Auth"]
+categories: ["Flutter", "Rails"]
 description: "Root cause analysis when Firebase phone auth SMS doesn't arrive, and fixing the issue where dev bypass button doesn't work in production."
 cover:
   image: "/images/og/firebase-phone-auth-not-working-diagnosis.png"

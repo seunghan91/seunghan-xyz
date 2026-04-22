@@ -3,6 +3,7 @@ title: "RAG의 한계와 에이전트 기반 하이브리드 검색 — 청킹�
 date: 2026-03-22
 draft: false
 tags: ["RAG", "Elasticsearch", "Agentic AI", "LLM", "한국어 NLP"]
+categories: ["AI Engineering"]
 description: "단순 RAG로는 복잡한 업무 문서를 처리할 수 없다. 청킹의 본질적 한계, 한국어 임베딩 부정확성, 그리고 Elasticsearch + Agent 기반 하이브리드 검색 아키텍처가 왜 필요한지 MVP 구축 경험과 학술 근거를 바탕으로 정리한다."
 ---
 

@@ -3,6 +3,7 @@ title: "2,800 Lines of Code → 160 Lines of Spec — Converting a Real Project 
 date: 2026-03-18
 draft: false
 tags: ["CanonCode", "Specification", "Architecture", "Code-as-Law", "LaunchCrew"]
+categories: ["AI Engineering"]
 description: "I converted the core business logic of a real QA matching platform (LaunchCrew) into a .lex specification. 2,800 lines became 160. An experiment in maintaining laws instead of code."
 cover:
   image: ""

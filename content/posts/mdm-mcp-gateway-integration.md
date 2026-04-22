@@ -3,6 +3,7 @@ title: "HWP 변환기를 MCP 툴로 만들기 — 기존 Gateway에 3줄 추가�
 date: 2026-04-15T09:00:00+09:00
 draft: false
 tags: ["MCP", "Rust", "HWP", "Claude", "AI Agent"]
+categories: ["AI Engineering"]
 description: "독립 MCP 서버를 만드는 대신 기존 Korea Law Hub Gateway에 MDM 변환 툴 3개를 추가했다. 인증·rate limit·로깅을 그대로 재사용하는 통합 전략과 Rust 바이너리 stdin/stdout 모드 설계 기록."
 ---
 

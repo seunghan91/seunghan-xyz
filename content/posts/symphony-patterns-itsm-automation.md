@@ -3,6 +3,7 @@ title: "OpenAI Symphony에서 배운 7가지 패턴을 Rails ITSM에 적용한 �
 date: 2026-01-16
 draft: false
 tags: ["Rails", "자동화", "ITSM", "Symphony", "SolidQueue", "아키텍처"]
+categories: ["AI Engineering", "Rails"]
 description: "이슈 트래커 자동화 오케스트레이터 Symphony의 핵심 패턴 7가지를 Rails 기반 티켓 시스템에 실제로 적용해본 기록"
 cover:
   image: "/images/og/symphony-patterns-itsm-automation.png"

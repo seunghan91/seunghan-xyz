@@ -3,6 +3,7 @@ title: "Godot 4 미니게임 모드 전환 — 상태 저장/복원 패턴과 _p
 date: 2026-03-26
 draft: false
 tags: ["godot", "gamedev", "gdscript", "minigame", "상태관리", "아키텍처"]
+categories: ["Dev"]
 description: "Godot 4에서 미니게임 모드를 만들 때 씬 상태를 저장하고 복원하는 패턴. _process()가 매 프레임 값을 덮어쓰는 함정, 게임 모드 전환 시 체크리스트, 그리고 실전에서 터진 버그들을 정리했다."
 ---
 

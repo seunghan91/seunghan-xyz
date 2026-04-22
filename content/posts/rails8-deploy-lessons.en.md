@@ -8,7 +8,7 @@ cover:
   image: "/images/og/rails8-deploy-lessons.png"
   alt: "Rails8 Deploy Lessons"
   hidden: true
-categories: ["Rails"]
+categories: ["Rails", "DevOps"]
 ---
 
 During the first cloud deployment of a Rails 8 project, I ran into five separate problems in a single day. Each one looked independent at the time, but the pattern was clear: fix one issue and the next one surfaces. Rails 8's newly introduced Solid Suite with its multi-database structure added extra unfamiliarity even for seasoned Rails developers. Here is a chronological account of what went wrong and how each issue was resolved.

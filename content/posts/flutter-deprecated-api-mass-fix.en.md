@@ -3,6 +3,7 @@ title: "Flutter Deprecated API Mass Fix - withOpacity, DropdownButtonFormField, 
 date: 2025-07-20
 draft: false
 tags: ["Flutter", "Dart", "deprecated", "flutter analyze", "Refactoring", "Code Quality"]
+categories: ["Flutter"]
 description: "How to batch-fix deprecated API warnings from flutter analyze. Pattern-by-pattern guide for withOpacity, DropdownButtonFormField, Switch.activeColor, GoRouter, etc."
 cover:
   image: "/images/og/flutter-deprecated-api-mass-fix.png"

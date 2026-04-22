@@ -3,6 +3,7 @@ title: "Godot 4로 다마고치 만들기 — Unity 포기하고 전환한 이�
 date: 2026-03-23
 draft: false
 tags: ["godot", "game-dev", "tamagotchi", "macOS", "retina"]
+categories: ["Dev"]
 description: "Unity에서 Godot 4.6으로 다마고치 프로젝트를 전환한 이유, AI 바이브코딩에서 GDScript가 유리한 구조적 이유, macOS Retina + embedded editor에서 발생하는 좌표 불일치 문제 해결법까지 실전 삽질 기록."
 ---
 

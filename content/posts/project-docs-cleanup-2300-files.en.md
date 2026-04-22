@@ -3,6 +3,7 @@ title: "Reducing 2,300 Project Documents to 400 — A Full Audit Record"
 date: 2026-01-27
 draft: false
 tags: ["Documentation", "Technical Debt", "Cleanup", "Git", "Dev Environment", "Productivity"]
+categories: ["Dev"]
 description: "2,350 markdown files had piled up in docs/. Ran a full audit with parallel agent analysis and kept only 404 active documents."
 cover:
   image: "/images/og/project-docs-cleanup-2300-files.png"

@@ -3,6 +3,7 @@ title: "Flutter TestFlight 업로드 삽질 — exportArchive Failed to Use Acco
 date: 2026-03-31
 draft: false
 tags: ["Flutter", "iOS", "TestFlight", "Xcode", "CI/CD"]
+categories: ["iOS", "Flutter"]
 description: "flutter build ipa에서 exportArchive Failed to Use Accounts 에러가 날 때 해결법. altool 빌드번호 충돌, ExportOptions.plist 설정, API Key 인증까지 실전 삽질 기록."
 ---
 

@@ -8,7 +8,7 @@ cover:
   image: "/images/og/rails8-cross-project-patterns-and-improvements.png"
   alt: "Rails8 Cross Project Patterns And Improvements"
   hidden: true
-categories: ["Rails"]
+categories: ["Flutter", "Rails"]
 ---
 
 When running two Rails 8 projects in parallel, patterns carefully built in one project often end up missing in the other. When implementing features, you naturally focus on the immediate requirements at hand — and it is easy to overlook a well-crafted solution from a sibling project that would save you significant time and headaches.

@@ -3,6 +3,7 @@ title: "Rails + Svelte 앱 UX/UI 전수 점검 및 개선 기록"
 date: 2026-03-06
 draft: false
 tags: ["Svelte", "Rails", "UX", "Accessibility", "svelte-sonner", "Tailwind"]
+categories: ["Rails", "Frontend"]
 description: "할일 관리 웹앱의 UX 문제를 전수 점검하고 시작일 UI 통일, Toast 알림, 터치 타겟, 비밀번호 토글을 개선한 과정"
 cover:
   image: "/images/og/uxui-review-and-fix-svelte-rails.png"

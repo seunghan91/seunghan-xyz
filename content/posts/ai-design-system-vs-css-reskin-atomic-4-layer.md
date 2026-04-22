@@ -3,6 +3,7 @@ title: "AI로 디자인 시스템 마이그레이션했는데 사실 CSS 리스�
 date: 2026-04-08T09:00:00+09:00
 draft: false
 tags: ["design-system", "atomic-design", "rails", "css", "ai-coding"]
+categories: ["AI Engineering", "Rails"]
 description: "Rails 8 + Hotwire 프로젝트에 iOS 26 디자인 시스템을 7주에 걸쳐 마이그레이션했다. 위반 417건이 0건이 됐다. 그런데 클라이언트 한 마디에 전부 가짜였다는 걸 깨달았다. Atomic Design 4-layer로 재설계한 회고."
 ---
 

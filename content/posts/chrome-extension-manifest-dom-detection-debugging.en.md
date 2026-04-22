@@ -3,6 +3,7 @@ title: "Chrome Extension Debugging Lessons — Domain Whitelist, Duplicate Liste
 date: 2026-03-09
 draft: false
 tags: ["Chrome Extension", "Firefox Extension", "Manifest V3", "JavaScript", "Debugging"]
+categories: ["iOS", "Frontend"]
 description: "Four mistakes made while developing a Chrome/Firefox extension: blocking DOM detection flow, duplicate event listeners, missing closure references, and AMO packaging errors."
 cover:
   image: ""

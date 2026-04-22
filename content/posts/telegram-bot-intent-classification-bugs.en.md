@@ -3,6 +3,7 @@ title: "3 Telegram Bot Intent Classification Bugs and Inline Keyboard Confirmati
 date: 2025-06-25
 draft: false
 tags: ["Rails", "Telegram", "AI", "Debugging", "Ruby"]
+categories: ["Rails"]
 description: "Fixing time parsing errors and over-matching completion patterns in an AI-based Telegram bot, and improving UX from immediate execution to inline keyboard confirmation."
 cover:
   image: "/images/og/telegram-bot-intent-classification-bugs.png"

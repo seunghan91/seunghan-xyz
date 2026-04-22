@@ -8,7 +8,7 @@ cover:
   image: "/images/og/rails-sso-turbo-drive-debugging.png"
   alt: "Rails Sso Turbo Drive Debugging"
   hidden: true
-categories: ["Rails", "Hotwire"]
+categories: ["Rails"]
 ---
 
 While implementing HMAC-based SSO between two Rails applications, I ran into two unexpected bugs. Both stemmed from how Turbo Drive and ERB handle things under the hood. The error message was identical in both cases — "state mismatch" — but the root causes were completely different. Fixing the first bug left the second one still lurking, which made the debugging process more frustrating than it needed to be.

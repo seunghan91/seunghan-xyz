@@ -3,6 +3,7 @@ title: "Flutter 노트 앱 디자인 리뉴얼 — Bear 스타일 에디터와 G
 date: 2026-03-24
 draft: false
 tags: ["Flutter", "UI/UX", "Glassmorphism", "Bear", "디자인시스템"]
+categories: ["Flutter"]
 description: "Flutter 노트 앱에 Bear 스타일 에디터 타이포그래피와 Glassmorphism 알림 카드를 적용한 과정. BackdropFilter 성능 최적화, colorScheme 마이그레이션, 마크다운 포맷 툴바 구현까지."
 ---
 

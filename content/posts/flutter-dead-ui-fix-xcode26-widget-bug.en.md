@@ -3,6 +3,7 @@ title: "Connecting Unimplemented Flutter UI Components + Xcode 26 Beta WidgetKit
 date: 2025-07-16
 draft: false
 tags: ["Flutter", "iOS", "Xcode", "WidgetKit", "LiveActivity", "Simulator"]
+categories: ["iOS", "Flutter"]
 description: "Connecting UI components left as onTap: () {} in a Flutter app, and working around the WidgetKit extension simulator installation bug in Xcode 26.2 beta."
 cover:
   image: "/images/og/flutter-dead-ui-fix-xcode26-widget-bug.png"

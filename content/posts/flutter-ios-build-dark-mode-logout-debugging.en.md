@@ -3,6 +3,7 @@ title: "Flutter iOS Build Broke Before TestFlight — 5 Errors, Dark Mode & Logo
 date: 2025-11-01
 draft: false
 tags: ["Flutter", "iOS", "TestFlight", "Dart", "Retrofit", "Freezed", "build_runner", "Dark Mode", "Makefile"]
+categories: ["iOS", "Flutter"]
 description: "Five build errors hit at once before a TestFlight push: Retrofit codegen failed, files were missing, build number rejected, UI hardcoded dark colors, and logout didn't clear tokens. All fixed."
 cover:
   image: "/images/og/flutter-ios-build-dark-mode-logout-debugging.png"

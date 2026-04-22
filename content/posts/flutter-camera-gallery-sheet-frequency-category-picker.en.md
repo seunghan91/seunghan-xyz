@@ -3,6 +3,7 @@ title: "Flutter image_picker Camera/Gallery Bottom Sheet + Riverpod Frequency-Ba
 date: 2026-03-09
 draft: false
 tags: ["Flutter", "Riverpod", "image_picker", "UX", "SharedPreferences", "DraggableScrollableSheet"]
+categories: ["AI Engineering", "Flutter"]
 description: "How I fixed a camera-only photo button with a bottom sheet picker, built frequency-based top-3 category shortcuts with Riverpod AsyncNotifier + SharedPreferences, and made a submit button change color based on emergency target."
 ---
 

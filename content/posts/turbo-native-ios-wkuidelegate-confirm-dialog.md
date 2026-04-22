@@ -3,6 +3,7 @@ title: "Turbo Native iOS에서 data-turbo-confirm이 동작하지 않는 이유 
 date: 2026-03-22
 draft: false
 tags: ["rails", "turbo-native", "ios", "hotwire", "wkwebview"]
+categories: ["Hotwire Native", "iOS"]
 description: "Rails의 data-turbo-confirm이 iOS 네이티브 앱에서 아무 반응이 없는 문제. WKWebView가 JavaScript confirm()을 기본 차단하는 보안 모델과 WKUIDelegate 해결법을 정리한다."
 faq:
   - q: "WKUIDelegate를 구현했는데도 iOS 앱에서 confirm 창이 뜨지 않습니다. 확인해야 할 것은?"

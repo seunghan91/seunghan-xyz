@@ -3,6 +3,7 @@ title: "Flutter 미구현 UI 컴포넌트 연결 + Xcode 26 베타 WidgetKit 설
 date: 2025-07-16
 draft: false
 tags: ["Flutter", "iOS", "Xcode", "WidgetKit", "LiveActivity", "Simulator"]
+categories: ["iOS", "Flutter"]
 description: "Flutter 앱에서 onTap: () {} 로 방치된 UI 컴포넌트들을 연결하고, Xcode 26.2 베타에서 발생하는 WidgetKit 익스텐션 시뮬레이터 설치 버그를 우회하는 방법 정리"
 cover:
   image: "/images/og/flutter-dead-ui-fix-xcode26-widget-bug.png"

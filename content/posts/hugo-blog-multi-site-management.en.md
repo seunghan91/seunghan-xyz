@@ -3,6 +3,7 @@ title: "Managing 3 Hugo Blogs from a Single Folder"
 date: 2025-10-08
 draft: false
 tags: ["Hugo", "Netlify", "Blog", "Static Site", "PaperMod", "Stack"]
+categories: ["DevOps"]
 description: "How to operate 3 Hugo blogs with different purposes (dev blog, app homepage, personal blog) from a single directory with independent Netlify deployments."
 cover:
   image: "/images/og/hugo-blog-multi-site-management.png"

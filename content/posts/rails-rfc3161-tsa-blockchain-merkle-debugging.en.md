@@ -8,7 +8,7 @@ cover:
   image: "/images/og/rails-rfc3161-tsa-blockchain-merkle-debugging.png"
   alt: "Rails Rfc3161 Tsa Blockchain Merkle Debugging"
   hidden: true
-categories: ["Rails"]
+categories: ["Flutter", "Rails"]
 ---
 
 To give an electronic contract storage system **legal evidentiary weight**, I needed to implement two things simultaneously:

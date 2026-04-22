@@ -8,7 +8,7 @@ cover:
   image: "/images/og/rails-sso-turbo-drive-debugging.png"
   alt: "Rails Sso Turbo Drive Debugging"
   hidden: true
-categories: ["Rails", "Hotwire"]
+categories: ["Rails"]
 ---
 
 Rails 앱 간 SSO(Single Sign-On)를 HMAC 기반으로 구현하던 중 예상치 못한 두 가지 버그를 만났다. 둘 다 Turbo Drive와 ERB의 동작 방식에서 비롯된 문제였다. 에러 메시지는 동일하게 "state mismatch"였지만 원인은 전혀 달랐고, 첫 번째 버그를 고쳐도 두 번째가 남아 있어 디버깅이 꽤 번거로웠다.

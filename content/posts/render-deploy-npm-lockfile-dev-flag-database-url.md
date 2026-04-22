@@ -3,6 +3,7 @@ title: "Render 배포 실패 두 가지 — npm lockfile dev 플래그와 DATABA
 date: 2026-03-30
 draft: false
 tags: ["render", "npm", "rails", "postgresql", "devops"]
+categories: ["Rails", "DevOps"]
 description: "Render 빌드에서 Cannot find package 'vite-plugin-ruby' 에러와 PostgreSQL 소켓 연결 실패를 디버깅한 기록. npm package-lock.json의 dev 플래그 함정과 PG18 업그레이드 후 DATABASE_URL 문제를 다룬다."
 ---
 

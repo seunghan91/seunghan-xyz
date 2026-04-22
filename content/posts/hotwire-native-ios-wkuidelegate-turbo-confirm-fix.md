@@ -3,6 +3,7 @@ title: "Hotwire Native iOS에서 삭제 버튼이 안 눌리는 이유 — WKUID
 date: 2026-03-22
 draft: false
 tags: ["hotwire-native", "ios", "wkwebview", "turbo", "rails"]
+categories: ["Hotwire Native", "iOS"]
 description: "Hotwire Native iOS 앱에서 data-turbo-confirm이 붙은 버튼이 동작하지 않는 원인과 WKUIDelegate 구현으로 해결하는 방법. WKWebView의 JavaScript confirm() 보안 모델부터 실전 코드까지."
 faq:
   - q: "WKUIDelegate를 구현했는데도 confirm 다이얼로그가 안 뜹니다. 원인이 뭔가요?"

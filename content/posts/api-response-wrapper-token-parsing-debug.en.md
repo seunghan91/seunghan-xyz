@@ -3,6 +3,7 @@ title: "Login Keeps Logging Out — Chain Bugs Caused by API Wrapper Format Mism
 date: 2025-12-02
 draft: false
 tags: ["Flutter", "Rails", "BLoC", "Debugging", "JWT", "Chrome Extension"]
+categories: ["Flutter", "Rails"]
 description: "Tracing why a mobile app kept logging out led to discovering that a single API response wrapper format mismatch caused 5 bugs across Flutter, Rails, and Chrome Extension clients."
 cover:
   image: "/images/og/api-response-wrapper-token-parsing-debug.png"

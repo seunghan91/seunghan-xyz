@@ -3,6 +3,7 @@ title: "Flutter IAP 스토어 베타 모드 설계와 구매 로직 보강 실�
 date: 2025-11-08
 draft: false
 tags: ["Flutter", "IAP", "In-App Purchase", "베타", "StoreKit", "BLoC"]
+categories: ["Flutter"]
 description: "오픈 베타 기간에 스토어 화면을 어떻게 처리할 것인가, IAP Restore 중복 지급 방지, 미인증 사용자 크레딧 보호 등 실전에서 만난 구매 로직 허점들과 해결법"
 cover:
   image: "/images/og/flutter-store-beta-mode-purchase-logic.png"

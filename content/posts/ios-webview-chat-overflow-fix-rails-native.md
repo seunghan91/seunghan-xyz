@@ -3,6 +3,7 @@ title: "iOS WebView 채팅 메시지가 박스를 뚫고 나간다 — overflow-
 date: 2026-03-22
 draft: false
 tags: ["iOS", "CSS", "Rails", "Hotwire Native", "WebView"]
+categories: ["Hotwire Native", "iOS"]
 description: "Rails 8 Hotwire Native 앱에서 채팅 메시지가 컨테이너를 넘치는 버그를 overflow-wrap: anywhere로 수정한 과정. Tailwind break-words가 flexbox에서 작동하지 않는 이유와 iOS WKWebView 대응 best practice."
 faq:
   - q: "Tailwind의 break-words 클래스를 썼는데 왜 iOS에서 텍스트가 넘치나요?"

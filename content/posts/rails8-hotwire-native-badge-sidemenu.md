@@ -4,7 +4,7 @@ date: 2026-03-17
 draft: false
 tags: ["iOS", "Rails", "HotwireNative", "TurboStreams", "Swift", "Stimulus", "BridgeComponent", "ActionCable"]
 description: "Rails 8 Turbo Streams로 알림 뱃지를 실시간 브로드캐스트하고, Hotwire Native Bridge로 iOS 앱 아이콘 뱃지와 벨 버튼을 갱신하는 end-to-end 구현. 그리고 사이드 메뉴에서 동적 URL이 필요한 항목의 네비게이션 문제 해결."
-categories: ["Hotwire Native", "Rails"]
+categories: ["Hotwire Native", "iOS"]
 series: ["Hotwire Native Mobile App"]
 ---
 

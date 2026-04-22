@@ -8,7 +8,7 @@ cover:
   image: "/images/og/rails-sso-one-time-token-between-services.png"
   alt: "Rails Sso One Time Token Between Services"
   hidden: true
-categories: ["Rails"]
+categories: ["Rails", "Frontend"]
 ---
 
 There are two Rails apps. One is an **internal staff app** — OTP login only, restricted to a specific domain. The other is a **review and management system** built on Devise + JWT. Internal employees need access to both, but creating and managing separate accounts for each was not a path worth taking.

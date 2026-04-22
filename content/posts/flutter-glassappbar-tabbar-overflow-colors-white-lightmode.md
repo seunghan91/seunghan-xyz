@@ -3,6 +3,7 @@ title: "Flutter UI 전수조사 — GlassAppBar TabBar overflow와 Colors.white 
 date: 2025-09-24
 draft: false
 tags: ["Flutter", "UI", "GlassAppBar", "TabBar", "overflow", "다크모드", "라이트모드"]
+categories: ["Flutter"]
 description: "앱 전체 화면을 대상으로 bottom overflow와 Colors.white 텍스트 버그를 전수조사한 과정. preferredSize 메커니즘과 라이트모드에서 흰 텍스트가 사라지는 원인을 정리했다."
 cover:
   image: "/images/og/flutter-glassappbar-tabbar-overflow-colors-white-lightmode.png"

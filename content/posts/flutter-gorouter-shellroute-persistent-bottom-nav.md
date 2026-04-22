@@ -3,6 +3,7 @@ title: "Flutter GoRouter ShellRoute로 바텀 네비게이션 전역 유지하�
 date: 2026-03-24
 draft: false
 tags: ["Flutter", "GoRouter", "ShellRoute", "iOS", "BLoC"]
+categories: ["iOS", "Flutter"]
 description: "Flutter GoRouter에서 context.push 시 바텀 네비게이션이 사라지는 문제를 ShellRoute로 해결한 과정. BLoC one-shot 네비게이션 트리거 버그 패턴과 iOS Liquid Glass 인터랙션 구현까지."
 ---
 

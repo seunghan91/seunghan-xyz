@@ -3,6 +3,7 @@ title: "Chrome Extension iframe OACX Auto-Fill Not Working — Timing and Korean
 date: 2026-01-23
 draft: false
 tags: ["Chrome Extension", "Manifest V3", "iframe", "OACX", "Korean IME", "Debugging", "MutationObserver"]
+categories: ["Dev"]
 description: "Built a government site OACX auto-fill extension but name input fails on certain sites. The cause was iframe async rendering timing and Korean IME composition events."
 cover:
   image: "/images/og/chrome-extension-oacx-iframe-korean-ime-fix.png"

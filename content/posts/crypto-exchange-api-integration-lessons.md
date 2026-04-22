@@ -3,6 +3,7 @@ title: "Binance·Bybit·OKX 5개 거래소 API — 공식 문서가 틀렸을 �
 date: 2025-12-06
 draft: false
 tags: ["Ruby", "Rails", "API", "암호화폐", "디버깅", "Faraday", "Circuit Breaker"]
+categories: ["Rails"]
 description: "5개 거래소 API를 Rails에서 붙이면서 각 거래소마다 문서와 다른 실제 동작을 마주쳤다. Faraday retry, Circuit Breaker, 거래소별 타임스탬프 단위 차이까지 실전 해결법을 정리했다."
 cover:
   image: "/images/og/crypto-exchange-api-integration-lessons.png"

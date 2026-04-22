@@ -4,7 +4,7 @@ date: 2026-03-19
 draft: false
 tags: ["iOS", "HotwireNative", "Swift", "Tailwind", "CSS", "Rails", "Debugging"]
 description: "Hotwire Native 멀티탭 앱에서 로그인 모달이 홈 탭에서만 뜨는 문제, Tailwind v4 CSS 속성 변경으로 사이드바가 안 열리는 버그, path_configuration의 tab_id 불일치로 네비게이션이 조용히 실패하는 세 가지 삽질을 해결한 기록."
-categories: ["Hotwire Native", "Rails"]
+categories: ["Hotwire Native", "iOS"]
 series: ["Hotwire Native Mobile App"]
 ---
 

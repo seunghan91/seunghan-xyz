@@ -8,7 +8,7 @@ cover:
   image: "/images/og/rails-devise-multistep-signup-resend-email.png"
   alt: "Rails Devise Multistep Signup Resend Email"
   hidden: true
-categories: ["Rails"]
+categories: ["Rails", "Frontend"]
 ---
 
 

@@ -3,6 +3,7 @@ title: "크롬 확장 content script — 한국 보험사 자동입력, HTML 목
 date: 2025-10-28
 draft: false
 tags: ["Chrome Extension", "Browser Extension", "Playwright", "ffmpeg", "JavaScript", "content script"]
+categories: ["iOS", "Frontend"]
 description: "다이렉트 자동차보험 10개사 JS 렌더링 대응 자동입력, React/Vue Native Setter trick, HTML+Playwright 스토어 스크린샷, ffmpeg 2-pass GIF 변환까지 하루 삽질 기록"
 cover:
   image: "/images/og/chrome-extension-insurance-autofill-playwright-gif.png"

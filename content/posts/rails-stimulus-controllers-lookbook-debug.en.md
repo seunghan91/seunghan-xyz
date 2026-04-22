@@ -8,7 +8,7 @@ cover:
   image: "/images/og/rails-stimulus-controllers-lookbook-debug.png"
   alt: "Rails Stimulus Controllers Lookbook Debug"
   hidden: true
-categories: ["Rails", "Hotwire"]
+categories: ["iOS", "Rails"]
 ---
 
 When building a component library with Rails + ViewComponent + Lookbook, I ran into a situation where all my Stimulus controllers were stubs — empty shells. Out of 13 controllers, only 3 were actually working; the remaining 10 were single-line `connect() {}` placeholders. This post documents the debugging process and implementation decisions for all 11 controllers I built out.

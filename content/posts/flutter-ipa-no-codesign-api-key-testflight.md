@@ -3,6 +3,7 @@ title: "flutter build ipa가 갑자기 실패한다면 — Development 인증서
 date: 2025-11-04
 draft: false
 tags: ["Flutter", "iOS", "TestFlight", "Xcode", "Makefile", "코드서명", "배포자동화"]
+categories: ["iOS", "Flutter"]
 description: "Distribution 인증서가 있는데도 flutter build ipa가 실패하는 이유는 Development 인증서가 없어서다. --no-codesign + API Key 조합으로 Xcode 로그인 없이 TestFlight에 올리는 방법을 정리했다."
 cover:
   image: "/images/og/flutter-ipa-no-codesign-api-key-testflight.png"

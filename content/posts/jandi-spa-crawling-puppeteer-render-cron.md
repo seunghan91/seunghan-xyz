@@ -3,6 +3,7 @@ title: "JANDI 채팅방 크롤링 — AngularJS 가상 스크롤 SPA를 Puppetee
 date: 2026-03-31
 draft: false
 tags: ["puppeteer", "crawling", "spa", "render", "jandi"]
+categories: ["DevOps"]
 description: "JANDI 메신저의 AngularJS SPA를 Puppeteer로 크롤링하면서 겪은 가상 스크롤, 세션 관리, Render cron job 배포까지의 전 과정을 정리했다. Playwright에서 Puppeteer + @sparticuz/chromium-min으로 전환한 이유도 함께."
 ---
 

@@ -3,6 +3,7 @@ title: "코드 2,800줄을 명세 160줄로 — CanonCode로 실제 프로젝트
 date: 2026-03-18
 draft: false
 tags: ["CanonCode", "Specification", "Architecture", "Code-as-Law", "LaunchCrew"]
+categories: ["AI Engineering"]
 description: "실제 운영 중인 QA 매칭 플랫폼(LaunchCrew)의 핵심 비즈니스 로직을 .lex 명세로 변환해보니, 2,800줄이 160줄로 줄었다. 코드 대신 법률을 유지보수하는 개발 방식에 대한 실험 기록."
 cover:
   image: ""

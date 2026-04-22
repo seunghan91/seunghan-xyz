@@ -3,6 +3,7 @@ title: "Rails 커뮤니티 게시판에 마크다운 에디터 + 좋아요 시�
 date: 2026-03-24
 draft: false
 tags: ["Rails", "Stimulus", "counter_cache", "마크다운", "importmap"]
+categories: ["Rails"]
 description: "Rails 8 importmap 환경에서 마크다운 에디터 라이브러리를 검토하고, 기존 Stimulus 컨트롤러를 재사용한 과정. counter_cache 패턴으로 좋아요 토글 구현, ERB 멀티라인 삼항연산자 구문 오류까지."
 ---
 

@@ -3,6 +3,7 @@ title: "Flutter BottomSheet가 네비게이션 바를 덮는다면 — showDialo
 date: 2026-03-09
 draft: false
 tags: ["Flutter", "UI", "BottomSheet", "Dialog", "share_plus", "SQLite", "디버깅"]
+categories: ["Flutter"]
 description: "하단 네비게이션 바 있는 앱에서 BottomSheet를 쓰면 네비바가 가려진다. showDialog로 교체하면 깔끔하게 해결된다. TextButton 색상 버그와 share_plus PlatformException 수정도 함께."
 ---
 

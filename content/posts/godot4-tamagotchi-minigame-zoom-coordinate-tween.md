@@ -3,6 +3,7 @@ title: "Godot 4 다마고치 미니게임 개발기 — 줌아웃 좌표계, Twe
 date: 2026-03-23
 draft: false
 tags: ["godot", "gamedev", "gdscript", "tween", "minigame"]
+categories: ["Dev"]
 description: "Godot 4에서 다마고치 미니게임을 만들며 겪은 삽질. Tween set_loops 에러, 부모 씬 줌아웃 시 자식 좌표 보정, _process에서 meta 값 덮어쓰기 문제까지 실전 해결 과정을 정리했다."
 ---
 

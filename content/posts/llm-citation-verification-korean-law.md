@@ -3,6 +3,7 @@ title: "LLM이 지어낸 법령을 DB로 걸러내기 — 한국어 법률 인�
 date: 2026-04-09T09:00:00+09:00
 draft: false
 tags: ["LLM", "Rails", "Postgres", "법률AI", "환각방지"]
+categories: ["AI Engineering", "Rails"]
 description: "GPT-4가 법령을 인용하면 18-29%는 존재하지 않는다. 한국어 조/항/호/목 패턴을 정규식으로 뽑고 Postgres로 검증해서 환각을 막은 실전 기록."
 ---
 

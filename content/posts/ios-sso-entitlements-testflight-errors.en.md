@@ -3,6 +3,7 @@ title: "iOS TestFlight Deployment Debugging: From SSO Errors to Entitlements Mis
 date: 2025-08-30
 draft: false
 tags: ["iOS", "Flutter", "TestFlight", "Apple Sign-In", "Google OAuth", "Provisioning", "Deployment"]
+categories: ["iOS", "Flutter"]
 description: "Apple Sign-In error 1000, Google OAuth 400 invalid_request, entitlements mismatch, BGTaskSchedulerPermittedIdentifiers missing — errors encountered during TestFlight deployment and their fixes."
 cover:
   image: "/images/og/ios-sso-entitlements-testflight-errors.png"

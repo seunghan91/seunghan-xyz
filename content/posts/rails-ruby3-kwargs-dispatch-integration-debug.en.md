@@ -8,7 +8,7 @@ cover:
   image: "/images/og/rails-ruby3-kwargs-dispatch-integration-debug.png"
   alt: "Rails Ruby3 Kwargs Dispatch Integration Debug"
   hidden: true
-categories: ["Rails"]
+categories: ["Rails", "DevOps"]
 ---
 
 I was building a dispatcher that lets an AI agent call a Rails API server to automatically assign tickets. The logic itself was straightforward, but the integration kept hitting unexpected walls. Over the course of one day, I ran into seven distinct bugs — each small on its own, but exhausting in rapid succession. I'm writing them down in hopes they save someone else the same frustration.

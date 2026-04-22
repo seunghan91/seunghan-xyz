@@ -3,6 +3,7 @@ title: "프로젝트 문서 2,300개를 400개로 줄인 전수점검 기록"
 date: 2026-01-27
 draft: false
 tags: ["문서관리", "기술부채", "정리", "Git", "개발환경", "생산성"]
+categories: ["Dev"]
 description: "docs/ 폴더에 2,350개 마크다운이 쌓여있었다. 에이전트 병렬 분석으로 전수점검하고, 활성 문서 404개만 남기기까지의 과정을 기록한다."
 cover:
   image: "/images/og/project-docs-cleanup-2300-files.png"

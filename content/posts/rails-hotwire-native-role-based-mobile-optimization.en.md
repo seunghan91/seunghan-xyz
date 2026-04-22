@@ -4,7 +4,7 @@ date: 2026-03-17
 draft: false
 tags: ["Rails", "Hotwire Native", "iOS", "WKWebView", "Tailwind", "i18n", "RBAC", "Stimulus"]
 description: "From fixing distorted layouts in a mobile WebView to designing a per-tournament staff permission system — a day of cascading fixes"
-categories: ["Hotwire Native", "Rails"]
+categories: ["Hotwire Native", "iOS"]
 series: ["Hotwire Native Mobile App"]
 ---
 

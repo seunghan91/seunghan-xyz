@@ -3,6 +3,7 @@ title: "Rails Turbo Frame으로 탭 SPA 만들기 -- 빈 페이지 함정과 해
 date: 2026-03-25
 draft: false
 tags: ["rails", "turbo-frame", "hotwire", "spa", "debugging"]
+categories: ["Rails"]
 description: "Rails Turbo Frame으로 탭 기반 SPA를 구현할 때 빈 페이지가 나오는 원인과 target _top, inline empty state 등 실전 해결 패턴을 정리했다."
 ---
 

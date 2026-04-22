@@ -3,6 +3,7 @@ title: "Flutter iOS TestFlight 업로드 실패: objective_c.framework 시뮬레
 date: 2026-03-09
 draft: false
 tags: ["Flutter", "iOS", "Xcode", "TestFlight", "Makefile", "빌드 오류"]
+categories: ["iOS", "Flutter"]
 description: "flutter build ipa 후 TestFlight 업로드 시 IOSSIMULATOR 플랫폼 태그, x86_64 슬라이스 오류가 발생하는 원인과 Makefile 자동화 해결책"
 ---
 

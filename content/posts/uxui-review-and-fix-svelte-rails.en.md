@@ -3,6 +3,7 @@ title: "Rails + Svelte App UX/UI Full Review and Improvement Record"
 date: 2026-03-06
 draft: false
 tags: ["Svelte", "Rails", "UX", "Accessibility", "svelte-sonner", "Tailwind"]
+categories: ["Rails", "Frontend"]
 description: "Full UX review of a todo management web app, improving start date UI consistency, toast notifications, touch targets, and password toggle."
 cover:
   image: "/images/og/uxui-review-and-fix-svelte-rails.png"

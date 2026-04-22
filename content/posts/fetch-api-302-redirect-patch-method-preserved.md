@@ -3,6 +3,7 @@ title: "fetch() + PATCH + 302 Redirect = 보이지 않는 버그"
 date: 2026-03-20
 draft: false
 tags: ["fetch API", "HTTP", "302 Redirect", "Stimulus", "Rails", "디버깅", "Turbo"]
+categories: ["Rails"]
 description: "fetch()로 PATCH 요청을 보내고 302 redirect를 받으면, 브라우저는 PATCH를 유지한 채 redirect한다. POST만 GET으로 바뀐다. 이걸 몰라서 반나절을 날렸다."
 ---
 

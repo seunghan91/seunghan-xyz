@@ -3,6 +3,7 @@ title: "앱스토어 마케팅 스크린샷 자동화 — Puppeteer + features.j
 date: 2026-03-26
 draft: false
 tags: ["AppStore", "Puppeteer", "Flutter", "마케팅", "자동화"]
+categories: ["iOS", "Flutter"]
 description: "HTML/CSS로 마케팅 프레임 만들고 Puppeteer로 렌더링하는 앱스토어 스크린샷 자동화 파이프라인. 스크린샷 먼저 찍고 분석 후 문구를 결정하는 features.json 방식으로 50개를 한 번에 뽑아낸다."
 ---
 

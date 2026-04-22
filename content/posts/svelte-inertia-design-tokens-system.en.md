@@ -3,6 +3,7 @@ title: "Establishing Design Token System Across 8 Svelte 5 + Inertia.js Projects
 date: 2026-03-03
 draft: false
 tags: ["Svelte 5", "Inertia.js", "Design Tokens", "Tailwind CSS", "Design System", "CSS Custom Properties"]
+categories: ["Frontend"]
 description: "Auditing design system adoption across 8 Rails + Inertia.js + Svelte 5 projects and bulk-building CSS Custom Properties based design tokens for unadopted projects."
 cover:
   image: "/images/og/svelte-inertia-design-tokens-system.png"

@@ -3,6 +3,7 @@ title: "Flutter에서 Gemini, OpenAI, Claude 직접 연동하기 — 멀티 AI �
 date: 2026-03-26
 draft: false
 tags: ["Flutter", "AI API", "Gemini", "OpenAI", "Claude", "Dart"]
+categories: ["AI Engineering", "Flutter"]
 description: "Flutter 앱에서 하드코딩된 AI API 키를 제거하고, Gemini/OpenAI/Claude를 직접 연동하는 멀티 프로바이더 패턴을 구현한 실전 기록. Vision API 요청 포맷 차이, Dio 클라이언트 설계, iOS objective_c.framework IOSSIMULATOR 빌드 에러 해결까지."
 ---
 

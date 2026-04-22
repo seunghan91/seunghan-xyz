@@ -3,6 +3,7 @@ title: "Flutter IAP Store Beta Mode Design and Purchase Logic Hardening"
 date: 2025-11-08
 draft: false
 tags: ["Flutter", "IAP", "In-App Purchase", "Beta", "StoreKit", "BLoC"]
+categories: ["Flutter"]
 description: "How to handle the store screen during open beta, preventing IAP Restore duplicate credits, protecting unauthenticated user credits, and other purchase logic gaps found in practice."
 cover:
   image: "/images/og/flutter-store-beta-mode-purchase-logic.png"

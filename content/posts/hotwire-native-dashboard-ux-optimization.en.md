@@ -8,7 +8,7 @@ cover:
   image: ""
   alt: "Hotwire Native Rails 8 Dashboard UX Optimization"
   hidden: true
-categories: ["Hotwire Native", "Rails"]
+categories: ["Hotwire Native", "iOS"]
 series: ["Hotwire Native Mobile App"]
 ---
 

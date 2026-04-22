@@ -4,7 +4,7 @@ date: 2026-03-17
 draft: false
 tags: ["Rails", "Hotwire Native", "iOS", "WKWebView", "Tailwind", "i18n", "RBAC", "Stimulus"]
 description: "데스크톱 레이아웃이 모바일 WebView에서 뭉개지는 문제부터, 역할 기반 네비게이션 분리, 운영진 권한 체계 설계까지 하루 동안의 삽질 기록"
-categories: ["Hotwire Native", "Rails"]
+categories: ["Hotwire Native", "iOS"]
 series: ["Hotwire Native Mobile App"]
 ---
 

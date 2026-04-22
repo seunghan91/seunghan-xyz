@@ -3,6 +3,7 @@ title: "Rails Hotwire 채팅 리디자인 — 버블 UI, 사이드바 채널 분
 date: 2025-03-24
 draft: false
 tags: ["Rails", "Hotwire", "Tailwind CSS", "ViewComponent", "채팅 UI"]
+categories: ["Rails", "Frontend"]
 description: "Rails + Hotwire 앱에서 iMessage 스타일 채팅 버블 구현, DM/채널 사이드바 분리, content_for로 특정 페이지에서만 레이아웃 섹션 숨기는 패턴까지 정리."
 ---
 

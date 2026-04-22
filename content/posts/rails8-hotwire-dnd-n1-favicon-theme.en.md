@@ -4,7 +4,7 @@ date: 2026-03-21
 draft: false
 tags: ["Rails 8", "Hotwire", "Turbo Stream", "Stimulus", "N+1", "Prosopite", "DnD", "Favicon", "iOS"]
 description: "Implementing drag-and-drop player assignment with Turbo Stream + Stimulus, discovering 121-query N+1 issues and adopting Prosopite, plus dynamic theme-aware favicons and iOS app icon switching"
-categories: ["Rails"]
+categories: ["iOS", "Rails"]
 ---
 
 Three real-world problems encountered while building a real-time tournament dashboard with Rails 8 + Hotwire, and the exact steps taken to resolve each one. These issues are not edge cases — they reflect the natural friction points of the Hotwire programming model that become apparent only at runtime.

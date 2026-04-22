@@ -3,6 +3,7 @@ title: "Svelte 5 + Inertia.js 프로젝트 8개에 디자인 토큰 체계 잡�
 date: 2026-03-03
 draft: false
 tags: ["Svelte 5", "Inertia.js", "Design Tokens", "Tailwind CSS", "디자인 시스템", "CSS Custom Properties"]
+categories: ["Frontend"]
 description: "Rails + Inertia.js + Svelte 5 기반 프로젝트 8개를 운영하면서 디자인 시스템 적용 현황을 감사하고, 미적용 프로젝트에 CSS Custom Properties 기반 디자인 토큰을 일괄 구축한 과정을 정리한다."
 cover:
   image: "/images/og/svelte-inertia-design-tokens-system.png"

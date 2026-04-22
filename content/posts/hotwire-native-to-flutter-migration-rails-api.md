@@ -3,6 +3,7 @@ title: "Hotwire Native에서 Flutter로 — Rails 앱의 모바일 네이티브 
 date: 2026-03-31
 draft: false
 tags: ["Flutter", "Rails", "Hotwire Native", "JWT", "모바일"]
+categories: ["Hotwire Native", "Flutter"]
 description: "Hotwire Native(WebView 래퍼) 앱을 Flutter 풀 네이티브로 마이그레이션한 과정. Rails JSON API 설계, JWT 인증, SSE 스트리밍, Firebase 설정, 프로덕션 배포까지 삽질 기록."
 ---
 

@@ -3,6 +3,7 @@ title: "Flutter BLoC 상태 설계 — 단순 목록을 넘어 복잡한 단계 
 date: 2025-07-06
 draft: false
 tags: ["Flutter", "BLoC", "상태관리", "UX"]
+categories: ["Flutter"]
 description: "BLoC로 목록 하나 띄우는 건 쉽다. 문제는 '세션 생성 → 질문 추가 → 답변 → 완료' 같은 단계형 흐름을 어떻게 이벤트·상태로 나눠야 유지보수가 되는지다. 설계 방법을 정리했다."
 cover:
   image: "/images/og/flutter-bloc-complex-state-management.png"

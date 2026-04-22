@@ -3,6 +3,7 @@ title: "Flutter 앱에 iOS 위젯 추가하기 — pbxproj 수동 편집부터 �
 date: 2026-03-08
 draft: false
 tags: ["Flutter", "iOS", "WidgetKit", "Swift", "go_router", "딥링크"]
+categories: ["iOS", "Flutter"]
 description: "Flutter 프로젝트에 iOS 위젯 익스텐션을 Xcode 없이 pbxproj 직접 수정으로 추가하고, App Group으로 데이터를 공유하고, go_router와 FlutterDeepLinkingEnabled로 딥링크까지 연결한 과정을 정리한다."
 ---
 

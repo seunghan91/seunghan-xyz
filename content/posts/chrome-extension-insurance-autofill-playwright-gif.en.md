@@ -3,6 +3,7 @@ title: "Chrome Extension Content Script — Korean Insurance Auto-Fill, HTML Moc
 date: 2025-10-28
 draft: false
 tags: ["Chrome Extension", "Browser Extension", "Playwright", "ffmpeg", "JavaScript", "content script"]
+categories: ["iOS", "Frontend"]
 description: "Auto-fill for 10 Korean direct car insurance sites with JS rendering support, React/Vue Native Setter trick, HTML+Playwright store screenshots, and ffmpeg 2-pass GIF conversion."
 cover:
   image: "/images/og/chrome-extension-insurance-autofill-playwright-gif.png"

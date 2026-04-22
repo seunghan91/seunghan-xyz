@@ -3,6 +3,7 @@ title: "pnpm ERR_PNPM_OUTDATED_LOCKFILE — CI 배포 실패 진단과 해결"
 date: 2026-04-02
 draft: false
 tags: ["pnpm", "CI/CD", "Render", "monorepo", "배포"]
+categories: ["DevOps"]
 description: "Render 배포에서 pnpm ERR_PNPM_OUTDATED_LOCKFILE 에러가 발생했다. CI 환경에서 frozen-lockfile이 기본 활성화되는 이유, 원인별 해결법, 재발 방지 방법을 정리했다."
 ---
 

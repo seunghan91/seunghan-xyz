@@ -3,6 +3,7 @@ title: "Slack Events API로 채널 메시지 자동 수집하기 — Rails 서�
 date: 2026-03-12
 draft: false
 tags: ["Rails", "Slack API", "Events API", "자동화", "삽질"]
+categories: ["Rails"]
 description: "Slack 봇이 멘션될 때만 동작하던 수집 시스템을 채널 메시지 자동 수집으로 확장했다. message.channels, reaction_added, file_shared 이벤트를 활용한 설계와 삽질 기록."
 cover:
   image: "/images/og/slack-events-api-auto-collection-rails.png"

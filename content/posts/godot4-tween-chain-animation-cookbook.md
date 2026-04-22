@@ -3,6 +3,7 @@ title: "Godot 4 Tween 실전 레시피 — 미니게임에서 써먹은 12가지
 date: 2026-03-25
 draft: false
 tags: ["godot", "gamedev", "gdscript", "tween", "minigame", "애니메이션"]
+categories: ["Dev"]
 description: "Godot 4의 Tween 시스템으로 미니게임 UI 애니메이션을 만든 실전 레시피 12가지. 체이닝 함정, 병렬/순차 실행, 콜백 타이밍까지 코드와 함께 정리했다."
 ---
 

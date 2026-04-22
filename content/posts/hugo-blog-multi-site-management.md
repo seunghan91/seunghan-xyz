@@ -3,6 +3,7 @@ title: "Hugo 블로그 3개를 하나의 폴더에서 관리하는 구조"
 date: 2025-10-08
 draft: false
 tags: ["Hugo", "Netlify", "블로그", "정적사이트", "PaperMod", "Stack"]
+categories: ["DevOps"]
 description: "용도가 다른 Hugo 블로그 3개(개발 블로그, 앱 홈페이지, 개인 블로그)를 단일 디렉토리에서 운영하면서 각각 Netlify로 독립 배포하는 방법"
 cover:
   image: "/images/og/hugo-blog-multi-site-management.png"

@@ -3,6 +3,7 @@ title: "모바일 앱 로그인이 자꾸 풀리는 진짜 이유 — JWT Refres
 date: 2026-03-23
 draft: false
 tags: ["JWT", "Flutter", "Rails", "인증", "모바일"]
+categories: ["Flutter", "Rails"]
 description: "Flutter + Rails API 환경에서 모바일 앱 로그인이 반복적으로 풀리는 근본 원인을 분석하고, JWT access token TTL, refresh token rotation, Redis 세션 제거, Puma 메모리 최적화까지 단계별로 해결한 실전 기록."
 ---
 

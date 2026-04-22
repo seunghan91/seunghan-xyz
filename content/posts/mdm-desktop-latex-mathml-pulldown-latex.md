@@ -3,6 +3,7 @@ title: "Tauri 데스크톱 앱에 LaTeX 수식 달기 — KaTeX 버리고 pulldo
 date: 2026-04-17T09:00:00+09:00
 draft: false
 tags: ["tauri", "rust", "latex", "mathml", "sveltekit"]
+categories: ["Frontend"]
 description: "오프라인 마크다운 뷰어에 LaTeX 수식을 붙일 때 KaTeX가 정답처럼 보이지만 아니었다. pulldown-latex로 Rust에서 MathML을 찍고 WebView 네이티브 렌더에 맡기는 경로를 택한 과정."
 ---
 

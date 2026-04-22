@@ -3,6 +3,7 @@ title: "CanonCode + LLM — 명세를 주면 코드가 정확해진다는 실험
 date: 2026-03-20
 draft: false
 tags: ["CanonCode", "LLM", "AI", "Code Generation", "바이브코딩"]
+categories: ["AI Engineering"]
 description: "CanonCode .lex 명세를 LLM에 컨텍스트로 제공하면 코드 생성 정확도가 어떻게 달라지는지 실험했다. 에스크로 결제, 상태 머신, 예외 처리 3가지 케이스에서 비교한 결과."
 ---
 

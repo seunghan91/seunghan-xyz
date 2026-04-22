@@ -3,6 +3,7 @@ title: "프로필 페이지 발표자료 핀 시스템 — Instagram 스타일 +
 date: 2026-04-05
 draft: false
 tags: ["svelte5", "rails", "ui-design", "css", "active-storage"]
+categories: ["AI Engineering", "Rails"]
 description: "Rails 8 + Svelte 5 프로필 페이지에 발표자료 핀 시스템을 만들면서 겪은 디자인 진화 과정. 버튼 → 빈 카드 → Instagram 스타일 썸네일 오버레이까지, Service Worker 캐시 함정과 N+1 해결기."
 ---
 

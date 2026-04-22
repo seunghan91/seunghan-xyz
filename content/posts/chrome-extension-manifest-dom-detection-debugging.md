@@ -3,6 +3,7 @@ title: "Chrome 확장 개발 삽질 모음 — 도메인 화이트리스트, 이
 date: 2026-03-09
 draft: false
 tags: ["Chrome Extension", "Firefox Extension", "Manifest V3", "JavaScript", "디버깅"]
+categories: ["iOS", "Frontend"]
 description: "Chrome/Firefox 확장 프로그램을 개발하면서 겪은 4가지 실수 — 도메인 감지 흐름 차단, 이벤트 리스너 중복 등록, 클로저 참조 누락, AMO 패키징 오류."
 cover:
   image: ""

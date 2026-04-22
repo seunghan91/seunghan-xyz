@@ -3,6 +3,7 @@ title: "Mole로 맥 190GB 정리한 후기 — 개발자 맥에 쌓인 캐시의
 date: 2026-03-30
 draft: false
 tags: ["macOS", "Mole", "disk-cleanup", "developer-tools", "Docker"]
+categories: ["DevOps"]
 description: "macOS 개발자 머신에 쌓인 190GB 캐시를 Mole CLI로 정리한 실전 기록. npm, Flutter, Docker, Xcode 캐시 분석과 안전한 삭제 방법을 다룬다."
 ---
 
