@@ -39,6 +39,8 @@ minifyOutput = true
     ShowCodeCopyButtons = true
     ShowWordCount = false
     ShowRssButtonInSectionTermList = false
+    ShowToc = true
+    TocOpen = false
     UseHugoToc = true
     disableSpecialTitlePostfix = true
 
@@ -131,6 +133,8 @@ AI를 활용해 모바일 앱과 웹 서비스를 빠르게 만들고 있습니�
     ShowCodeCopyButtons = true
     ShowWordCount = false
     ShowRssButtonInSectionTermList = false
+    ShowToc = true
+    TocOpen = false
     UseHugoToc = true
     disableSpecialTitlePostfix = true
 
@@ -239,3 +243,18 @@ home = ["HTML", "RSS", "JSON"]
   [markup.highlight]
   style = "github-dark"
   noClasses = false
+
+# Related posts — strengthens internal linking for SEO
+[related]
+  threshold = 10
+  includeNewer = true
+  toLower = true
+  [[related.indices]]
+    name = "tags"
+    weight = 100
+  [[related.indices]]
+    name = "categories"
+    weight = 50
+  [[related.indices]]
+    name = "date"
+    weight = 1

@@ -1,9 +1,18 @@
 User-agent: *
 Allow: /
+# Block taxonomy XML feeds
 Disallow: /tags/*/index.xml
 Disallow: /categories/*/index.xml
 Disallow: /en/tags/
 Disallow: /en/categories/
+# Block pagination - wastes crawl budget on duplicate listings
+Disallow: /page/
+Disallow: /posts/page/
+Disallow: /ko/page/
+Disallow: /en/page/
+Disallow: /tags/*/page/
+Disallow: /categories/*/page/
+Disallow: /ko/tags/*/page/
 
 # AI Crawlers - explicitly allowed
 User-agent: GPTBot
