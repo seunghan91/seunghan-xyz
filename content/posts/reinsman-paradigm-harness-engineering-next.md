@@ -58,7 +58,7 @@ OpenAI의 하네스 엔지니어링 공식 태그라인이 *"Humans steer. Agent
 
 > **Reinsman**: 하네스 위에서 에이전트의 행동을 현장 맥락에 맞게 의사결정·모니터링하고, AI와 조직의 속도를 조율하는 역할.
 
-![레인스맨 패러다임 다이어그램 — Model + Harness 위에 고삐를 쥔 Reinsman, 그 전체를 AX 조직이 감싼 구조](/images/reinsman-diagram.png)
+![Reinsman — 고삐를 쥔 사람. AI라는 말이 아무리 정교해져도, 그 옆에서 고삐를 쥐고 방향을 잡아주는 사람이 있어야 조직 안에서 움직인다.](/images/reinsman-illustration.png)
 
 새 용어를 꼭 만들어야 한다고 주장하려는 건 아닙니다.
 다만 지금은 이 역할을 가리킬 단어가 비어 있어서,

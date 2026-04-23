@@ -1,0 +1,210 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="100%" height="100%">
+    <defs>
+        <!-- Subtle grain texture pattern for editorial feel -->
+        <pattern id="noise" x="0" y="0" width="150" height="150" patternUnits="userSpaceOnUse">
+            <circle cx="10" cy="10" r="1.2" fill="#3B2A1F" opacity="0.04"/>
+            <circle cx="45" cy="25" r="0.8" fill="#3B2A1F" opacity="0.06"/>
+            <circle cx="80" cy="15" r="1.5" fill="#3B2A1F" opacity="0.03"/>
+            <circle cx="120" cy="40" r="1" fill="#3B2A1F" opacity="0.05"/>
+            <circle cx="25" cy="65" r="1.2" fill="#3B2A1F" opacity="0.04"/>
+            <circle cx="65" cy="80" r="1.5" fill="#3B2A1F" opacity="0.02"/>
+            <circle cx="110" cy="95" r="0.8" fill="#3B2A1F" opacity="0.06"/>
+            <circle cx="140" cy="70" r="1" fill="#3B2A1F" opacity="0.05"/>
+            <circle cx="35" cy="115" r="1.3" fill="#3B2A1F" opacity="0.04"/>
+            <circle cx="85" cy="130" r="0.9" fill="#3B2A1F" opacity="0.05"/>
+            <circle cx="135" cy="140" r="1.4" fill="#3B2A1F" opacity="0.03"/>
+            <circle cx="10" cy="145" r="0.7" fill="#3B2A1F" opacity="0.06"/>
+        </pattern>
+    </defs>
+
+    <!-- Base Cream Background -->
+    <rect width="1200" height="800" fill="#FAF4E8"/>
+
+    <!-- Background Elements -->
+    <!-- Abstract Sun / Moon -->
+    <circle cx="220" cy="240" r="130" fill="#FADFAD" opacity="0.3" stroke="none"/>
+    <circle cx="270" cy="280" r="90" fill="#D49A89" opacity="0.15" stroke="none"/>
+
+    <!-- Abstract Frame (representing AX organizational boundary) -->
+    <path d="M 720 180 Q 880 140 1020 230 Q 1070 380 970 490 Q 820 540 690 430 Q 640 280 720 180 Z" 
+          fill="none" stroke="#D49A89" stroke-width="2.5" stroke-dasharray="12 16" opacity="0.4" stroke-linecap="round"/>
+
+    <!-- Ground Shadows -->
+    <ellipse cx="360" cy="610" rx="160" ry="14" fill="#EAE0CC" opacity="0.8"/>
+    <ellipse cx="845" cy="615" rx="65" ry="10" fill="#EAE0CC" opacity="0.8"/>
+
+    <!-- Wavy Earth / Ground Lines -->
+    <path d="M 80 610 Q 300 630 600 605 T 1120 610" fill="none" stroke="#3B2A1F" stroke-width="2" opacity="0.3" stroke-linecap="round"/>
+    <path d="M 40 620 Q 400 645 800 615 T 1160 625" fill="none" stroke="#3B2A1F" stroke-width="1.5" opacity="0.15" stroke-linecap="round"/>
+
+    <!-- ================= FAR SIDE ELEMENTS ================= -->
+    <!-- Far Back Leg (Horse) -->
+    <path d="M 285 490 L 295 595 C 295 605, 325 605, 320 595 L 305 480 Z" fill="#D98A6C" stroke="#3B2A1F" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M 292 580 L 322 580" fill="none" stroke="#3B2A1F" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Far Front Leg (Horse) -->
+    <path d="M 465 460 L 480 595 C 480 605, 510 605, 500 595 L 480 440 Z" fill="#D98A6C" stroke="#3B2A1F" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M 477 580 L 502 580" fill="none" stroke="#3B2A1F" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Back Leg (Human) -->
+    <path d="M 855 480 L 870 605 C 870 615, 895 615, 890 605 L 875 480 Z" fill="#1C2836" stroke="#3B2A1F" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M 865 605 C 865 595, 895 595, 895 605 L 895 612 C 895 618, 865 618, 865 612 Z" fill="#3B2A1F"/>
+
+    <!-- Secondary Rein (Back layer, slight droop) -->
+    <path d="M 545 305 C 580 440, 680 490, 775 410" fill="none" stroke="#D98A6C" stroke-width="4" stroke-linecap="round"/>
+    <path d="M 775 410 C 760 440, 765 470, 775 490" fill="none" stroke="#D98A6C" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- ================= HORSE (AI CREATURE) ================= -->
+    <g id="ai-horse">
+        <!-- Main Body -->
+        <path d="M 250 600 L 215 600 C 215 500, 150 460, 155 360 C 160 260, 260 270, 330 310 C 380 340, 430 260, 460 220 C 480 190, 520 200, 525 235 C 535 250, 575 280, 565 320 C 555 350, 515 360, 485 340 C 465 380, 455 430, 460 600 L 420 600 C 415 500, 385 490, 345 490 C 295 490, 260 510, 250 600 Z" 
+              fill="#F4B894" stroke="#3B2A1F" stroke-width="3.5" stroke-linejoin="round"/>
+        
+        <!-- Subtle Shading / Overlays for Depth -->
+        <path d="M 250 600 C 260 510, 295 490, 345 490 C 385 490, 415 500, 420 600 L 460 600 C 455 460, 460 390, 485 340 C 500 350, 530 355, 550 340 C 510 390, 470 460, 460 600 Z" 
+              fill="#D98A6C" opacity="0.25" stroke="none"/>
+        <path d="M 155 360 C 150 430, 200 480, 215 600 L 250 600 C 240 520, 260 490, 300 490 C 250 480, 180 430, 170 330 C 160 340, 155 350, 155 360 Z" 
+              fill="#D98A6C" opacity="0.2" stroke="none"/>
+              
+        <!-- Hooves (Near) -->
+        <path d="M 214 580 L 250 580" fill="none" stroke="#3B2A1F" stroke-width="2" stroke-linecap="round"/>
+        <path d="M 421 580 L 460 580" fill="none" stroke="#3B2A1F" stroke-width="2" stroke-linecap="round"/>
+
+        <!-- Ear -->
+        <path d="M 495 210 Q 475 155 515 175 Q 520 200 515 220 Z" fill="#F4B894" stroke="#3B2A1F" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M 500 205 Q 490 170 510 185 Z" fill="#D98A6C" stroke="none"/>
+
+        <!-- Organic Bubbly Mane -->
+        <path d="M 505 205 Q 465 185 455 225 Q 425 215 415 265 Q 385 255 375 305 Q 345 305 345 345 C 345 365, 370 365, 385 350 L 465 235 Z" 
+              fill="#D98A6C" stroke="#3B2A1F" stroke-width="3" stroke-linejoin="round"/>
+
+        <!-- Face Details -->
+        <circle cx="530" cy="270" r="4.5" fill="#3B2A1F"/>
+        <circle cx="528" cy="268" r="1.5" fill="#FAF4E8"/>
+        <!-- Cheek Blush -->
+        <circle cx="540" cy="290" r="14" fill="#D49A89" opacity="0.4"/>
+        <!-- Gentle Smile -->
+        <path d="M 550 310 Q 560 320 570 310" fill="none" stroke="#3B2A1F" stroke-width="2" stroke-linecap="round"/>
+        <!-- Nose dot -->
+        <circle cx="568" cy="295" r="1.5" fill="#3B2A1F" opacity="0.6"/>
+
+        <!-- Orange Tack / Harness -->
+        <!-- Saddle Pad -->
+        <path d="M 320 315 C 340 295, 380 315, 395 345 C 385 365, 345 375, 310 345 Z" fill="#E28743" stroke="#3B2A1F" stroke-width="2.5" stroke-linejoin="round"/>
+        <!-- Girth -->
+        <path d="M 350 355 L 315 490" fill="none" stroke="#E28743" stroke-width="8" stroke-linecap="round"/>
+        <path d="M 350 355 L 315 490" fill="none" stroke="#3B2A1F" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 6"/>
+        <!-- Neck Strap -->
+        <path d="M 465 355 Q 435 290 410 270" fill="none" stroke="#E28743" stroke-width="8" stroke-linecap="round"/>
+        <!-- Head Strap -->
+        <path d="M 545 310 Q 510 265 495 220" fill="none" stroke="#E28743" stroke-width="7" stroke-linecap="round"/>
+        <!-- Snout Strap -->
+        <path d="M 525 330 L 568 288" fill="none" stroke="#E28743" stroke-width="8" stroke-linecap="round"/>
+        <!-- Harness Connector Ring -->
+        <circle cx="540" cy="305" r="5" fill="#E8B851" stroke="#3B2A1F" stroke-width="2"/>
+    </g>
+
+    <!-- ================= HUMAN (REINSMAN) ================= -->
+    <g id="human-reinsman">
+        <!-- Front Leg -->
+        <path d="M 825 480 L 815 605 C 815 615, 845 615, 840 605 L 855 480 Z" fill="#2A3B4C" stroke="#3B2A1F" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M 810 605 C 810 595, 845 595, 845 605 L 845 612 C 845 618, 810 618, 810 612 Z" fill="#3B2A1F"/>
+
+        <!-- Under Shirt -->
+        <path d="M 840 310 L 860 310 L 855 355 L 835 345 Z" fill="#E8B851" stroke="#3B2A1F" stroke-width="2" stroke-linejoin="round"/>
+
+        <!-- Main Sage Green Jacket (Oversized, organic) -->
+        <path d="M 835 310 C 815 330, 795 380, 805 455 C 805 495, 825 515, 845 515 C 865 515, 885 495, 885 455 C 895 380, 875 330, 855 310 L 835 310 Z" 
+              fill="#8BA382" stroke="#3B2A1F" stroke-width="3.5" stroke-linejoin="round"/>
+        <!-- Jacket Shading -->
+        <path d="M 805 455 C 805 495, 825 515, 845 515 C 865 515, 885 495, 885 455 C 890 410, 885 370, 870 340 C 880 390, 870 470, 845 490 C 820 470, 810 400, 820 340 C 805 370, 800 410, 805 455 Z" 
+              fill="#748C6B" opacity="0.3" stroke="none"/>
+        <!-- Jacket Collar / Lapel Detail -->
+        <path d="M 835 310 L 865 310 L 855 355 L 825 355 Z" fill="#748C6B" stroke="#3B2A1F" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M 840 345 Q 835 405, 845 515" fill="none" stroke="#3B2A1F" stroke-width="2.5" stroke-linecap="round"/>
+
+        <!-- Head Base -->
+        <path d="M 845 240 C 865 240, 875 255, 875 270 C 875 288, 865 302, 845 302 C 825 302, 815 288, 815 270 C 815 255, 825 240, 845 240 Z" 
+              fill="#EAE0CC" stroke="#3B2A1F" stroke-width="3" stroke-linejoin="round"/>
+        <!-- Hair (Simple organic cap) -->
+        <path d="M 810 275 C 810 235, 880 235, 880 275 C 880 290, 870 295, 860 285 C 845 265, 825 265, 810 275 Z" 
+              fill="#3B2A1F" stroke="#3B2A1F" stroke-width="2" stroke-linejoin="round"/>
+        <!-- Ear -->
+        <circle cx="870" cy="275" r="5" fill="#EAE0CC" stroke="#3B2A1F" stroke-width="2"/>
+        
+        <!-- Face Details -->
+        <!-- Calm Eye -->
+        <path d="M 825 268 Q 830 263 835 268" fill="none" stroke="#3B2A1F" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Subtle Smile -->
+        <path d="M 827 285 Q 832 290 837 285" fill="none" stroke="#3B2A1F" stroke-width="2" stroke-linecap="round"/>
+        <!-- Cheek Blush -->
+        <circle cx="842" cy="278" r="8" fill="#D49A89" opacity="0.5"/>
+
+        <!-- Near Arm / Sleeve -->
+        <path d="M 845 340 C 820 370, 790 390, 770 390 C 765 400, 775 415, 785 415 C 815 415, 845 385, 860 360 Z" 
+              fill="#8BA382" stroke="#3B2A1F" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M 835 350 C 810 380, 780 400, 775 405" fill="none" stroke="#748C6B" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+
+        <!-- Hand Holding Rein -->
+        <circle cx="765" cy="400" r="9" fill="#EAE0CC" stroke="#3B2A1F" stroke-width="2.5"/>
+    </g>
+
+    <!-- ================= MAIN REIN ================= -->
+    <!-- Front sweeping terracotta rein connecting AI and Human -->
+    <path d="M 540 305 C 575 425, 665 470, 765 400" fill="none" stroke="#C15C3D" stroke-width="5.5" stroke-linecap="round"/>
+    <!-- Excess Rein trailing down from human's hand -->
+    <path d="M 765 400 C 750 435, 760 485, 770 505" fill="none" stroke="#C15C3D" stroke-width="4" stroke-linecap="round"/>
+
+    <!-- ================= ATMOSPHERIC ELEMENTS ================= -->
+    <!-- Foreground Plants (Bottom Left) -->
+    <g id="plants-left">
+        <!-- Stems -->
+        <path d="M 70 615 Q 50 510 110 410" fill="none" stroke="#8BA382" stroke-width="3" stroke-linecap="round"/>
+        <path d="M 90 615 Q 110 540 170 490" fill="none" stroke="#8BA382" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 60 615 Q 30 560 40 520" fill="none" stroke="#8BA382" stroke-width="2" stroke-linecap="round"/>
+        
+        <!-- Leaves -->
+        <path d="M 110 410 C 120 390, 140 400, 130 420 Z" fill="#D49A89" stroke="#3B2A1F" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M 85 460 C 70 450, 60 470, 80 480 Z" fill="#8BA382" stroke="#3B2A1F" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M 140 520 C 160 510, 160 540, 140 550 Z" fill="#D49A89" stroke="#3B2A1F" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M 170 490 C 180 470, 200 490, 180 510 Z" fill="#E8B851" stroke="#3B2A1F" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M 40 520 C 50 500, 70 510, 60 530 Z" fill="#D49A89" stroke="#3B2A1F" stroke-width="2" stroke-linejoin="round"/>
+    </g>
+
+    <!-- Foreground Plants (Bottom Right - subtle) -->
+    <g id="plants-right" opacity="0.85">
+        <path d="M 1130 615 Q 1160 530 1110 460" fill="none" stroke="#8BA382" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 1110 460 C 1090 450, 1080 470, 1100 480 Z" fill="#D49A89" stroke="#3B2A1F" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M 1140 530 C 1160 520, 1170 550, 1150 560 Z" fill="#8BA382" stroke="#3B2A1F" stroke-width="2" stroke-linejoin="round"/>
+    </g>
+
+    <!-- Warm Floating Stars & Dust -->
+    <g id="stars-dust">
+        <!-- Top Left Star -->
+        <path d="M 390 150 Q 393 160 403 163 Q 393 166 390 176 Q 387 166 377 163 Q 387 160 390 150 Z" fill="#E8B851"/>
+        <!-- Top Mid Star -->
+        <path d="M 650 180 Q 652.5 187.5 660 190 Q 652.5 192.5 650 200 Q 647.5 192.5 640 190 Q 647.5 187.5 650 180 Z" fill="#E8B851"/>
+        <!-- Right Star -->
+        <path d="M 940 190 Q 944 198 952 202 Q 944 206 940 214 Q 936 206 928 202 Q 936 198 940 190 Z" fill="#E8B851"/>
+        
+        <!-- Soft Particle Dots -->
+        <circle cx="440" cy="130" r="3" fill="#D49A89" opacity="0.8"/>
+        <circle cx="690" cy="280" r="2.5" fill="#E8B851" opacity="0.9"/>
+        <circle cx="580" cy="160" r="2" fill="#E28743" opacity="0.7"/>
+        <circle cx="280" cy="140" r="1.5" fill="#E8B851" opacity="0.6"/>
+        <circle cx="980" cy="320" r="2" fill="#D49A89" opacity="0.7"/>
+    </g>
+
+    <!-- ================= TYPOGRAPHY ================= -->
+    <g id="typography">
+        <text x="1100" y="740" text-anchor="end" font-family="Pretendard, 'Noto Sans KR', Georgia, serif" font-size="16" font-weight="500" fill="#3B2A1F" letter-spacing="-0.3">
+            Reinsman — 고삐를 쥔 사람
+        </text>
+        <text x="1100" y="765" text-anchor="end" font-family="Pretendard, 'Noto Sans KR', Georgia, serif" font-size="12" font-weight="400" fill="#A88B6B" letter-spacing="0.2">
+            Production = Agent × Reinsman
+        </text>
+    </g>
+
+    <!-- ================= GLOBAL TEXTURE OVERLAY ================= -->
+    <rect width="1200" height="800" fill="url(#noise)" pointer-events="none"/>
+</svg>
