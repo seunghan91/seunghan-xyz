@@ -6,14 +6,12 @@ draft: false
 hidemeta: true
 ShowBreadCrumbs: false
 ShowPostNavLinks: false
-description: "한국거래소(KRX) IT전략부 7년차 + 사이드로 Flutter·Rails·Svelte 앱 20+ 출시. AI-Native Engineering 실전 경험을 공유합니다."
+description: "한국거래소(KRX) IT전략부 7년차. AI-Native Engineering 실전 경험을 공유합니다."
 ---
 
 ## 안녕하세요, 김승한입니다
 
-**한국거래소(Korea Exchange, KRX) IT전략부**에서 7년차로 일하며,
-퇴근 후·주말에는 **Flutter·Rails·Svelte로 개인 앱 20개 이상**을 만들어
-App Store와 Google Play에 출시해 왔습니다.
+**한국거래소(Korea Exchange, KRX) IT전략부**에서 7년차로 일하고 있습니다.
 
 이 블로그는 그 과정에서 부딪힌 실전 디버깅, 아키텍처 결정,
 AI를 도구로 활용한 개발 워크플로우를 정리한 작업 일지입니다.
@@ -43,39 +41,6 @@ AI를 도구로 활용한 개발 워크플로우를 정리한 작업 일지입�
 KRX는 **국가주요시설(국정원 보안)** + **금융권(금융위원회 규제)** 이중 규제를
 동시에 받는 국내 유일 기관입니다. 이 환경에서 시장 요구사항을 구현하며
 컴플라이언스를 준수하는 경험을 쌓았습니다.
-
----
-
-## 사이드 — 앱 20+ 출시 (Dcode Labs 협업)
-
-본업 외 시간에 **김다혜 대표의 Dcode Labs**에 합류해 앱 개발·출시를 담당하고 있습니다.
-
-### App Store 출시작 (일부)
-| 앱 | 분야 | 스택 |
-|----|------|------|
-| **Easy Bracket** | 테니스 대진표 자동 생성 | Rails + Svelte / Flutter |
-| **LaunchCrew** | 미니톤·해커톤 매칭 | Rails 8 + Svelte 5 + Inertia |
-| **Keeps** | 펫 다이어리 | Rails + Svelte |
-| **TripHelper** | 여행 동행 매칭 | Rails + Svelte |
-| **RealPick** | 부동산 정보 큐레이션 | Rails + Hotwire |
-| **2026 운세** | 사주·운세 분석 | Flutter |
-| **보이스팅(Talkk)** | 음성 SNS | Rails + Svelte |
-| **Slipbox** | 영수증 OCR | Rails + Svelte |
-| **Unmask** | AI 이미지 생성 | Flutter |
-
-### AI 활용 인프라
-- **Claude API/MCP 실전 운용**: ainote MCP 서버 직접 구축, npm 배포(`@ainote/mcp`)
-- **Render.com**: 10+ 서비스 운영 (Singapore region)
-- **20+ 프로덕션 앱에 Claude API 활용**
-
----
-
-## 학력 / 자격
-
-- **강원대학교** 철학(주전공) + 소프트웨어공학(복수전공, 삼성 SCSC 과정)
-- **인문 100년 장학금** (2016, 교육부 국가우수장학금, 등록금 전액)
-- **정보처리기사** (2018, 한국산업인력공단)
-- 멋쟁이사자처럼 강원대 **회장 3년 연속** (2015~2017)
 
 ---
 
