@@ -6,12 +6,12 @@ draft: false
 hidemeta: true
 ShowBreadCrumbs: false
 ShowPostNavLinks: false
-description: "한국거래소(KRX) IT전략부 7년차. AI-Native Engineering 실전 경험을 공유합니다."
+description: "한국거래소(KRX) IT전략부 8년차. AI-Native Engineering 실전 경험을 공유합니다."
 ---
 
 ## 안녕하세요, 김승한입니다
 
-**한국거래소(Korea Exchange, KRX) IT전략부**에서 7년차로 일하고 있습니다.
+**한국거래소(Korea Exchange, KRX) IT전략부**에서 8년차로 일하고 있습니다.
 
 이 블로그는 그 과정에서 부딪힌 실전 디버깅, 아키텍처 결정,
 AI를 도구로 활용한 개발 워크플로우를 정리한 작업 일지입니다.
