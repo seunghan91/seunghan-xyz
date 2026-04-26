@@ -13,6 +13,7 @@
 | 2026-04-21 | tailwind-v4-theme-migration-oklch-fallback.md | Tailwind v4 @theme 함정 — tailwind.config.js가 무시되고 기본 OKLCH로 폴백되던 문제 |
 | 2026-04-25 | reinsman-paradigm-harness-engineering-next.md | 레인스맨(Reinsman) — 하네스 엔지니어링 다음에 오는 것 |
 | 2026-04-26 | reinsman-paradigm-harness-engineering-next.en.md | Reinsman — What Comes After Harness Engineering (EN) |
+| 2026-04-29 | render-rails-monorepo-ruby-version-solidqueue-puma.md | Render에 Rails 8 monorepo 처음 올릴 때 빌드 4번 깨먹은 이야기 — .ruby-version 함정과 SolidQueue web 통합 |
 
 ## 사용법
 - 포스트 작성 시 `date: YYYY-MM-DDT09:00:00+09:00` 설정
