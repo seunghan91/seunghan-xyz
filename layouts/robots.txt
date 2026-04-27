@@ -5,14 +5,14 @@ Disallow: /tags/*/index.xml
 Disallow: /categories/*/index.xml
 Disallow: /en/tags/
 Disallow: /en/categories/
-# Block pagination - wastes crawl budget on duplicate listings
-Disallow: /page/
-Disallow: /posts/page/
-Disallow: /ko/page/
-Disallow: /en/page/
+# Block taxonomy pagination only — keep main post pagination crawlable
+# so Googlebot can discover every post via internal links (sitemap alone
+# is treated as a low-priority discovery signal).
 Disallow: /tags/*/page/
 Disallow: /categories/*/page/
 Disallow: /ko/tags/*/page/
+Disallow: /en/tags/*/page/
+Disallow: /en/categories/*/page/
 
 # AI Crawlers - explicitly allowed
 User-agent: GPTBot

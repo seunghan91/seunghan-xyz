@@ -237,6 +237,12 @@ series = "series"
 [outputs]
 home = ["HTML", "RSS", "JSON"]
 
+# SEO: surface every post on the listing page via direct internal links.
+# Default pagerSize=10 left non-front-page posts reachable only through
+# /page/N/ pagination, which Google deprioritizes vs sitemap-only entries.
+[pagination]
+pagerSize = 200
+
 [markup]
   [markup.goldmark.renderer]
   unsafe = true
