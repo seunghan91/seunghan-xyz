@@ -14,6 +14,7 @@
 | 2026-04-25 | reinsman-paradigm-harness-engineering-next.md | 레인스맨(Reinsman) — 하네스 엔지니어링 다음에 오는 것 |
 | 2026-04-26 | reinsman-paradigm-harness-engineering-next.en.md | Reinsman — What Comes After Harness Engineering (EN) |
 | 2026-04-29 | render-rails-monorepo-ruby-version-solidqueue-puma.md | Render에 Rails 8 monorepo 처음 올릴 때 빌드 4번 깨먹은 이야기 — .ruby-version 함정과 SolidQueue web 통합 |
+| 2026-05-02 | android-clean-architecture-mvi-7-phase-refactoring-pitfalls.md | Android Clean Arch + MVI 7-phase 리팩토링 함정 8가지 — iOS 스택과 다른 점 |
 
 ## 사용법
 - 포스트 작성 시 `date: YYYY-MM-DDT09:00:00+09:00` 설정
