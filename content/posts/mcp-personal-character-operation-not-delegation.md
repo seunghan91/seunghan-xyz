@@ -1,6 +1,6 @@
 ---
 title: "MCP는 내 전용 캐릭터다 — 위임이 아니라 운용으로"
-date: 2026-05-03T09:00:00+09:00
+date: 2026-05-03T11:33:33+09:00
 draft: false
 tags: ["MCP", "AI Agent", "Digital Identity", "AX", "DT"]
 description: "MCP를 SaaS 도구로만 쓰지 말고 내 전용 캐릭터로 운용하는 관점. GitHub MCP 17,600 토큰의 함정부터 위임이 아닌 운용 패턴, Hashimoto 공식 확장까지."

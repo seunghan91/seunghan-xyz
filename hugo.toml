@@ -28,7 +28,7 @@ minifyOutput = true
     keywords = ["Developer", "Flutter", "iOS", "Rails", "모바일 개발", "앱 개발", "디버깅", "개발 블로그"]
     images = ["/og-image.png"]
     author = "Seunghan"
-    DateFormat = "2006-01-02"
+    DateFormat = "2006-01-02 15:04"
     defaultTheme = "auto"
     disableThemeToggle = false
     ShowReadingTime = true
@@ -122,7 +122,7 @@ AI를 활용해 모바일 앱과 웹 서비스를 빠르게 만들고 있습니�
     keywords = ["Developer", "Flutter", "iOS", "Rails", "Mobile Development", "Debugging", "Tech Blog"]
     images = ["/og-image.png"]
     author = "Seunghan"
-    DateFormat = "2006-01-02"
+    DateFormat = "2006-01-02 15:04"
     defaultTheme = "auto"
     disableThemeToggle = false
     ShowReadingTime = true
