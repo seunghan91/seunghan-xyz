@@ -16,6 +16,7 @@
 | 2026-04-29 | render-rails-monorepo-ruby-version-solidqueue-puma.md | Render에 Rails 8 monorepo 처음 올릴 때 빌드 4번 깨먹은 이야기 — .ruby-version 함정과 SolidQueue web 통합 |
 | 2026-05-02 | android-clean-architecture-mvi-7-phase-refactoring-pitfalls.md | Android Clean Arch + MVI 7-phase 리팩토링 함정 8가지 — iOS 스택과 다른 점 |
 | 2026-05-03 | mcp-personal-character-operation-not-delegation.md | MCP는 내 전용 캐릭터다 — 위임이 아니라 운용으로 |
+| 2026-05-11 | rails-raw-sql-column-typo-oauth-userinfo-500-defense-in-depth.md | Rails raw SQL 컬럼명 typo로 OAuth userinfo 전부 500 — 4중 보호막이 다 뚫린 이야기 (즉시 게시) |
 
 ## 사용법
 - 포스트 작성 시 `date: YYYY-MM-DDT09:00:00+09:00` 설정
