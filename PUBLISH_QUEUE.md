@@ -19,6 +19,7 @@
 | 2026-05-11 | rails-raw-sql-column-typo-oauth-userinfo-500-defense-in-depth.md | Rails raw SQL 컬럼명 typo로 OAuth userinfo 전부 500 — 4중 보호막이 다 뚫린 이야기 (즉시 게시) |
 | 2026-05-13 | codex-review-swiftui-secret-ui-privacysensitive-pasteboard-singleton.md | AI 흔적 지우기 스킬 vs Codex 리뷰 — SwiftUI 시크릿 UI 보안 8개 구멍 (즉시 게시) |
 | 2026-05-16 | ruby-include-duck-typing-jsonb-oauth-redirect-uri-bypass.md | Ruby `.include?` 가 보안 hole 을 우연히 닫은 사건 — duck typing 과 jsonb `\|\|` 의 합작 |
+| 2026-05-21 | codex-cli-iterative-review-4-rounds-ssrf-ipv4-mapped-ipv6-bypass.md | Codex CLI 4 라운드 코드 리뷰 — 매 라운드마다 새 P1이 나온 이유 (즉시 게시) |
 
 ## 사용법
 - 포스트 작성 시 `date: YYYY-MM-DDT09:00:00+09:00` 설정
