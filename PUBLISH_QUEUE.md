@@ -27,3 +27,4 @@
 - 큐의 마지막 날짜 + 1일로 배정
 - 영문(.en.md)은 한국어 다음날 배정
 - `git add PUBLISH_QUEUE.md` 함께 커밋
+| 2026-05-25 | ai-parallel-agents-git-branch-pitfalls-worktree-pin.md | 병렬 AI 에이전트 6명 dispatch 중 만난 git branch 함정 3개 — worktree pin 패턴 (즉시 게시) |
