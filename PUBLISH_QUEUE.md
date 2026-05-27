@@ -28,3 +28,4 @@
 - 영문(.en.md)은 한국어 다음날 배정
 - `git add PUBLISH_QUEUE.md` 함께 커밋
 | 2026-05-25 | ai-parallel-agents-git-branch-pitfalls-worktree-pin.md | 병렬 AI 에이전트 6명 dispatch 중 만난 git branch 함정 3개 — worktree pin 패턴 (즉시 게시) |
+| 2026-05-27 | rails-turbo-form-200-ok-nested-form-otp-verify-no-response.md | Rails Turbo form 함정 2종 — 200 OK 무시 + nested button_to, OTP 검증 sev1+sev2 (즉시 게시) |
