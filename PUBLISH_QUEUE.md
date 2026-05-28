@@ -30,3 +30,4 @@
 | 2026-05-25 | ai-parallel-agents-git-branch-pitfalls-worktree-pin.md | 병렬 AI 에이전트 6명 dispatch 중 만난 git branch 함정 3개 — worktree pin 패턴 (즉시 게시) |
 | 2026-05-27 | rails-turbo-form-200-ok-nested-form-otp-verify-no-response.md | Rails Turbo form 함정 2종 — 200 OK 무시 + nested button_to, OTP 검증 sev1+sev2 (즉시 게시) |
 | 2026-05-28 | imposter-syndrome-laing-false-self-sns-mask-2017-paper.md | 8년 전 학부 논문이 임포스터 신드롬이었다 — Laing 거짓 자기, SNS 가면, Clance 1978 (즉시 게시) |
+| 2026-05-29 | ai-mask-creator-consumer-divide-tool-democratization-myth.md | AI가 가면 생산을 평등화해도 만드는/소비하는 사람은 갈라진다 — 90-9-1 법칙과 11% Expressing (예약) |
