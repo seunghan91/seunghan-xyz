@@ -8,7 +8,7 @@ description: "iOS에서 멀쩡하던 Google SSO가 macOS에서만 안 됐다. �
 
 iOS/macOS 코드를 같은 Swift 패키지로 공유하는 앱을 만들고 있다. 로그인은 Apple/Google SSO를 쓴다. iOS에서는 Google 로그인이 잘 됐다. 그런데 macOS 빌드에서만 Google 로그인이 끝까지 완료가 안 됐다. 버튼을 눌러도 아무 반응이 없거나, 인증창이 떠도 "계속"을 누르면 OAuth 동의 페이지가 안 뜨고 브라우저 창만 덜렁 열렸다.
 
-같은 코드인데 왜 한쪽 플랫폼에서만 깨지는가. 이게 며칠 짜리 삽질의 시작이었다. 결론부터 말하면 범인은 `ASWebAuthenticationSession`이었고, macOS에서는 이 API를 쓰지 않고 외부 브라우저를 직접 여는 방식으로 바꿔서 해결했다. 이 글은 그 과정과, macOS 데스크톱 OAuth를 어떻게 구현해야 하는지에 대한 정리다.
+같은 코드인데 왜 한쪽 플랫폼에서만 깨지는가. 이게 며칠간 이어진 삽질의 시작이었다. 결론부터 말하면 범인은 `ASWebAuthenticationSession`이었고, macOS에서는 이 API를 쓰지 않고 외부 브라우저를 직접 여는 방식으로 바꿔서 해결했다. 이 글은 그 과정과, macOS 데스크톱 OAuth를 어떻게 구현해야 하는지에 대한 정리다.
 
 <!--more-->
 
@@ -214,7 +214,7 @@ private func registerReturnObserver() {
 
 ## iOS vs macOS — 같은 OAuth, 다른 경로
 
-이번 일로 정리된 멘탈 모델은 이렇다.
+이번 일을 겪고 나서 정리한 멘탈 모델은 이렇다.
 
 | 항목 | iOS | macOS |
 |---|---|---|
@@ -234,7 +234,7 @@ private func registerReturnObserver() {
 - **`onOpenURL`은 OAuth 콜백을 다른 딥링크보다 먼저 가로채야 한다.** 순서가 밀리면 콜백이 엉뚱한 라우터로 새서 세션이 안 닫힌다.
 - **취소 경로를 명시적으로 처리하라.** 사용자가 브라우저에서 그냥 돌아오면 콜백이 영영 안 온다. 앱 재활성화 + grace timeout으로 취소를 만들어줘야 한다.
 - **iOS 17.4 / macOS 14.4 이상만 타깃이면** `ASWebAuthenticationSession.Callback`으로 custom scheme 대신 claimed https URL을 쓸 수도 있다([Apple Forums 750051](https://developer.apple.com/forums/thread/750051)). 다만 macOS의 외부 브라우저 호출 자체가 문제라면 이것도 근본 해결은 아니다.
-- **데스크톱이라면 loopback redirect(RFC 8252 §7.3)도 적극 고려하라.** 로컬에 임시 포트를 열어 `http://127.0.0.1:{port}/cb`로 받는 방식이다. 데스크톱 firewall이 기본 허용이고, Google/GitHub/Microsoft 등 대부분의 provider가 지원한다. custom scheme보다 "앱으로 다시 튕겨주는" 단계 의존이 적어서 더 견고할 때가 많다.
+- **데스크톱이라면 loopback redirect(RFC 8252 §7.3)도 적극 고려하라.** 로컬에 임시 포트를 열어 `http://127.0.0.1:{port}/cb`로 받는 방식이다. 데스크톱 firewall이 기본 허용이고, Google/GitHub/Microsoft 등 대부분의 provider가 지원한다. custom scheme보다 "앱으로 다시 튕겨주는" 단계에 덜 의존해서 더 견고할 때가 많다.
 
 ---
 
@@ -244,4 +244,4 @@ private func registerReturnObserver() {
 
 해결은 표준으로 돌아가는 거였다. RFC 8252가 말하는 대로 macOS에서는 외부 브라우저를 직접 열고(custom scheme 또는 loopback) redirect를 직접 받았다. iOS는 인앱 Safari 기반의 `ASWebAuthenticationSession`이 여전히 정답이라 그대로 뒀다. 한 코드베이스 안에서 플랫폼별로 OAuth 경로를 갈라낸 것이다.
 
-비슷한 macOS/SwiftUI 보안·인증 삽질은 [SwiftUI 시크릿 UI 보안 구멍 정리](/posts/codex-review-swiftui-secret-ui-privacysensitive-pasteboard-singleton/)에도 더 적어뒀다. 같은 에러로 검색해서 들어온 사람에게 이 글이 며칠을 아껴주면 좋겠다.
+비슷한 macOS/SwiftUI 보안·인증 삽질은 [SwiftUI 시크릿 UI 보안 구멍 정리](/posts/codex-review-swiftui-secret-ui-privacysensitive-pasteboard-singleton/)에도 더 적어뒀다. 같은 에러를 검색하다 들어온 사람에게 이 글이 며칠을 아껴주면 좋겠다.
