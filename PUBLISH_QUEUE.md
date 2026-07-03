@@ -33,3 +33,4 @@
 | 2026-05-29 | ai-mask-creator-consumer-divide-tool-democratization-myth.md | AI가 가면 생산을 평등화해도 만드는/소비하는 사람은 갈라진다 — 90-9-1 법칙과 11% Expressing (예약) |
 | 2026-06-26 | macos-aswebauthenticationsession-chrome-oauth-external-browser.md | macOS Google 로그인이 Chrome에서 먹통 — ASWebAuthenticationSession 버그와 external browser 우회 (즉시 게시) |
 | 2026-06-27 | rust-binary128-libquadmath-bit-exact.md | 순수 Rust로 IEEE754 binary128을 libquadmath와 bit-exact 재현 — correctly-rounded 유일성·68K 퍼징·FFI ABI 함정 (즉시 게시) |
+| 2026-07-03 | ios-26-caemitterlayer-full-width-line-emitter-bug.md | iOS 26 CAEmitterLayer 전체폭 line emitter 방출 드롭 회귀 — 4라운드 A/B 판별 디버깅기 (즉시 게시) |
