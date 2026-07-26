@@ -32,7 +32,7 @@ KIMI = pathlib.Path.home() / ".local" / "bin" / "kimi"
 SOURCE_URL = "https://www.anthropic.com/economic-index"
 
 # 프롬프트 규칙이나 검증 로직을 바꾸면 이 값을 올린다 -> 캐시 전량 무효화
-PROMPT_VERSION = "2"
+PROMPT_VERSION = "3"
 RUN_DATE = "2026-07-26"
 
 
@@ -111,6 +111,9 @@ not who the users are. Write "conversations matched to software development task
 "early-career builders", not "freelancers", not "professionals". A high coursework share means \
 conversations looked like coursework — it does NOT mean the users are students. Never draw \
 conclusions about employment, hiring, job loss, or the labour market.
+3a. This is descriptive data with no significance testing. Never write "statistically", \
+"significant", "margin of error", "correlated", or "indistinguishable from" — you cannot \
+make claims about statistical confidence from these figures.
 3b. This is ONE snapshot with no trend series. You may NOT claim anything is rising, falling, \
 growing, accelerating, newly arrived, early or late in adoption. No years, no dates, no \
 "increasingly". The data cannot support any statement about change over time.
@@ -254,6 +257,14 @@ def validate(text, c):
     ]:
         if phrase in low:
             bad.append(f"고용/노동시장 추론 '{phrase}'")
+
+    # 4b. 통계적 주장 — 유의성 검정을 한 데이터가 아니다
+    for phrase in [
+        "statistically", "significant difference", "margin of error", "confidence interval",
+        "correlat", "causal", "p-value", "indistinguishable from",
+    ]:
+        if phrase in low:
+            bad.append(f"통계 주장 '{phrase}' (유의성 검정 없는 데이터)")
 
     # 5. 데이터가 측정하지 않는 시간 축 (도입 시기·추세)
     for phrase in [
