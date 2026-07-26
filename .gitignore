@@ -18,3 +18,8 @@ Thumbs.db
 # Local tools (contains API keys — NEVER commit)
 tools/
 .netlify/
+
+# Country page generation — LLM narrative cache (regenerable, keyed by prompt hash)
+scripts/.narrative_cache/
+scripts/.narrative_cache_old/
+scripts/__pycache__/

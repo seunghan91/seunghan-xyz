@@ -152,6 +152,12 @@ Passionate about improving user experiences and solving real-world problems.
     url = "https://github.com/seunghan91"
 
     [[languages.en.menu.main]]
+    identifier = "build-with-ai"
+    name = "Build With AI"
+    url = "/en/build-with-ai/"
+    weight = 5
+
+    [[languages.en.menu.main]]
     identifier = "about"
     name = "About"
     url = "/about/"
