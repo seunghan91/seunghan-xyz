@@ -1,8 +1,12 @@
 {{- /* Netlify Forms. 빌드 산출 HTML 을 Netlify 가 스캔해 폼을 등록한다.
-       이메일 주소를 공개하지 않아도 비공개 문의를 받을 수 있다. */ -}}
+       이메일 주소를 공개하지 않아도 비공개 문의를 받을 수 있다.
+
+       action 은 반드시 명시한다. 생략하면 브라우저가 현재 URL 로 POST 하는데
+       /en/build-with-ai/ 로의 POST 는 404 라 실사용자 제출이 통째로 실패한다. */ -}}
 <form
   name="build-with-ai"
   method="POST"
+  action="/en/build-with-ai/thanks/"
   data-netlify="true"
   netlify-honeypot="bot-field"
   class="cf">
