@@ -141,11 +141,22 @@ whether I'll answer you. Write anyway.
 
 ## Get in touch
 
-- **GitHub** — [github.com/seunghan91](https://github.com/seunghan91). Open an
-  issue on any repository, or start a discussion.
+Use whichever suits what you're asking.
 
-Tell me what you're building and where you're stuck. Include the code if there
-is code. I read everything; I answer as fast as I can, which is not always fast.
+{{< contact-form >}}
+
+If you'd rather not use a form:
+
+- **[GitHub](https://github.com/seunghan91)** — open an issue or start a
+  discussion on any repository. Public, so others with the same problem can read
+  the answer too.
+- **[KakaoTalk open chat](https://open.kakao.com/o/sYu2sj9h)** — faster and less
+  formal. It's a Korean messaging app, free, and works anywhere; you'll need to
+  install it to join.
+
+The form is the one to use if your code isn't public, or if you'd rather not ask
+in the open. Plenty of good questions are about work you can't post — that's
+fine, and it's why the form exists.
 
 ---
 

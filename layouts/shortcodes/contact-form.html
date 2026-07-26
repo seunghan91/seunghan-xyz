@@ -1,0 +1,93 @@
+{{- /* Netlify Forms. 빌드 산출 HTML 을 Netlify 가 스캔해 폼을 등록한다.
+       이메일 주소를 공개하지 않아도 비공개 문의를 받을 수 있다. */ -}}
+<form
+  name="build-with-ai"
+  method="POST"
+  data-netlify="true"
+  netlify-honeypot="bot-field"
+  class="cf">
+  <input type="hidden" name="form-name" value="build-with-ai">
+  <p class="cf__hp">
+    <label>Leave this field empty: <input name="bot-field"></label>
+  </p>
+
+  <div class="cf__row">
+    <label class="cf__field">
+      <span>Your email <em>(so I can reply)</em></span>
+      <input type="email" name="email" required placeholder="you@example.com">
+    </label>
+    <label class="cf__field">
+      <span>Where are you? <em>(optional)</em></span>
+      <input type="text" name="country" placeholder="Nairobi, Kenya">
+    </label>
+  </div>
+
+  <label class="cf__field">
+    <span>A link, if you have one <em>(optional)</em></span>
+    <input type="url" name="link" placeholder="https://github.com/you/your-repo">
+  </label>
+
+  <label class="cf__field">
+    <span>What are you building, and where are you stuck?</span>
+    <textarea name="message" rows="7" required
+      placeholder="Rough is fine. An error message, a decision you keep going back and forth on, a design you're unsure about. If you're at the very beginning and don't have any of that yet, say so — I'll point you somewhere useful."></textarea>
+  </label>
+
+  <button type="submit" class="cf__submit">Send</button>
+  <p class="cf__note">
+    Goes straight to my inbox — nobody else sees it. Write in English, Korean, or
+    your own language. I read everything; I answer as fast as I can, which is not
+    always fast.
+  </p>
+</form>
+
+<style>
+.cf { margin: 1.25rem 0 0.5rem; }
+.cf__hp { position: absolute; left: -9999px; }
+.cf__row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .cf__row { grid-template-columns: 1fr; } }
+.cf__field { display: block; margin-bottom: 12px; }
+.cf__field > span {
+  display: block;
+  font-size: 0.86rem;
+  margin-bottom: 5px;
+  opacity: 0.85;
+}
+.cf__field em { font-style: normal; opacity: 0.6; font-size: 0.82rem; }
+.cf input, .cf textarea {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--theme);
+  color: var(--content);
+  font-family: inherit;
+  font-size: 0.94rem;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+.cf input:focus, .cf textarea:focus {
+  outline: none;
+  border-color: var(--secondary);
+}
+.cf textarea { resize: vertical; min-height: 120px; }
+.cf__submit {
+  padding: 9px 22px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--tertiary);
+  color: var(--content);
+  font-family: inherit;
+  font-size: 0.94rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+.cf__submit:hover { opacity: 0.82; }
+.cf__note {
+  font-size: 0.83rem;
+  opacity: 0.62;
+  margin-top: 0.7rem;
+  line-height: 1.6;
+}
+</style>
