@@ -1,0 +1,18 @@
+/* 본문 글꼴 — SUIT Variable (SIL OFL).
+   PaperMod 는 assets/css/extended/ 의 CSS 를 테마 CSS 뒤에 붙여 컴파일하므로
+   테마 파일을 건드리지 않고 reset.css 의 시스템 폰트 스택을 덮어쓸 수 있다. */
+@import url('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css');
+
+:root {
+  --suit-stack: 'SUIT Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, 'Helvetica Neue', sans-serif;
+}
+
+html,
+body,
+button,
+input,
+textarea,
+select {
+  font-family: var(--suit-stack);
+}
