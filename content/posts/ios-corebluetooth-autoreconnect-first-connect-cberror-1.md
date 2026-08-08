@@ -1,9 +1,9 @@
 ---
-title: "iOS BLE 첫 연결만 실패했다 — auto-reconnect 옵션과 CBError Code=1"
+title: "iOS BLE 연결이 CBError Code=1 로 거부됐다 — auto-reconnect 옵션 함정"
 date: 2026-08-08T15:27:13+09:00
 draft: false
 tags: ["iOS", "CoreBluetooth", "BLE", "디버깅", "Swift"]
-description: "CBConnectPeripheralOptionEnableAutoReconnect 를 처음 만나는 peripheral 에 걸면 연결이 통째로 거부된다. CBError Code=1 로 첫 연결만 실패하던 버그를 실기 로그로 좁혀간 기록."
+description: "CBConnectPeripheralOptionEnableAutoReconnect 를 얹으면 CoreBluetooth 가 연결 요청을 CBError Code=1 로 거부한다. 헛짚은 가설 세 개를 거쳐 실기 로그로 좁혀간 기록."
 ---
 
 BLE 녹음기를 앱에 붙이는 작업을 하다가, 아이폰에서 기기 연결이 안 되는 상황을 만났다. 안드로이드 쪽은 같은 기기에 잘 붙는데 아이폰만 안 됐다.
@@ -12,7 +12,9 @@ BLE 녹음기를 앱에 붙이는 작업을 하다가, 아이폰에서 기기 �
 
 더 이상했던 건 이 기능을 처음 만들었을 때는 분명히 됐다는 점이다. 그 뒤로 한동안 다른 기능을 붙이다가 어느 순간 이렇게 됐다. 전형적인 회귀인데, 언제 깨졌는지가 안 보였다.
 
-결론부터 쓰면 원인은 `CBConnectPeripheralOptionEnableAutoReconnect` 였다. iOS 17 에서 추가된 자동 재연결 옵션인데, 이걸 **처음 만나는 peripheral** 에 걸면 CoreBluetooth 가 연결 요청 자체를 거부한다. 그래서 **첫 연결만** 실패한다. 한 번 붙고 나면 멀쩡히 된다.
+결론부터 쓰면 원인은 `CBConnectPeripheralOptionEnableAutoReconnect` 였다. iOS 17 에서 추가된 자동 재연결 옵션인데, 이걸 얹은 채 connect 하면 CoreBluetooth 가 요청 자체를 `CBError Code=1` 로 거부한다. 옵션만 떼자 같은 기기에 그대로 붙었다.
+
+여기까지 오는 데 가설을 세 번 갈아탔고, 그중 두 번은 그럴듯했지만 틀렸다. 마지막에는 "조건부로 켜면 된다"고 고친 처방마저 틀렸다. 그 과정을 그대로 적는다.
 
 ---
 
@@ -192,56 +194,93 @@ Apple 문서의 정의를 다시 읽어보면 답이 그대로 적혀 있다.
 
 > An NSNumber (Boolean) indicating that the AutoReconnect is enabled for the peripheral is connected. **After peripheral device is connected**, this will allow the system to initiate connect to the peer device automatically when link is dropped.
 
-"연결된 **뒤**, 링크가 끊기면 시스템이 자동으로 다시 붙게 한다." 이건 처음부터 재연결 전용 옵션이다. 아직 시스템이 알지도 못하는 기기에 이걸 얹으면 파라미터가 유효하지 않다.
+"연결된 **뒤**, 링크가 끊기면 시스템이 자동으로 다시 붙게 한다." 이건 처음부터 **이미 연결된 기기의 재연결**을 위한 옵션이다. 아직 그 상태가 아닌 기기에 얹으면 파라미터가 유효하지 않다.
+
+그런데 "그럼 언제부터 유효한가"를 코드로 판별하는 게 다음 함정이었다.
 
 ---
 
-## 왜 이렇게 오래 안 드러났나
+## 첫 번째 처방도 틀렸다
 
-이 버그의 성질이 고약하다. **첫 연결만 실패한다.** 한 번 붙고 나면 그 기기는 시스템 캐시에 들어가고, 그 뒤로는 옵션이 정상적으로 먹는다.
+원인을 알았으니 고치는 건 쉬울 줄 알았다. "시스템이 아는 기기에만 켜면 되겠지" 하고 이렇게 갈랐다.
 
-개발하는 사람은 보통 이미 붙여본 기기로 시험한다. 페어링을 지우고 완전히 새 상태에서 붙여보는 일은 드물다. 그래서:
+```swift
+let known = central.retrievePeripherals(withIdentifiers: [id]).first
+  ?? central.retrieveConnectedPeripherals(withService: serviceUUID)
+      .first(where: { $0.identifier == id })
+guard let p = known ?? discovered[id] else { throw Error.notFound }
 
-- 기능을 처음 만들 때: 옵션이 없었으니 잘 됐고, 그때 기기가 캐시에 들어갔다
-- 재연결 기능을 넣으면서 옵션 추가: 이미 캐시에 있는 기기라 여전히 잘 됐다
-- 한참 뒤 새 기기(또는 캐시가 비워진 상태)로 붙이려는 순간: 100% 실패
+let autoReconnect = known != nil    // ← 이게 틀렸다
+central.connect(p, autoReconnect: autoReconnect)
+```
 
-회귀를 넣은 커밋과 증상이 드러난 시점 사이가 몇 주씩 벌어진다. `git log -S` 로 옵션이 들어온 커밋을 찾고 나서야 "재연결 기능을 넣은 그 커밋"이라는 게 확인됐다.
+빌드해서 다시 눌렀더니 여전히 실패했다. 로그를 보고 나서야 왜인지 알았다.
+
+```
+DIAG connect 호출 id=A1DCFFC7-…-0AA9CD84EE6E known=true
+DIAG didFailToConnect ... Code=1 "One or more parameters were invalid."
+```
+
+`known=true` 였다. `retrievePeripherals(withIdentifiers:)` 가 이 기기를 돌려준 거다. 그래서 옵션이 켜진 채로 나갔고 그대로 거부당했다.
+
+여기서 이 API 의 정의를 다시 봐야 한다. Apple 문서는 이렇게 적는다.
+
+> Retrieve a list of known peripherals — peripherals that **you've discovered or connected to** in the past.
+
+**"발견했거나(discovered)" 연결한** 이다. 방금 스캔에서 본 기기도 known 으로 잡힌다. 즉 이 API 는 "연결해 본 적 있는가"를 알려주지 않는다. auto-reconnect 를 쓸 수 있는 상태인지 **판별할 수단이 아니었던 것**이다.
+
+그래서 옵션을 아예 빼고 A/B 로 확인했다.
+
+```swift
+let autoReconnect = false   // 실험: 옵션만 뗀다
+```
+
+이 빌드에서 같은 기기에 바로 붙었다.
+
+```
+DIAG connect 호출 known=false
+DIAG didConnect — 서비스 탐색 시작
+```
+
+---
+
+## 고친 방법 — 옵션을 쓰지 않는다
+
+결론은 조건부가 아니라 제거였다.
+
+```swift
+// 애플 권장 순서: retrievePeripherals → retrieveConnectedPeripherals → 스캔
+let known = central.retrievePeripherals(withIdentifiers: [id]).first
+  ?? central.retrieveConnectedPeripherals(withService: serviceUUID)
+      .first(where: { $0.identifier == id })
+// 조회에 안 잡히는 기기는 스캔에서 붙잡아 둔 핸들이 메운다
+guard let p = known ?? discovered[id] else { throw Error.notFound }
+
+// auto-reconnect 옵션은 어느 경로에서도 켜지 않는다.
+central.connect(p, autoReconnect: false)
+```
+
+| 상황 | peripheral 출처 | auto-reconnect |
+|------|----------------|----------------|
+| 처음 붙이는 기기 | 스캔에서 보관한 핸들 | **끈다** |
+| 조회로 찾은 기기 | `retrievePeripherals` | **끈다** |
+| 시스템에 이미 붙어 있음 | `retrieveConnectedPeripherals` | **끈다** |
+
+peripheral 을 찾는 순서(조회 우선, 스캔 핸들 폴백)는 Apple 샘플 구조 그대로 두고, **옵션만 뺐다.**
+
+잃는 게 있나 따져봤는데 거의 없었다. 링크가 끊긴 뒤 다시 붙는 일은 이미 앱이 한다 — 화면에 들어올 때 기억한 기기로 재연결하고, 주기 동기화도 따로 돈다. 시스템 auto-reconnect 는 그 위에 중복으로 얹히는 셈이다.
+
+오히려 켜져 있으면 손해가 하나 있다. **자동 재연결이 켜진 상태에서는 실패가 `didFailToConnect` 로 오지 않는다.** 시스템이 계속 재시도하기 때문인데, 그래서 앱은 아무 콜백도 못 받고 타임아웃까지 매달린다. 진단을 어렵게 만드는 옵션이었던 셈이다.
+
+### 회귀 시점 찾기
+
+옵션이 언제 들어왔는지는 `git log -S` 한 줄로 나왔다.
 
 ```bash
 git log --oneline -S "CBConnectPeripheralOptionEnableAutoReconnect" -- ios/
 ```
 
----
-
-## 고친 방법
-
-핵심은 **시스템이 아는 기기에만 auto-reconnect 를 켜는 것**이다.
-
-```swift
-// 시스템이 아는 기기 — 전에 한 번이라도 연결해 본 대상이다.
-let known = central.retrievePeripherals(withIdentifiers: [id]).first
-  ?? central.retrieveConnectedPeripherals(withService: serviceUUID)
-      .first(where: { $0.identifier == id })
-
-// 처음 만나는 기기는 위 조회에 안 잡힌다. 스캔에서 붙잡아 둔 핸들이 그 자리를 메운다.
-guard let p = known ?? discovered[id] else { throw Error.notFound }
-
-// auto-reconnect 는 시스템이 아는 기기에만 걸 수 있다.
-let autoReconnect = known != nil
-
-central.connect(p, autoReconnect: autoReconnect)
-```
-
-정리하면 이렇다.
-
-| 상황 | peripheral 출처 | auto-reconnect |
-|------|----------------|----------------|
-| 처음 붙이는 기기 | 스캔에서 보관한 핸들 | **끈다** |
-| 전에 붙였던 기기 | `retrievePeripherals` | 켠다 |
-| 시스템에 이미 붙어 있음 | `retrieveConnectedPeripherals` | 켠다 |
-
-이 표가 Apple 샘플 코드의 구조와 정확히 같다. 첫 연결은 스캔, 이후는 조회. 옵션은 조회로 나온 경우에만.
+"연결한 기기를 기억해 스캔 없이 다시 붙는다"는 커밋이었다. 재연결을 빠르게 하려고 넣은 옵션이 정작 연결 자체를 막았다. 그 커밋과 증상이 드러난 시점 사이가 몇 주 벌어져 있어서, 코드만 봐서는 연결이 잘 안 됐다.
 
 ---
 
@@ -337,10 +376,12 @@ BLE 기기를 iOS 앱에 붙일 때 확인할 것들을 정리했다.
 세 줄로 요약하면 이렇다.
 
 - `CBConnectPeripheralOptionEnableAutoReconnect` 는 **연결된 뒤**의 재연결용 옵션이다. 첫 연결에 얹으면 `CBError Code=1` 로 요청 자체가 거부된다.
-- 그래서 **첫 연결만** 실패하고 재연결은 멀쩡하다. 개발 중에는 거의 안 드러난다.
+- "시스템이 아는 기기에만 켜면 된다"도 **틀렸다.** `retrievePeripherals` 는 *발견만 한* 기기도 돌려주므로 그 판정으로는 가릴 수 없다. 답은 조건부가 아니라 제거였다.
 - 스캔에서 발견한 `CBPeripheral` 은 강한 참조로 들고 있어야 하고, 첫 연결은 그 핸들로 걸어야 한다.
 
-디버깅 과정에서 두 번 헛짚었는데, 둘 다 "그럴듯한 원인"이었지 로그로 확인한 게 아니었다. 결국 실패 지점에 `print` 하나 박고 `--console` 로 띄운 게 5분 만에 답을 줬다. 추측을 겹쳐 쌓기 전에 계측부터 하는 게 빠르다는 걸 또 배웠다.
+가설 두 개와 처방 하나를 연달아 틀렸는데, 셋 다 "그럴듯했지만 로그로 확인한 게 아니었다". 결국 실패 지점에 `print` 하나 박고 `--console` 로 띄운 게 5분 만에 답을 줬고, 그 뒤 옵션만 떼는 A/B 한 번이 처방까지 확정해줬다. 추측을 겹쳐 쌓기 전에 계측부터 하는 게 빠르다는 걸 또 배웠다.
+
+마지막 하나 — **고쳤다고 생각한 뒤에도 실기로 한 번 더 확인해야 한다.** 이 글의 처방은 원래 "조건부로 켠다"였고, 그대로 공개했다가 실기 로그에 반박당해 고쳤다.
 
 iOS 플랫폼 버그를 A/B 로 좁혀간 다른 기록은 [iOS 26 CAEmitterLayer 전체폭 line emitter 방출 드롭 회귀](/posts/ios-26-caemitterlayer-full-width-line-emitter-bug/)에 정리해뒀다.
 
