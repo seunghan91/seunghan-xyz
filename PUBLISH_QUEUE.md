@@ -35,3 +35,4 @@
 | 2026-06-27 | rust-binary128-libquadmath-bit-exact.md | 순수 Rust로 IEEE754 binary128을 libquadmath와 bit-exact 재현 — correctly-rounded 유일성·68K 퍼징·FFI ABI 함정 (즉시 게시) |
 | 2026-07-03 | ios-26-caemitterlayer-full-width-line-emitter-bug.md | iOS 26 CAEmitterLayer 전체폭 line emitter 방출 드롭 회귀 — 4라운드 A/B 판별 디버깅기 (즉시 게시) |
 | 2026-08-07 | mcp-spec-revisions-2026-07-28-stateless-migration.md | MCP 스펙이 세 리비전 앞서가 있었다 — 2026-07-28 스테이트리스 전환의 전말 (즉시 게시) |
+| 2026-08-08 | ios-corebluetooth-autoreconnect-first-connect-cberror-1.md | iOS BLE 첫 연결만 실패 — auto-reconnect 옵션과 CBError Code=1, 실기 로그로 좁힌 디버깅기 (즉시 게시) |
