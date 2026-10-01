@@ -1,0 +1,8 @@
+/* 한국어 어절이 줄 끝에서 갈라지지 않게 한다 ("리눅 / 스").
+   긴 URL·코드는 overflow-wrap 으로 넘침을 막는다. */
+.post-title,
+.post-description,
+.post-content {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
