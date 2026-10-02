@@ -2,14 +2,14 @@
   Omarchy 창 단축키 카드 + 4초 반복 데모. /omarchy/manual/ 전용.
   스타일은 .okm 아래로만 범위를 묶어 다른 페이지에 영향을 주지 않는다.
   색은 PaperMod 테마 변수(theme-vars.css)를 써서 라이트·다크를 따라간다.
-  근거: Omarchy 4.0.4 default/hypr/bindings/tiling.lua (맥 Try Omarchy 에서 Super = ⌘)
+  근거: Omarchy 4.0.4 default/hypr/bindings/tiling.lua (Super = PC 의 Windows 키, 맥 Try Omarchy 의 ⌘)
 */ -}}
 {{- $keys := slice
-  (dict "what" "창 띄우기 / 되돌리기" "keys" (slice "⌘" "T") "demo" "float")
-  (dict "what" "띄워서 맨 위에 고정" "keys" (slice "⌘" "O") "demo" "pin")
-  (dict "what" "창 옮기기" "keys" (slice "⌘" "드래그") "demo" "move")
-  (dict "what" "창 크기 조절" "keys" (slice "⌘" "우클릭 드래그") "hint" "트랙패드 우클릭 = 두 손가락 클릭" "demo" "resize")
-  (dict "what" "전체 화면" "keys" (slice "⌘" "F") "demo" "full")
+  (dict "what" "창 띄우기 / 되돌리기" "keys" (slice "Super" "T") "demo" "float")
+  (dict "what" "띄워서 맨 위에 고정" "keys" (slice "Super" "O") "demo" "pin")
+  (dict "what" "창 옮기기" "keys" (slice "Super" "드래그") "demo" "move")
+  (dict "what" "창 크기 조절" "keys" (slice "Super" "우클릭 드래그") "hint" "트랙패드 우클릭 = 두 손가락 클릭" "demo" "resize")
+  (dict "what" "전체 화면" "keys" (slice "Super" "F") "demo" "full")
 -}}
 <style>
 .okm { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 var(--content-gap); }
@@ -39,11 +39,11 @@
 .post-content .okm .okm-kp-pin { animation-name: okm-press1; }
 .post-content .okm .okm-kp-move, .post-content .okm .okm-kp-resize { animation-name: okm-hold; }
 
-/* ⌘T — 오른쪽 창이 떠올라 가운데로, 다시 제자리로 */
+/* Super+T — 오른쪽 창이 떠올라 가운데로, 다시 제자리로 */
 @keyframes okm-float { 0%,30% { left: 52%; top: 14px; width: 45%; height: calc(100% - 20px); }
   42%,70% { left: 27%; top: 26px; width: 46%; height: 62%; } 82%,100% { left: 52%; top: 14px; width: 45%; height: calc(100% - 20px); } }
 .okm-d-float .okm-w2 { animation-name: okm-float; }
-/* ⌘O — 작게 떠서 오른쪽 위에 고정(점), 왼쪽 창이 커져도 위에 남는다 */
+/* Super+O — 작게 떠서 오른쪽 위에 고정(점), 왼쪽 창이 커져도 위에 남는다 */
 @keyframes okm-pinw { 0%,30% { left: 52%; top: 14px; width: 45%; height: calc(100% - 20px); }
   42%,88% { left: 62%; top: 16px; width: 34%; height: 44%; } 96%,100% { left: 52%; top: 14px; width: 45%; height: calc(100% - 20px); } }
 @keyframes okm-pinw1 { 0%,46% { width: 45%; } 56%,88% { width: 94%; } 96%,100% { width: 45%; } }
@@ -51,18 +51,18 @@
 .okm-d-pin .okm-w2 { animation-name: okm-pinw; }
 .okm-d-pin .okm-w1 { animation-name: okm-pinw1; }
 .okm-d-pin .okm-pin { display: block; animation-name: okm-pindot; }
-/* ⌘ + 드래그 — 떠 있는 창을 커서가 끌고 간다 */
+/* Super + 드래그 — 떠 있는 창을 커서가 끌고 간다 */
 .okm-d-move .okm-w2, .okm-d-resize .okm-w2 { left: 18%; top: 26px; width: 40%; height: 58%; }
 @keyframes okm-movew { 0%,22% { left: 18%; } 68%,100% { left: 48%; } }
 @keyframes okm-movec { 0%,22% { left: calc(18% + 30px); top: 40px; } 68%,100% { left: calc(48% + 30px); top: 40px; } }
 .okm-d-move .okm-w2 { animation-name: okm-movew; }
 .okm-d-move .okm-cur { animation-name: okm-movec; }
-/* ⌘ + 우클릭 드래그 — 오른쪽 아래 모서리를 끌어 키운다 */
+/* Super + 우클릭 드래그 — 오른쪽 아래 모서리를 끌어 키운다 */
 @keyframes okm-rsw { 0%,22% { width: 40%; height: 58%; } 68%,100% { width: 66%; height: 66%; } }
 @keyframes okm-rsc { 0%,22% { left: calc(58% - 6px); top: calc(26px + 58% - 6px); } 68%,100% { left: calc(84% - 6px); top: calc(26px + 66% - 6px); } }
 .okm-d-resize .okm-w2 { animation-name: okm-rsw; }
 .okm-d-resize .okm-cur { animation-name: okm-rsc; }
-/* ⌘F — 창이 화면을 가득 채웠다가 돌아온다 */
+/* Super+F — 창이 화면을 가득 채웠다가 돌아온다 */
 @keyframes okm-fullw { 0%,30% { left: 52%; top: 14px; width: 45%; height: calc(100% - 20px); }
   42%,70% { left: 0%; top: 8px; width: 100%; height: calc(100% - 8px); } 82%,100% { left: 52%; top: 14px; width: 45%; height: calc(100% - 20px); } }
 .okm-d-full .okm-w2 { animation-name: okm-fullw; }
