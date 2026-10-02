@@ -19,6 +19,13 @@ description: "Rails 창시자 DHH가 만든 리눅스 배포판 Omarchy와 Try O
 
 ---
 
+## 플러그인
+
+- [Glance Dock](/omarchy/glance-dock/) — 상단바에 마우스를 올리면 뜨는 독과 화면 가장자리 독을 더하는 셸 플러그인입니다.
+- [Omarchy 창 다루기](/omarchy/manual/) — 처음 쓸 때 필요한 창 단축키를 정리했습니다.
+
+---
+
 ## Omarchy는 무엇인가
 
 Omarchy는 루비 온 레일즈(Ruby on Rails)를 만든

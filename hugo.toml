@@ -74,6 +74,12 @@ AI를 활용해 모바일 앱과 웹 서비스를 빠르게 만들고 있습니�
     weight = 20
 
     [[languages.ko.menu.main]]
+    identifier = "omarchy"
+    name = "Omarchy"
+    url = "/omarchy/"
+    weight = 25
+
+    [[languages.ko.menu.main]]
     identifier = "blog"
     name = "블로그"
     url = "/posts/"
