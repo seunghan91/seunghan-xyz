@@ -1,0 +1,87 @@
+{{- /*
+  Omarchy 창 단축키 카드 + 4초 반복 데모. /omarchy/manual/ 전용.
+  스타일은 .okm 아래로만 범위를 묶어 다른 페이지에 영향을 주지 않는다.
+  색은 PaperMod 테마 변수(theme-vars.css)를 써서 라이트·다크를 따라간다.
+  근거: Omarchy 4.0.4 default/hypr/bindings/tiling.lua (맥 Try Omarchy 에서 Super = ⌘)
+*/ -}}
+{{- $keys := slice
+  (dict "what" "창 띄우기 / 되돌리기" "keys" (slice "⌘" "T") "demo" "float")
+  (dict "what" "띄워서 맨 위에 고정" "keys" (slice "⌘" "O") "demo" "pin")
+  (dict "what" "창 옮기기" "keys" (slice "⌘" "드래그") "demo" "move")
+  (dict "what" "창 크기 조절" "keys" (slice "⌘" "우클릭 드래그") "hint" "트랙패드 우클릭 = 두 손가락 클릭" "demo" "resize")
+  (dict "what" "전체 화면" "keys" (slice "⌘" "F") "demo" "full")
+-}}
+<style>
+.okm { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 var(--content-gap); }
+@media (max-width: 600px) { .okm { grid-template-columns: 1fr; } }
+.okm-card { border: 1px solid var(--border); background: var(--entry); border-radius: var(--radius); padding: 14px 16px; }
+.okm-what { font-size: .82em; color: var(--secondary); margin-bottom: 8px; line-height: 1.5; }
+.okm-how { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: .85em; color: var(--content); }
+.post-content .okm kbd { display: inline-block; min-width: 30px; text-align: center; padding: 3px 8px; font: 600 14px/1.4 -apple-system, sans-serif; color: var(--primary);
+  background: var(--code-bg); border: 1px solid var(--tertiary); border-bottom-width: 3px; border-radius: 6px; }
+.okm-hint { font-size: .78em; color: var(--secondary); margin-top: 6px; }
+
+/* 미니 데스크톱 데모 — 정적 모양, 유리·확대 효과 없음. 모든 카드 같은 4초 박자 */
+.okm-demo { position: relative; height: 112px; margin-top: 12px; border-radius: 6px; background: var(--code-bg); overflow: hidden; border: 1px solid var(--border); }
+.okm-bar { position: absolute; left: 0; right: 0; top: 0; height: 8px; background: var(--tertiary); }
+.okm-w { position: absolute; background: var(--entry); border: 1.5px solid var(--tertiary); border-radius: 3px; }
+.okm-w1 { left: 3%; top: 14px; width: 45%; height: calc(100% - 20px); }
+.okm-w2 { left: 52%; top: 14px; width: 45%; height: calc(100% - 20px); border-color: var(--primary); z-index: 2; }
+.okm-pin { display: none; position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); }
+.okm-cur { position: absolute; z-index: 5; fill: var(--primary); stroke: var(--theme); stroke-width: 1; }
+.okm-demo *, .post-content .okm kbd { animation-duration: 4s; animation-iteration-count: infinite; animation-timing-function: cubic-bezier(.33,1,.68,1); }
+@media (prefers-reduced-motion: reduce) { .okm-demo *, .post-content .okm kbd { animation: none !important; } }
+
+@keyframes okm-press1 { 0%,22%,38%,100% { transform: none; background: var(--code-bg); } 26%,34% { transform: translateY(2px); background: var(--tertiary); } }
+@keyframes okm-press2 { 0%,22%,38%,66%,82%,100% { transform: none; background: var(--code-bg); } 26%,34%,70%,78% { transform: translateY(2px); background: var(--tertiary); } }
+@keyframes okm-hold   { 0%,18%,72%,100% { transform: none; background: var(--code-bg); } 22%,68% { transform: translateY(2px); background: var(--tertiary); } }
+.post-content .okm .okm-kp-float, .post-content .okm .okm-kp-full { animation-name: okm-press2; }
+.post-content .okm .okm-kp-pin { animation-name: okm-press1; }
+.post-content .okm .okm-kp-move, .post-content .okm .okm-kp-resize { animation-name: okm-hold; }
+
+/* ⌘T — 오른쪽 창이 떠올라 가운데로, 다시 제자리로 */
+@keyframes okm-float { 0%,30% { left: 52%; top: 14px; width: 45%; height: calc(100% - 20px); }
+  42%,70% { left: 27%; top: 26px; width: 46%; height: 62%; } 82%,100% { left: 52%; top: 14px; width: 45%; height: calc(100% - 20px); } }
+.okm-d-float .okm-w2 { animation-name: okm-float; }
+/* ⌘O — 작게 떠서 오른쪽 위에 고정(점), 왼쪽 창이 커져도 위에 남는다 */
+@keyframes okm-pinw { 0%,30% { left: 52%; top: 14px; width: 45%; height: calc(100% - 20px); }
+  42%,88% { left: 62%; top: 16px; width: 34%; height: 44%; } 96%,100% { left: 52%; top: 14px; width: 45%; height: calc(100% - 20px); } }
+@keyframes okm-pinw1 { 0%,46% { width: 45%; } 56%,88% { width: 94%; } 96%,100% { width: 45%; } }
+@keyframes okm-pindot { 0%,40% { opacity: 0; } 44%,88% { opacity: 1; } 92%,100% { opacity: 0; } }
+.okm-d-pin .okm-w2 { animation-name: okm-pinw; }
+.okm-d-pin .okm-w1 { animation-name: okm-pinw1; }
+.okm-d-pin .okm-pin { display: block; animation-name: okm-pindot; }
+/* ⌘ + 드래그 — 떠 있는 창을 커서가 끌고 간다 */
+.okm-d-move .okm-w2, .okm-d-resize .okm-w2 { left: 18%; top: 26px; width: 40%; height: 58%; }
+@keyframes okm-movew { 0%,22% { left: 18%; } 68%,100% { left: 48%; } }
+@keyframes okm-movec { 0%,22% { left: calc(18% + 30px); top: 40px; } 68%,100% { left: calc(48% + 30px); top: 40px; } }
+.okm-d-move .okm-w2 { animation-name: okm-movew; }
+.okm-d-move .okm-cur { animation-name: okm-movec; }
+/* ⌘ + 우클릭 드래그 — 오른쪽 아래 모서리를 끌어 키운다 */
+@keyframes okm-rsw { 0%,22% { width: 40%; height: 58%; } 68%,100% { width: 66%; height: 66%; } }
+@keyframes okm-rsc { 0%,22% { left: calc(58% - 6px); top: calc(26px + 58% - 6px); } 68%,100% { left: calc(84% - 6px); top: calc(26px + 66% - 6px); } }
+.okm-d-resize .okm-w2 { animation-name: okm-rsw; }
+.okm-d-resize .okm-cur { animation-name: okm-rsc; }
+/* ⌘F — 창이 화면을 가득 채웠다가 돌아온다 */
+@keyframes okm-fullw { 0%,30% { left: 52%; top: 14px; width: 45%; height: calc(100% - 20px); }
+  42%,70% { left: 0%; top: 8px; width: 100%; height: calc(100% - 8px); } 82%,100% { left: 52%; top: 14px; width: 45%; height: calc(100% - 20px); } }
+.okm-d-full .okm-w2 { animation-name: okm-fullw; }
+</style>
+<div class="okm">
+  {{- range $keys }}
+  {{- $demo := .demo }}
+  <div class="okm-card">
+    <div class="okm-what">{{ .what }}</div>
+    <div class="okm-how">
+      {{- range $i, $k := .keys }}{{ if $i }}<span>+</span>{{ end }}<kbd class="okm-kp-{{ $demo }}">{{ $k }}</kbd>{{ end -}}
+    </div>
+    {{- with .hint }}<div class="okm-hint">{{ . }}</div>{{ end }}
+    <div class="okm-demo okm-d-{{ $demo }}" aria-hidden="true">
+      <div class="okm-bar"></div><div class="okm-w okm-w1"></div><div class="okm-w okm-w2"><span class="okm-pin"></span></div>
+      {{- if or (eq $demo "move") (eq $demo "resize") }}
+      <svg class="okm-cur" viewBox="0 0 12 18" width="11" height="16"><path d="M1 1 L1 15 L4.5 11.5 L7 17 L9 16 L6.6 10.6 L11 10.6 Z"/></svg>
+      {{- end }}
+    </div>
+  </div>
+  {{- end }}
+</div>

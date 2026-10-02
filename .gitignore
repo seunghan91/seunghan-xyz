@@ -23,3 +23,5 @@ tools/
 scripts/.narrative_cache/
 scripts/.narrative_cache_old/
 scripts/__pycache__/
+
+.mockups/

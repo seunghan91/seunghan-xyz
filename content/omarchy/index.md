@@ -15,6 +15,8 @@ description: "Rails 창시자 DHH가 만든 리눅스 배포판 Omarchy와 Try O
 2026년 9월 30일, Omarchy 프로젝트에 오픈소스 기여를 시작했습니다.
 이 페이지는 그 과정을 날짜순으로 남기는 기록장입니다.
 
+> 맥에서 Omarchy를 처음 쓴다면 [Omarchy 창 다루기](/omarchy/manual/)부터 보세요.
+
 ---
 
 ## Omarchy는 무엇인가
