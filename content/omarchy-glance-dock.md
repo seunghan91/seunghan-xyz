@@ -28,6 +28,7 @@ description: "Omarchy 상단 바에 마우스를 올리면 그 워크스페이�
 | 종류 | Omarchy 바 위젯 플러그인 (Quickshell/QML) |
 | 환경 | Omarchy + Hyprland |
 | 개발 | Seunghan ([@seunghan91](https://github.com/seunghan91)) |
+| 마켓 | [omarchyplugins.com](https://omarchyplugins.com/plugin.html?id=io.github.seunghan91.glance-dock) (검증 완료) |
 | 라이선스 | MIT |
 
 ---
@@ -78,6 +79,9 @@ Glance Dock은 마우스 아래 내려오는 독, 가장자리 독, 종료 메�
 
 ## 설치·업데이트·제거
 
+Omarchy 공식 플러그인 마켓에 검증을 거쳐 올라가 있습니다.
+[마켓 페이지](https://omarchyplugins.com/plugin.html?id=io.github.seunghan91.glance-dock)에서 설치 명령을 복사해도 되고, 아래 명령을 그대로 써도 됩니다.
+
 설치하면서 바로 켭니다.
 
 ```bash
@@ -103,6 +107,17 @@ Omarchy 메뉴의 플러그인 항목에서도 켜기·끄기·제거를 할 수
 
 ## 설정
 
+바의 위젯 설정에서 바꾸거나, 터미널에서 `omarchy bar set`으로 바꿉니다.
+
+```bash
+# 가장자리 독을 오른쪽으로
+omarchy bar set io.github.seunghan91.glance-dock edgeDock right
+# 가장자리 독을 고정(창이 옆으로 비켜남)
+omarchy bar set io.github.seunghan91.glance-dock edgeMode pinned
+# 독이 열리기까지 기다리는 시간(숫자 설정은 --json)
+omarchy bar set io.github.seunghan91.glance-dock hoverDelayMs 150 --json
+```
+
 - `iconScale` — 아이콘 크기.\
   `small`(0.85배) · `normal`(1배) · `large`(1.2배), 기본 `normal`
 - `hoverDelayMs` — 독이 열리기까지 기다리는 시간.\
@@ -127,6 +142,8 @@ Omarchy 메뉴의 플러그인 항목에서도 켜기·끄기·제거를 할 수
 ## 소스·라이선스
 
 - 소스: [github.com/seunghan91/omarchy-glance-dock](https://github.com/seunghan91/omarchy-glance-dock)
+- 설명서: [한국어](https://github.com/seunghan91/omarchy-glance-dock/blob/main/README.ko.md) 등 9개 언어 README
+- 마켓: [omarchyplugins.com](https://omarchyplugins.com/plugin.html?id=io.github.seunghan91.glance-dock)
 - 라이선스: MIT
 
 [← Omarchy 기여 기록으로 돌아가기](/omarchy/)
