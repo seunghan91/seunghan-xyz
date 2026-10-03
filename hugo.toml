@@ -86,6 +86,12 @@ AI를 활용해 모바일 앱과 웹 서비스를 빠르게 만들고 있습니�
     weight = 30
 
     [[languages.ko.menu.main]]
+    identifier = "column"
+    name = "칼럼"
+    url = "/column/"
+    weight = 32
+
+    [[languages.ko.menu.main]]
     identifier = "categories"
     name = "카테고리"
     url = "/categories/"
