@@ -39,3 +39,4 @@
 | 2026-10-03 | column/dynamo-and-ai-interview-thoughts.md | [칼럼] 증기기관을 모터로 바꿔도 공장은 그대로였다 — AI 인터뷰에서 꺼낸 생각 (즉시 게시·칼럼 섹션 신설) |
 | 2026-10-06 | mcp-webmcp-open-source-contribution-production-evidence.md | MCP·WebMCP 오픈소스 기여 두 달 — ruby-sdk #493·#507·#508·#489·#491, WebMCP #234·#331 (즉시 게시) |
 | 2026-10-09 | iphone-18-pro-us-direct-purchase-apple-exchange-rate.md | 아이폰 18 프로 미국 직구 계산 — 애플 환율 1,509원, 네이버 적립까지 비교 (예약·쇼츠 OO-8anxypcw 10-08 18시 공개 뒤) |
+| 2026-10-10 | omarchy-windows-pc-ai-agent-os-no-mac-needed.md | 클로드 코드·Codex 윈도우 설치 — 맥북 없이 AI 에이전트 OS(Omarchy)로 (예약·오늘 이미 1편 게시) |
