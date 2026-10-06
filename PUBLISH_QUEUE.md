@@ -37,3 +37,4 @@
 | 2026-08-07 | mcp-spec-revisions-2026-07-28-stateless-migration.md | MCP 스펙이 세 리비전 앞서가 있었다 — 2026-07-28 스테이트리스 전환의 전말 (즉시 게시) |
 | 2026-08-08 | ios-corebluetooth-autoreconnect-first-connect-cberror-1.md | iOS BLE 첫 연결만 실패 — auto-reconnect 옵션과 CBError Code=1, 실기 로그로 좁힌 디버깅기 (즉시 게시) |
 | 2026-10-03 | column/dynamo-and-ai-interview-thoughts.md | [칼럼] 증기기관을 모터로 바꿔도 공장은 그대로였다 — AI 인터뷰에서 꺼낸 생각 (즉시 게시·칼럼 섹션 신설) |
+| 2026-10-06 | mcp-webmcp-open-source-contribution-production-evidence.md | MCP·WebMCP 오픈소스 기여 두 달 — ruby-sdk #493·#507·#508·#489·#491, WebMCP #234·#331 (즉시 게시) |
